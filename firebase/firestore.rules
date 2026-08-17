@@ -1,0 +1,58 @@
+rules_version = '2';
+
+// Deploy this with the Firebase CLI (`firebase deploy --only firestore:rules`)
+// or paste it into Firebase Console → Firestore Database → Rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ---------------------------------------------------------------
+    // users/{uid} — public profile: pic, bio, social links
+    // ---------------------------------------------------------------
+    match /users/{uid} {
+      allow read: if true;                 // profiles are public, like the feed
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if false;
+    }
+
+    // ---------------------------------------------------------------
+    // carouselOrders/{orderId} — the N$150 "pay to drop a carousel" fee.
+    // Clients can never write here directly. Orders are created as
+    // "pending" and flipped to "paid_demo" only by the Express server
+    // using the Firebase Admin SDK (which bypasses these rules).
+    // This is where a real payment webhook will plug in later — see
+    // server/routes/payments.js.
+    // ---------------------------------------------------------------
+    match /carouselOrders/{orderId} {
+      allow read: if isSignedIn() && resource.data.sellerId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // ---------------------------------------------------------------
+    // carousels/{carouselId} — a seller's paid carousel drop.
+    // A carousel can only be created once its linked order has
+    // actually been marked paid_demo by the server, and only by the
+    // seller that order belongs to.
+    // ---------------------------------------------------------------
+    match /carousels/{carouselId} {
+      allow read: if true;                 // the feed is public
+
+      allow create: if isSignedIn()
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.keys().hasAll(['sellerId', 'orderId', 'items', 'createdAt'])
+        && get(/databases/$(database)/documents/carouselOrders/$(request.resource.data.orderId)).data.sellerId == request.auth.uid
+        && get(/databases/$(database)/documents/carouselOrders/$(request.resource.data.orderId)).data.status == 'paid_demo';
+
+      allow update: if isSignedIn() && resource.data.sellerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.sellerId == request.auth.uid;
+    }
+  }
+}

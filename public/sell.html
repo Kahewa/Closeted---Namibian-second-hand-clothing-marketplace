@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sell your closet — CLOSET.na</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&amp;family=Bungee&amp;family=Nunito:wght@400;600;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap"
+  rel="stylesheet"
+/>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="navbar">
+      <div class="navbar__inner">
+        <a href="index.html" class="logo">
+          <span class="logo__closet">CLOSET</span><span class="logo__na">.na</span>
+        </a>
+        <nav class="navlinks">
+          <span data-nav-auth></span>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="shell" style="padding-top: 20px;">
+        <p class="eyebrow">// sell your closet</p>
+        <h1 class="h1" style="margin-top:6px;">One fee. A whole carousel.</h1>
+        <p class="muted" style="margin-top:8px;">
+          Each photo you add becomes one item for sale, with its own size, store, condition and price.
+          Swipe through, sell it all, then drop another carousel whenever your closet needs a clear-out.
+        </p>
+
+        <!-- Step 1 — the (demo) listing fee -->
+        <section class="chrome-card fee-explainer" data-step="fee" style="margin-top:22px;">
+          <p class="eyebrow">Step 1 of 2</p>
+          <h2 class="h2" style="margin-top:6px;">Unlock a carousel</h2>
+          <p class="price-display" data-fee-amount>N$150</p>
+          <ul>
+            <li>List as many items as fit in one carousel</li>
+            <li>Sell them all — come back and pay again whenever you want to drop a fresh closet</li>
+            <li>No payment gateway is connected yet — this button is a demo so you can test the full flow</li>
+          </ul>
+          <button type="button" class="btn btn--primary btn--block" data-pay-btn>Pay <span data-fee-amount>N$150</span> (demo)</button>
+        </section>
+
+        <!-- Step 2 — add items -->
+        <section data-step="items" hidden style="margin-top:22px;">
+          <p class="eyebrow">Step 2 of 2</p>
+          <h2 class="h2" style="margin-top:6px;">Add your pieces</h2>
+          <span class="item-count-badge" data-item-count>0 items in this carousel</span>
+
+          <form data-carousel-form novalidate>
+            <div data-item-rows></div>
+
+            <button type="button" class="btn btn--chrome btn--block" data-add-item style="margin-bottom:18px;">＋ Add another item</button>
+
+            <button type="submit" class="btn btn--primary btn--block" data-submit-carousel>🚀 Post my carousel</button>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">CLOSET.na — made for Namibia's secondhand fashion scene 🇳🇦</footer>
+  </div>
+
+  <script type="module" src="js/nav.js"></script>
+  <script type="module" src="js/sell.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "closet-na",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CLOSET.na — a Y2K-styled marketplace where Namibians buy and sell pre-loved clothes and shoes, in carousel drops.",
+  "main": "server/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "firebase-admin": "^14.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
