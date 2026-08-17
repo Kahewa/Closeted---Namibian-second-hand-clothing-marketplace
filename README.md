@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Closet.bg
+=======
+# CLOSET.bg
+>>>>>>> 04f596bb34f8d59bb8035a1ea5b24a14e4582987
 
 **Closet By Grace** — a soft-digital, periwinkle-and-sky-blue marketplace for Namibia: people list their pre-loved clothes and
 shoes as a **carousel** — one paid "drop" that can hold as many items as they
