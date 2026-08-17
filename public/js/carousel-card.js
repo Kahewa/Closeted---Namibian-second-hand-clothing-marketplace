@@ -1,11 +1,11 @@
-import { db, storage } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import {
   doc,
   updateDoc,
   deleteDoc,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { ref, deleteObject } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-storage.js";
-import { el, initials, formatNAD, timeAgo, toFirestoreDate, toast } from "./utils.js";
+import { deleteImages } from "./cloudinary.js";
+import { el, initials, formatNAD, timeAgo, toFirestoreDate, toast, whatsappHref } from "./utils.js";
 
 const CONDITION_CLASS = {
   "New with tags": "condition-pill--new",
@@ -210,9 +210,27 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
 
   card.append(media, dotsRow, metaBar);
 
+  // Straight into WhatsApp when the seller gave a number. Older carousels
+  // posted before that field existed fall back to their profile, where the
+  // socials live.
+  const waLink = whatsappHref(
+    carousel.sellerWhatsapp,
+    `Hi${carousel.sellerName ? ` ${carousel.sellerName.split(" ")[0]}` : ""}! I saw your closet drop on Closet.bg. I'd like to enquire about a few items`
+  );
+
   card.append(
     el("footer", { class: "carousel-card__footer" }, [
-      el("a", { class: "btn btn--outline btn--sm", href: `profile.html?uid=${carousel.sellerId}#contact` }, "💌 Message seller"),
+      waLink
+        ? el(
+            "a",
+            { class: "btn btn--lime btn--sm", href: waLink, target: "_blank", rel: "noopener noreferrer" },
+            "💬 Message seller on WhatsApp"
+          )
+        : el(
+            "a",
+            { class: "btn btn--outline btn--sm", href: `profile.html?uid=${carousel.sellerId}#contact` },
+            "💌 Message seller"
+          ),
     ])
   );
 
@@ -226,16 +244,16 @@ async function toggleSold(carousel, itemId) {
 }
 
 async function deleteCarousel(carousel) {
-  await Promise.all(
-    (carousel.items || []).map(async (item) => {
-      if (!item.storagePath) return;
-      try {
-        await deleteObject(ref(storage, item.storagePath));
-      } catch (err) {
-        console.warn("Couldn't delete a storage file (continuing):", err);
-      }
-    })
-  );
+  // Image cleanup is best-effort: if the server is down or Cloudinary's
+  // keys are missing, the seller should still be able to take the listing
+  // off the feed. Worst case a few orphaned files sit in the account.
+  try {
+    const idToken = await auth.currentUser.getIdToken();
+    await deleteImages((carousel.items || []).map((item) => item.publicId), idToken);
+  } catch (err) {
+    console.warn("Couldn't delete the photos (removing the listing anyway):", err);
+  }
+
   await deleteDoc(doc(db, "carousels", carousel.id));
   toast("Listing deleted");
 }

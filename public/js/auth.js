@@ -49,6 +49,10 @@ export async function signUpWithEmail(name, email, password) {
 
 export async function signInWithEmail(email, password) {
   const cred = await signInWithEmailAndPassword(auth, email, password);
+  // Repairs accounts whose users/{uid} doc never landed — e.g. someone
+  // signed up before the Firestore rules were deployed. Without this the
+  // profile page would say "this closet doesn't exist" forever.
+  await ensureUserDoc(cred.user);
   return cred.user;
 }
 
@@ -87,10 +91,14 @@ export function renderNavAuth(user) {
     return;
   }
 
+  const avatar = user.photoURL
+    ? `<img class="avatar-bubble" src="${user.photoURL}" alt="" referrerpolicy="no-referrer" />`
+    : `<span class="avatar-bubble">${initials(user.displayName)}</span>`;
+
   authArea.innerHTML = `
     <div class="nav-user">
-      <button class="nav-avatar-btn" type="button" data-nav-user-trigger aria-haspopup="true" aria-expanded="false">
-        <span class="nav-avatar">${initials(user.displayName)}</span>
+      <button class="nav-avatar-btn" type="button" data-nav-user-trigger aria-haspopup="true" aria-expanded="false" aria-label="Account menu">
+        ${avatar}
       </button>
       <div class="nav-user__menu" data-nav-user-menu>
         <a href="profile.html?uid=${user.uid}">👗 My profile</a>

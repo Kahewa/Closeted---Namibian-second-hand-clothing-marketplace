@@ -1,12 +1,13 @@
-# CLOSET.na
+# Closet.bg
 
-A Y2K-styled marketplace for Namibia: people list their pre-loved clothes and
+**Closet By Grace** — a soft-digital, periwinkle-and-sky-blue marketplace for Namibia: people list their pre-loved clothes and
 shoes as a **carousel** — one paid "drop" that can hold as many items as they
 want. Each photo in the carousel is one item, with its own size, store,
 condition and price. Buyers swipe through carousels in a feed, and can visit
 a seller's profile to see everything they've got and how to reach them.
 
-Built with **Node.js/Express** + **Firebase** (Auth, Firestore, Storage).
+Built with **Node.js/Express** + **Firebase** (Auth, Firestore) and
+**Cloudinary** for image hosting.
 
 > ⚠️ **No payment gateway is connected yet, on purpose** — the N$150
 > carousel fee is fully mocked so you can see and test the whole app first.
@@ -55,26 +56,30 @@ notifications, an admin/moderation dashboard.
 ## Project structure
 
 ```
-closet-na/
+closet-bg/
 ├── server/                  Express app (Node.js)
 │   ├── index.js             entrypoint — serves public/ + mounts /api
 │   ├── firebaseAdmin.js     Admin SDK bootstrap
 │   ├── middleware/verifyToken.js
-│   └── routes/payments.js   the mocked N$150 order flow
+│   ├── routes/payments.js   the mocked N$150 order flow
+│   └── routes/media.js      signed Cloudinary image deletion
+├── firebase.json            CLI config → the rules + indexes below
 ├── firebase/
 │   ├── firestore.rules
-│   └── storage.rules
+│   ├── firestore.indexes.json
+│   └── storage.rules        (unused — kept in case you move back to Firebase Storage)
 ├── public/                  the whole frontend — plain HTML/CSS/JS, no build step
 │   ├── login.html / index.html (feed) / sell.html / profile.html
 │   ├── css/style.css
-│   └── js/                  firebase-config, auth, nav, feed, sell, profile, carousel-card, utils
+│   └── js/                  firebase-config, cloudinary, auth, nav, feed, sell, profile, carousel-card, utils
 ├── package.json
 ├── .env.example
 └── serviceAccountKey.json   ← you add this (see below), never committed
 ```
 
 The frontend talks to Firebase **directly from the browser** (Auth,
-Firestore, Storage) using the Firebase client SDK loaded from Google's CDN —
+Firestore) using the Firebase client SDK loaded from Google's CDN, and
+uploads photos directly to Cloudinary —
 there's no bundler, so you can open any `public/js/*.js` file and read it
 top to bottom. Express's only job right now is serving those static files
 and running the listing-fee order flow.
@@ -86,19 +91,28 @@ and running the listing-fee order flow.
 ### 1. Prerequisites
 
 - Node.js 18+
-- A free [Firebase](https://console.firebase.google.com) project
+- A free [Firebase](https://console.firebase.google.com) project (Spark plan
+  is enough — see the note on Storage below)
+- A free [Cloudinary](https://cloudinary.com) account, for the photos
+
+> **Why Cloudinary and not Firebase Storage?** Firebase now requires the
+> paid **Blaze** plan to create a Storage bucket on new projects. Auth and
+> Firestore are still free on Spark, so only the images moved out.
+> `firebase/storage.rules` is kept but unused; see step 4.
 
 ### 2. Create your Firebase project
 
 1. In the [Firebase Console](https://console.firebase.google.com), create a
    new project (Google Analytics is optional, you don't need it).
 2. **Authentication** → Sign-in method → enable **Email/Password**, and
-   **Google** if you want the Google button to work.
+   **Google** if you want the Google button to work. Under
+   Authentication → Settings, check `localhost` is an authorized domain.
 3. **Firestore Database** → Create database → start in production mode
-   (we're supplying real rules, see step 5).
-4. **Storage** → Get started (same default bucket is fine).
-5. **Project settings → General → Your apps** → click the `</>` (web) icon,
+   (we're supplying real rules, see step 6).
+4. **Project settings → General → Your apps** → click the `</>` (web) icon,
    register an app, and copy the `firebaseConfig` object it gives you.
+
+Skip the **Storage** section of the console entirely.
 
 ### 3. Connect the frontend
 
@@ -116,37 +130,69 @@ const firebaseConfig = {
 ```
 
 This is safe to leave in client-side code — it's not a secret key, it just
-tells the browser which Firebase project to talk to. Firestore/Storage
-*security* comes from the rules in step 5, not from hiding this config.
+tells the browser which Firebase project to talk to. Firestore *security*
+comes from the rules in step 6, not from hiding this config.
 
-### 4. Connect the backend
+Paste **only the values**. The snippet the console shows also contains an
+`import … from "firebase/app"` line and its own `const app = initializeApp(…)`
+— both break this app, which loads the SDK from a CDN and exports `app`
+itself further down the file.
+
+### 4. Connect image hosting (Cloudinary)
+
+1. Sign up at [cloudinary.com](https://cloudinary.com) — the free tier needs
+   no card.
+2. Dashboard → copy the **Cloud name** shown at the top.
+3. **Settings (gear) → Upload → Upload presets → Add upload preset**, set
+   **Signing Mode: Unsigned**, save, and copy the preset's name.
+4. Put both into `public/js/cloudinary.js`:
+
+```js
+export const CLOUD_NAME = "…";
+export const UPLOAD_PRESET = "…";
+```
+
+These two are public by design: an unsigned preset can only add images, not
+read, list or delete them. Deleting needs the API secret, which lives in
+`.env` on the server (step 7) and is used by `server/routes/media.js`.
+
+### 5. Connect the backend
 
 **Project settings → Service accounts → Generate new private key** downloads
 a JSON file. Rename it `serviceAccountKey.json` and put it in the project
 root (next to `package.json`). It's already in `.gitignore` — this file is a
 real secret, never commit or share it.
 
-### 5. Deploy the security rules
+Without it the demo payment fails, and because the Firestore rules require a
+paid order before a carousel can be created, posting a carousel fails too.
+
+### 6. Deploy the security rules
 
 Easiest with the [Firebase CLI](https://firebase.google.com/docs/cli):
 
 ```bash
 npm install -g firebase-tools
 firebase login
-firebase init firestore storage   # point it at firebase/firestore.rules and firebase/storage.rules, use your existing project
-firebase deploy --only firestore:rules,storage
+firebase use --add                # pick your project
+firebase deploy --only firestore:rules,firestore:indexes
 ```
 
-Or just paste the contents of `firebase/firestore.rules` and
-`firebase/storage.rules` into their respective **Rules** tabs in the
-Firebase Console.
+`firebase.json` already points at `firebase/firestore.rules` and
+`firebase/firestore.indexes.json`, so there's no `firebase init` step —
+running it would overwrite that config. The index is not optional: the
+profile page's "this seller's carousels, newest first" query needs it, and
+Firestore rejects the query until it exists.
 
-### 6. Run it
+Or paste `firebase/firestore.rules` into the **Rules** tab in the Firebase
+Console, then create the index from the link Firebase prints in the browser
+console the first time you open a profile.
+
+### 7. Run it
 
 ```bash
 npm install
-cp .env.example .env
-npm run dev      # or: npm start
+cp .env.example .env    # then fill in the CLOUDINARY_* values
+npm run dev             # or: npm start
 ```
 
 Open **http://localhost:3000**. Sign up, click "Sell", pay the (demo) fee,
@@ -191,7 +237,9 @@ When you're ready to take real money:
 `sellerId`, `sellerName`, `sellerPhotoURL` (both copied from the profile at
 post time — editing your profile later won't rewrite older listings; a
 Cloud Function to fan that out would be a nice v2), `orderId`, `createdAt`,
-`items: [{ id, imageURL, storagePath, category, size, store, condition, price, notes, sold }]`
+`items: [{ id, imageURL, publicId, category, size, store, condition, price, notes, sold }]`
+(`imageURL` is the Cloudinary CDN URL; `publicId` is what the server needs
+to delete that image again)
 
 Categories are fixed to: Tops, Bottoms, Dresses & Skirts, Outerwear, Shoes,
 Other Clothing — see `CATEGORIES` in `public/js/utils.js`.

@@ -4,6 +4,7 @@ const path = require("path");
 const express = require("express");
 
 const paymentsRouter = require("./routes/payments");
+const mediaRouter = require("./routes/media");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use("/api/carousel-fee", paymentsRouter);
+app.use("/api/media", mediaRouter);
 
 // Anything else (typos, stray links) just goes back to the feed rather
 // than showing a bare 404 — this isn't a client-side-routed SPA, every
@@ -26,5 +28,5 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✨ CLOSET.na is running at http://localhost:${PORT}`);
+  console.log(`✨ Closet.bg is running at http://localhost:${PORT}`);
 });

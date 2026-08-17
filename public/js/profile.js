@@ -1,4 +1,4 @@
-import { auth, db, storage } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import {
   doc,
@@ -10,8 +10,9 @@ import {
   orderBy,
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-storage.js";
+import { uploadImage } from "./cloudinary.js";
 import { renderCarouselCard } from "./carousel-card.js";
+import { ensureUserDoc } from "./auth.js";
 import { $, el, toast, initials, whatsappHref, isValidUrl } from "./utils.js";
 
 const params = new URLSearchParams(location.search);
@@ -59,7 +60,16 @@ onAuthStateChanged(auth, async (user) => {
 
 async function loadProfile() {
   try {
-    const snap = await getDoc(doc(db, "users", targetUid));
+    let snap = await getDoc(doc(db, "users", targetUid));
+
+    // Viewing your own profile with no users/{uid} doc means the one that
+    // should have been written at sign-up never landed — create it now
+    // rather than dead-ending on "this closet doesn't exist".
+    if (!snap.exists() && currentUser && currentUser.uid === targetUid) {
+      await ensureUserDoc(currentUser);
+      snap = await getDoc(doc(db, "users", targetUid));
+    }
+
     if (!snap.exists()) {
       loadingState.textContent = "This closet doesn't exist (yet).";
       return;
@@ -165,17 +175,14 @@ avatarInput?.addEventListener("change", async () => {
   }
   try {
     avatarUploadLabel.classList.add("avatar-upload--busy");
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const storageRef = ref(storage, `profile-pics/${targetUid}/avatar.${ext}`);
-    await uploadBytes(storageRef, file, { contentType: file.type });
-    const url = await getDownloadURL(storageRef);
+    const { url } = await uploadImage(file, `profile-pics/${targetUid}`);
     await updateDoc(doc(db, "users", targetUid), { profilePicURL: url });
     profileData.profilePicURL = url;
     paintView();
     toast("Profile picture updated ✨");
   } catch (err) {
     console.error(err);
-    toast("Couldn't upload that photo. Please try again.", "error");
+    toast(err.message || "Couldn't upload that photo. Please try again.", "error");
   } finally {
     avatarUploadLabel.classList.remove("avatar-upload--busy");
   }
@@ -204,6 +211,8 @@ async function loadListings() {
     listingsEmpty.hidden = false;
     listingsEmpty.querySelector("[data-listings-empty-body]").innerHTML =
       `Couldn't load listings.<br><small>${err.message}</small>` +
-      (err.message?.includes("index") ? "<br><small>Firestore needs a one-time index for this — check your server console for a link to create it.</small>" : "");
+      (err.message?.includes("index")
+        ? "<br><small>Firestore needs a one-time composite index for this query — open your browser console and click the link Firebase printed there, or deploy <code>firebase/firestore.indexes.json</code>.</small>"
+        : "");
   }
 }

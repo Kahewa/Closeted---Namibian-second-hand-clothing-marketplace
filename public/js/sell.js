@@ -1,14 +1,15 @@
-import { auth, db, storage } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import {
   collection,
   doc,
   getDoc,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-storage.js";
+import { uploadImage } from "./cloudinary.js";
 import { requireAuth } from "./auth.js";
-import { $, el, toast, formatNAD, CATEGORIES, CONDITIONS, CAROUSEL_FEE } from "./utils.js";
+import { $, el, toast, formatNAD, whatsappHref, CATEGORIES, CONDITIONS, CAROUSEL_FEE } from "./utils.js";
 
 const MAX_ITEMS = 30;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -22,6 +23,7 @@ const addItemBtn = $("[data-add-item]");
 const form = $("[data-carousel-form]");
 const submitBtn = $("[data-submit-carousel]");
 const itemCountEl = $("[data-item-count]");
+const whatsappInput = $("[data-whatsapp]");
 
 feeAmountEls.forEach((elm) => (elm.textContent = formatNAD(CAROUSEL_FEE)));
 
@@ -29,13 +31,40 @@ let currentUser = null;
 let paidOrderId = null;
 let rowIndex = 0;
 
-requireAuth((user) => {
+requireAuth(async (user) => {
   currentUser = user;
+
+  // Most sellers drop more than one carousel, so pull the number they used
+  // last time out of their profile rather than making them retype it.
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    const saved = snap.exists() ? snap.data().socialLinks?.whatsapp : "";
+    if (saved && !whatsappInput.value) whatsappInput.value = saved;
+  } catch (err) {
+    console.warn("Couldn't prefill the WhatsApp number:", err);
+  }
 });
 
 // ---------------------------------------------------------------------
 // Step 1: the (demo) N$150 listing fee
 // ---------------------------------------------------------------------
+
+// The fee routes live on the Express server. If the page is being served
+// by something else (Apache/Laragon, `npx serve`, file://), /api/... comes
+// back as an HTML 404 and `res.json()` blows up with a JSON parse error
+// that says nothing useful — so translate that into the real problem.
+async function apiError(res, fallback) {
+  const body = await res.text();
+  try {
+    return JSON.parse(body).error || fallback;
+  } catch {
+    if (res.status === 404) {
+      return "The listing-fee API isn't reachable. Start the app with `npm start` and open it on http://localhost:3000 — the payment step needs the Express server.";
+    }
+    return `${fallback} (HTTP ${res.status})`;
+  }
+}
+
 payBtn.addEventListener("click", async () => {
   payBtn.disabled = true;
   payBtn.classList.add("btn--loading");
@@ -47,7 +76,7 @@ payBtn.addEventListener("click", async () => {
       method: "POST",
       headers: { Authorization: `Bearer ${idToken}` },
     });
-    if (!initiateRes.ok) throw new Error((await initiateRes.json()).error || "Couldn't start the order.");
+    if (!initiateRes.ok) throw new Error(await apiError(initiateRes, "Couldn't start the order."));
     const order = await initiateRes.json();
 
     // Tiny fake delay so the "processing" state actually reads as a
@@ -59,7 +88,7 @@ payBtn.addEventListener("click", async () => {
       method: "POST",
       headers: { Authorization: `Bearer ${idToken}` },
     });
-    if (!confirmRes.ok) throw new Error((await confirmRes.json()).error || "Couldn't confirm the order.");
+    if (!confirmRes.ok) throw new Error(await apiError(confirmRes, "Couldn't confirm the order."));
 
     paidOrderId = order.orderId;
     feeStep.hidden = true;
@@ -170,6 +199,13 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+  const whatsapp = whatsappInput.value.trim();
+  if (!whatsappHref(whatsapp)) {
+    toast("Add a WhatsApp number so buyers can reach you (e.g. 081 234 5678).", "error");
+    whatsappInput.focus();
+    return;
+  }
+
   const drafts = [];
   for (const row of rows) {
     const get = (field) => row.querySelector(`[data-field="${field}"]`);
@@ -197,15 +233,14 @@ form.addEventListener("submit", async (e) => {
     const items = await Promise.all(
       drafts.map(async (draft, i) => {
         const itemId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${i}`;
-        const ext = (draft.file.name.split(".").pop() || "jpg").toLowerCase();
-        const storagePath = `carousels/${currentUser.uid}/${carouselRef.id}/${itemId}.${ext}`;
-        const storageRef = ref(storage, storagePath);
-        await uploadBytes(storageRef, draft.file, { contentType: draft.file.type });
-        const imageURL = await getDownloadURL(storageRef);
+        const { url, publicId } = await uploadImage(
+          draft.file,
+          `carousels/${currentUser.uid}/${carouselRef.id}`
+        );
         return {
           id: itemId,
-          imageURL,
-          storagePath,
+          imageURL: url,
+          publicId,
           category: draft.category,
           size: draft.size,
           store: draft.store,
@@ -224,10 +259,21 @@ form.addEventListener("submit", async (e) => {
       sellerId: currentUser.uid,
       sellerName: profile.displayName || currentUser.displayName || "Closet Seller",
       sellerPhotoURL: profile.profilePicURL || "",
+      sellerWhatsapp: whatsapp,
       orderId: paidOrderId,
       items,
       createdAt: serverTimestamp(),
     });
+
+    // Keep the profile in step so the number is prefilled next time and
+    // the WhatsApp button on the profile page matches the carousel's.
+    if (whatsapp !== profile.socialLinks?.whatsapp) {
+      try {
+        await updateDoc(doc(db, "users", currentUser.uid), { "socialLinks.whatsapp": whatsapp });
+      } catch (err) {
+        console.warn("Couldn't save the number to your profile (carousel still posted):", err);
+      }
+    }
 
     toast("Your carousel is live! 🎉");
     setTimeout(() => {
@@ -238,6 +284,6 @@ form.addEventListener("submit", async (e) => {
     toast(err.message || "Couldn't post your carousel. Please try again.", "error");
     submitBtn.disabled = false;
     submitBtn.classList.remove("btn--loading");
-    submitBtn.textContent = "🚀 Post my carousel";
+    submitBtn.textContent = "Post my carousel";
   }
 });

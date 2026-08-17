@@ -91,9 +91,32 @@ export function toast(message, type = "info") {
   }, 3400);
 }
 
-export function whatsappHref(value = "") {
-  const digits = value.replace(/[^\d+]/g, "").replace(/^\+/, "");
-  return digits ? `https://wa.me/${digits}` : null;
+/**
+ * Turns whatever a seller typed into a wa.me link.
+ *
+ * wa.me needs a full international number with no punctuation, but people
+ * naturally write their number the local way — "081 234 5678". Sending
+ * that through as-is produces a dead link, so a leading 0 is swapped for
+ * Namibia's country code. Anything already written with + or 00 is
+ * respected as-is, so foreign numbers still work.
+ *
+ * @param {string} value - the raw number a seller typed
+ * @param {string} [message] - optional text to pre-fill in the chat
+ * @returns {string|null} a wa.me URL, or null if it can't be a phone number
+ */
+export function whatsappHref(value = "", message = "") {
+  let digits = String(value).replace(/[^\d+]/g, "");
+  if (!digits) return null;
+
+  if (digits.startsWith("+")) digits = digits.slice(1);
+  else if (digits.startsWith("00")) digits = digits.slice(2);
+  else if (digits.startsWith("0")) digits = `264${digits.slice(1)}`;
+
+  digits = digits.replace(/\D/g, "");
+  if (digits.length < 8) return null;
+
+  const query = message ? `?text=${encodeURIComponent(message)}` : "";
+  return `https://wa.me/${digits}${query}`;
 }
 
 export function isValidUrl(value = "") {

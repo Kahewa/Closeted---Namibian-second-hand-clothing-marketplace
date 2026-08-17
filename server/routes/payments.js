@@ -1,5 +1,5 @@
 const express = require("express");
-const { admin } = require("../firebaseAdmin");
+const { admin, adminApp } = require("../firebaseAdmin");
 const verifyToken = require("../middleware/verifyToken");
 
 const router = express.Router();
@@ -26,6 +26,20 @@ const CAROUSEL_FEE_CURRENCY = "NAD";
 // POST /api/carousel-fee/initiate
 // Creates a pending N$150 order for the signed-in user.
 router.post("/initiate", verifyToken, async (req, res) => {
+  // No service account → no Admin SDK → we can't write carouselOrders.
+  // Hand back a throwaway order so the UI can carry on. Pair this with
+  // demoMode() in firestore.rules, which skips the paid-order check.
+  if (!adminApp) {
+    return res.json({
+      orderId: `demo-${req.uid}-${Date.now()}`,
+      sellerId: req.uid,
+      amount: CAROUSEL_FEE_AMOUNT,
+      currency: CAROUSEL_FEE_CURRENCY,
+      status: "pending",
+      demo: true,
+    });
+  }
+
   try {
     const db = admin.firestore();
     const orderRef = db.collection("carouselOrders").doc();
@@ -52,6 +66,10 @@ router.post("/initiate", verifyToken, async (req, res) => {
 // can be tested with no real payment gateway wired up. Delete this route
 // (and replace it with real webhook verification) before launch.
 router.post("/confirm-demo/:orderId", verifyToken, async (req, res) => {
+  if (!adminApp) {
+    return res.json({ orderId: req.params.orderId, status: "paid_demo", demo: true });
+  }
+
   try {
     const db = admin.firestore();
     const orderRef = db.collection("carouselOrders").doc(req.params.orderId);

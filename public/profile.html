@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Profile — CLOSET.na</title>
+<title>Profile — Closet.bg</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&amp;family=Bungee&amp;family=Nunito:wght@400;600;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -15,20 +15,26 @@
 </head>
 <body>
   <div class="page">
+    <div class="sparkle-field" aria-hidden="true">
+      <span class="sparkle" style="top:8%;right:-7%;"></span>
+      <span class="sparkle sparkle--ink" style="top:40%;left:3%;animation-delay:1.8s;"></span>
+      <span class="sparkle sparkle--sm" style="top:76%;right:-2%;animation-delay:2.6s;"></span>
+    </div>
+
     <header class="navbar">
       <div class="navbar__inner">
         <a href="index.html" class="logo">
-          <span class="logo__closet">CLOSET</span><span class="logo__na">.na</span>
+          <span class="logo__closet">Closet</span><span class="logo__bg">.bg</span>
         </a>
         <nav class="navlinks">
-          <a href="sell.html" class="btn btn--primary btn--sm">🏷️ Sell</a>
+          <a href="sell.html" class="btn btn--primary btn--sm">Sell</a>
           <span data-nav-auth></span>
         </nav>
       </div>
     </header>
 
     <main>
-      <div class="shell">
+      <div class="shell shell--wide">
         <p class="text-center muted" data-profile-loading style="padding-top:60px;">Loading closet…</p>
 
         <div class="empty-state" data-profile-signed-out hidden style="margin-top:40px;">
@@ -54,7 +60,7 @@
 
                 <div class="profile-actions">
                   <button type="button" class="btn btn--chrome btn--sm" data-edit-toggle hidden>✏️ Edit profile</button>
-                  <a href="sell.html" class="btn btn--lime btn--sm" data-sell-cta hidden>🏷️ Sell more</a>
+                  <a href="sell.html" class="btn btn--lime btn--sm" data-sell-cta hidden>Sell more</a>
                 </div>
               </div>
             </div>
@@ -102,7 +108,7 @@
       </div>
     </main>
 
-    <footer class="site-footer">CLOSET.na — made for Namibia's secondhand fashion scene 🇳🇦</footer>
+    <footer class="site-footer">Closet By Grace — made for Namibia's secondhand fashion scene 🇳🇦</footer>
   </div>
 
   <script type="module" src="js/nav.js"></script>

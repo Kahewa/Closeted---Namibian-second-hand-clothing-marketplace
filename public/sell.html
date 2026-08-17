@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sell your closet — CLOSET.na</title>
+<title>Sell your closet — Closet.bg</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&amp;family=Bungee&amp;family=Nunito:wght@400;600;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -15,10 +15,16 @@
 </head>
 <body>
   <div class="page">
+    <div class="sparkle-field" aria-hidden="true">
+      <span class="sparkle" style="top:10%;left:-7%;"></span>
+      <span class="sparkle sparkle--sm" style="top:34%;right:-3%;animation-delay:1.4s;"></span>
+      <span class="sparkle sparkle--ink" style="top:66%;left:4%;animation-delay:2.4s;"></span>
+    </div>
+
     <header class="navbar">
       <div class="navbar__inner">
         <a href="index.html" class="logo">
-          <span class="logo__closet">CLOSET</span><span class="logo__na">.na</span>
+          <span class="logo__closet">Closet</span><span class="logo__bg">.bg</span>
         </a>
         <nav class="navlinks">
           <span data-nav-auth></span>
@@ -28,7 +34,7 @@
 
     <main>
       <div class="shell" style="padding-top: 20px;">
-        <p class="eyebrow">// sell your closet</p>
+        <p class="eyebrow">sell your closet</p>
         <h1 class="h1" style="margin-top:6px;">One fee. A whole carousel.</h1>
         <p class="muted" style="margin-top:8px;">
           Each photo you add becomes one item for sale, with its own size, store, condition and price.
@@ -55,17 +61,35 @@
           <span class="item-count-badge" data-item-count>0 items in this carousel</span>
 
           <form data-carousel-form novalidate>
+            <div class="chrome-card" style="margin-bottom:18px;">
+              <div class="field" style="margin-bottom:0;">
+                <label for="carousel-whatsapp">💬 WhatsApp number</label>
+                <input
+                  id="carousel-whatsapp"
+                  type="tel"
+                  data-whatsapp
+                  placeholder="081 234 5678"
+                  autocomplete="tel"
+                  required
+                />
+                <p class="muted" style="font-size:12px;margin-top:2px;">
+                  The "Message seller" button on your carousel opens a WhatsApp chat to this
+                  number. Saved to your profile so you only type it once.
+                </p>
+              </div>
+            </div>
+
             <div data-item-rows></div>
 
             <button type="button" class="btn btn--chrome btn--block" data-add-item style="margin-bottom:18px;">＋ Add another item</button>
 
-            <button type="submit" class="btn btn--primary btn--block" data-submit-carousel>🚀 Post my carousel</button>
+            <button type="submit" class="btn btn--primary btn--block" data-submit-carousel>Post my carousel</button>
           </form>
         </section>
       </div>
     </main>
 
-    <footer class="site-footer">CLOSET.na — made for Namibia's secondhand fashion scene 🇳🇦</footer>
+    <footer class="site-footer">Closet By Grace — made for Namibia's secondhand fashion scene 🇳🇦</footer>
   </div>
 
   <script type="module" src="js/nav.js"></script>

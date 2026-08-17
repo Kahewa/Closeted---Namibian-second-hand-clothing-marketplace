@@ -9,64 +9,33 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { renderCarouselCard } from "./carousel-card.js";
-import { $, $all, el, CATEGORIES } from "./utils.js";
+import { $ } from "./utils.js";
 
 const PAGE_SIZE = 8;
 
 const feedEl = $("[data-feed]");
 const loadMoreBtn = $("[data-load-more]");
 const emptyState = $("[data-empty-state]");
-const chipsRow = $("[data-category-chips]");
 
 let currentUser = null;
 let lastDoc = null;
 let reachedEnd = false;
 let loading = false;
-let activeCategory = "All";
 const loadedCarousels = [];
 
+// The feed starts loading before Firebase has resolved who's signed in, so
+// once it does, repaint — that's what makes a seller's own "mark sold" and
+// "delete" controls appear on their cards.
 onAuthStateChanged(auth, (user) => {
+  const changed = (currentUser?.uid || null) !== (user?.uid || null);
   currentUser = user;
+  if (changed && loadedCarousels.length) repaintFeed();
 });
-
-function buildChips() {
-  const categories = ["All", ...CATEGORIES];
-  categories.forEach((cat) => {
-    const chip = el(
-      "button",
-      {
-        class: `chip${cat === activeCategory ? " chip--active" : ""}`,
-        type: "button",
-        onClick: () => selectCategory(cat, chip),
-      },
-      cat
-    );
-    chipsRow.append(chip);
-  });
-}
-
-function selectCategory(cat, chipEl) {
-  activeCategory = cat;
-  $all(".chip", chipsRow).forEach((c) => c.classList.remove("chip--active"));
-  chipEl.classList.add("chip--active");
-  repaintFeed();
-}
-
-function matchesCategory(carousel) {
-  if (activeCategory === "All") return true;
-  return (carousel.items || []).some((item) => item.category === activeCategory);
-}
 
 function repaintFeed() {
   feedEl.innerHTML = "";
-  const visible = loadedCarousels.filter(matchesCategory);
-  visible.forEach((carousel) => feedEl.append(renderCarouselCard(carousel, currentUser)));
-  emptyState.hidden = visible.length > 0;
-  if (visible.length === 0 && loadedCarousels.length > 0) {
-    emptyState.querySelector("[data-empty-title]").textContent = `No ${activeCategory.toLowerCase()} dropped yet`;
-    emptyState.querySelector("[data-empty-body]").textContent =
-      "Try a different category, or check back soon — new closets drop all the time.";
-  }
+  loadedCarousels.forEach((carousel) => feedEl.append(renderCarouselCard(carousel, currentUser)));
+  emptyState.hidden = loadedCarousels.length > 0;
 }
 
 async function loadPage() {
@@ -101,6 +70,5 @@ async function loadPage() {
   }
 }
 
-buildChips();
 loadMoreBtn.addEventListener("click", loadPage);
 loadPage();

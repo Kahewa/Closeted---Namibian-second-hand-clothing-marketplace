@@ -13,6 +13,21 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    // ⚠️ DEMO MODE ⚠️
+    // true  = anyone signed in can post a carousel without a paid order,
+    //         so the app can be tested without serviceAccountKey.json.
+    // false = the real rule: the server must have marked an order paid.
+    // Flip this to false the moment you add the service account key,
+    // and definitely before this goes anywhere public.
+    function demoMode() {
+      return true;
+    }
+
+    function hasPaidOrder(orderId) {
+      return get(/databases/$(database)/documents/carouselOrders/$(orderId)).data.sellerId == request.auth.uid
+        && get(/databases/$(database)/documents/carouselOrders/$(orderId)).data.status == 'paid_demo';
+    }
+
     // ---------------------------------------------------------------
     // users/{uid} — public profile: pic, bio, social links
     // ---------------------------------------------------------------
@@ -48,8 +63,7 @@ service cloud.firestore {
       allow create: if isSignedIn()
         && request.resource.data.sellerId == request.auth.uid
         && request.resource.data.keys().hasAll(['sellerId', 'orderId', 'items', 'createdAt'])
-        && get(/databases/$(database)/documents/carouselOrders/$(request.resource.data.orderId)).data.sellerId == request.auth.uid
-        && get(/databases/$(database)/documents/carouselOrders/$(request.resource.data.orderId)).data.status == 'paid_demo';
+        && (demoMode() || hasPaidOrder(request.resource.data.orderId));
 
       allow update: if isSignedIn() && resource.data.sellerId == request.auth.uid;
       allow delete: if isSignedIn() && resource.data.sellerId == request.auth.uid;
