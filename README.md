@@ -1,4 +1,4 @@
-# CLOSET.na
+# CLOSET.bg
 
 A Y2K-styled marketplace for Namibia: people list their pre-loved clothes and
 shoes as a **carousel** — one paid "drop" that can hold as many items as they
