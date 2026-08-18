@@ -7,12 +7,23 @@
 // anything. Deleting needs the API secret, which stays on the server —
 // see server/routes/media.js.
 
-// 🔑 Cloudinary Dashboard → the "Cloud name" shown at the top.
-export const CLOUD_NAME = "YOUR_CLOUD_NAME";
+// 🔑 Both values come from local-config.js, which is gitignored — copy
+// local-config.example.js to local-config.js and fill it in. Dynamic
+// import so a missing file degrades to a clear error message rather than
+// taking down every page that imports this module.
+let cloudName = "YOUR_CLOUD_NAME";
+let uploadPreset = "YOUR_UNSIGNED_PRESET";
 
-// 🔑 Settings (gear) → Upload → Upload presets → Add upload preset,
-// with "Signing Mode" set to Unsigned. Paste that preset's name here.
-export const UPLOAD_PRESET = "YOUR_UNSIGNED_PRESET";
+try {
+  const local = await import("./local-config.js");
+  cloudName = local.CLOUDINARY_CLOUD_NAME || cloudName;
+  uploadPreset = local.CLOUDINARY_UPLOAD_PRESET || uploadPreset;
+} catch {
+  /* no local-config.js yet — uploadImage() below explains what to do */
+}
+
+export const CLOUD_NAME = cloudName;
+export const UPLOAD_PRESET = uploadPreset;
 
 export const isCloudinaryConfigured =
   !CLOUD_NAME.startsWith("YOUR_") && !UPLOAD_PRESET.startsWith("YOUR_");
@@ -34,7 +45,7 @@ const JPEG_QUALITY = 0.82;
 export async function uploadImage(file, folder) {
   if (!isCloudinaryConfigured) {
     throw new Error(
-      "Image uploads aren't configured yet — add your Cloudinary cloud name and unsigned preset to public/js/cloudinary.js."
+      "Image uploads aren't configured yet — copy public/js/local-config.example.js to local-config.js and add your Cloudinary cloud name and unsigned preset."
     );
   }
 

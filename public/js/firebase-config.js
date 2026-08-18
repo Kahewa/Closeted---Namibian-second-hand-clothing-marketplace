@@ -8,17 +8,26 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/12.17.1/firebas
 // No Firebase Storage import: creating a bucket needs the paid Blaze plan,
 // so images live on Cloudinary instead — see public/js/cloudinary.js.
 
-// 🔑 Replace with YOUR project's config — Firebase Console → Project
-// settings → General → "Your apps" → SDK setup and configuration.
-// This is safe to keep public/client-side; it is not a secret key.
-const firebaseConfig = {
+// 🔑 The project's config lives in local-config.js, which is gitignored —
+// copy local-config.example.js to local-config.js and fill it in.
+// Loaded with a dynamic import so a missing file shows the setup banner
+// below instead of killing the whole module (a static import that fails
+// takes every page down with a blank screen).
+let firebaseConfig = {
   apiKey: "YOUR_API_KEY",
-  authDomain: "closet-bg.firebaseapp.com",
-  projectId: "closet-bg",
-  storageBucket: "closet-bg.firebasestorage.app",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
   messagingSenderId: "YOUR_SENDER_ID",
   appId: "YOUR_APP_ID",
 };
+
+try {
+  const local = await import("./local-config.js");
+  if (local.FIREBASE_CONFIG) firebaseConfig = local.FIREBASE_CONFIG;
+} catch {
+  /* no local-config.js yet — the banner below explains what to do */
+}
 
 // Every value above still starting with YOUR_ means nobody has pasted a
 // real config in yet. Without this check the app fails deep inside the
@@ -32,7 +41,7 @@ if (!isFirebaseConfigured) {
   console.warn(
     "%cCloset.bg — Firebase isn't configured yet.",
     "font-weight:bold",
-    "\nPaste your project's config into public/js/firebase-config.js."
+    "\nCopy public/js/local-config.example.js to local-config.js and fill it in."
   );
   showSetupBanner();
 }
@@ -59,8 +68,9 @@ function showSetupBanner() {
     ].join(";");
     banner.innerHTML = `
       <strong style="font-size:14px;">Firebase isn't connected yet</strong><br />
-      Log in, uploads and the feed stay empty until you paste your project's
-      config into <code style="background:rgba(255,255,255,.14);padding:1px 5px;border-radius:5px;">public/js/firebase-config.js</code>.
+      Log in, uploads and the feed stay empty until you copy
+      <code style="background:rgba(255,255,255,.14);padding:1px 5px;border-radius:5px;">public/js/local-config.example.js</code>
+      to <code style="background:rgba(255,255,255,.14);padding:1px 5px;border-radius:5px;">local-config.js</code> and fill it in.
       <button type="button" aria-label="Dismiss"
         style="position:absolute;top:10px;right:12px;color:#fff;font-size:18px;line-height:1;background:none;border:none;cursor:pointer;">×</button>
     `;

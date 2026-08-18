@@ -1,5 +1,6 @@
 node_modules/
 .env
 serviceAccountKey.json
+public/js/local-config.js
 .DS_Store
 npm-debug.log*
