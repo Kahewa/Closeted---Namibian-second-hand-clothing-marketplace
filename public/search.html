@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Find people — Closet Sales Namibia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap"
+  rel="stylesheet"
+/>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="people">
+  <div class="page">
+    <main>
+      <div class="shell" style="padding-top:24px;">
+        <h1 class="h1">Find a closet</h1>
+        <p class="muted" style="margin-top:8px;font-size:14px;">
+          Search by username to see someone's closet and everything they've listed.
+        </p>
+
+        <form class="joinbox" data-search-form style="margin-top:18px;text-align:left;">
+          <label class="visually-hidden" for="q">Username</label>
+          <div class="joinbox__row">
+            <input id="q" type="text" data-search-input placeholder="@grace.closet" autocomplete="off" />
+            <button type="submit" class="btn btn--primary" data-search-btn>search</button>
+          </div>
+        </form>
+
+        <p class="text-center muted" data-search-status style="margin-top:20px;" hidden></p>
+        <div data-search-results style="margin-top:18px;"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/search.js"></script>
+</body>
+</html>

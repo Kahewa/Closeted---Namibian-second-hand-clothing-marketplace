@@ -15,12 +15,13 @@ if (fs.existsSync(serviceAccountPath)) {
   console.log("🔥 Firebase Admin initialized.");
 } else {
   console.warn(
-    "⚠️  serviceAccountKey.json not found — running in DEMO MODE.\n" +
-      "   The listing-fee flow is faked in memory and login tokens are\n" +
-      "   NOT cryptographically verified, so anyone who can reach this\n" +
-      "   server could act as any user. Fine on localhost, never online.\n" +
-      "   Add the key (README.md → 'Connect the backend') and set\n" +
-      "   demoMode() to false in firebase/firestore.rules to turn it off."
+    "!  serviceAccountKey.json not found.\n" +
+      "   The site runs fine without it: the N$150 fee is paid manually and\n" +
+      "   approved from the admin dashboard, which never touches this server.\n" +
+      "   What it does affect is /api/media/delete (removing a listing's photos\n" +
+      "   from Cloudinary): login tokens there fall back to being read WITHOUT\n" +
+      "   signature verification. Fine on localhost, never on a public URL.\n" +
+      "   Add the key — README.md, 'Connect the backend' — to turn that off."
   );
 }
 

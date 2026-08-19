@@ -1,12 +1,25 @@
 import { auth } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "./auth.js";
-import { $, $all, toast } from "./utils.js";
+import { $, $all, toast, isAdminUser } from "./utils.js";
 
 const redirectTarget = new URLSearchParams(location.search).get("redirect") || "index.html";
 
+// createUserWithEmailAndPassword signs the user in immediately, so this
+// listener fires while signUpWithEmail is still writing the profile doc
+// and claiming the username. Navigating away at that moment would leave
+// an account with no username. `busy` holds the redirect until the whole
+// sign-up finishes, and the handlers below navigate themselves.
+let busy = false;
+
+function goHome(user) {
+  // The admin lands on the dashboard rather than the shopper's feed.
+  location.href = isAdminUser(user) ? "admin.html" : decodeURIComponent(redirectTarget);
+}
+
 onAuthStateChanged(auth, (user) => {
-  if (user) location.href = decodeURIComponent(redirectTarget);
+  if (!user || busy) return;
+  goHome(user);
 });
 
 const tabs = $all("[data-tab]");
@@ -47,9 +60,18 @@ $("[data-signup-form]").addEventListener("submit", async (e) => {
   }
   btn.disabled = true;
   btn.textContent = "Creating your closet…";
+  busy = true;
   try {
-    await signUpWithEmail(form.name.value.trim(), form.email.value.trim(), form.password.value);
+    const user = await signUpWithEmail(
+      form.name.value.trim(),
+      form.email.value.trim(),
+      form.password.value,
+      form.username.value
+    );
+    busy = false;
+    goHome(user);
   } catch (err) {
+    busy = false;
     toast(friendlyAuthError(err), "error");
     btn.disabled = false;
     btn.textContent = "Sign up";

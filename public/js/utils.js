@@ -7,6 +7,45 @@ export const CONDITIONS = ["New with tags", "Like new", "Good", "Fair"];
 export const CAROUSEL_FEE = 150;
 export const CAROUSEL_FEE_CURRENCY = "NAD";
 
+// The single admin account. Mirrored in firebase/firestore.rules — change
+// it in both places or the dashboard and the rules will disagree.
+export const ADMIN_EMAIL = "bygreys.na@gmail.com";
+
+export function isAdminUser(user) {
+  return !!user && (user.email || "").toLowerCase() === ADMIN_EMAIL;
+}
+
+// Where sellers send the N$150 listing fee. Shown in the payment dialog
+// on the sell page; the reference is filled in with their username so
+// payments can be matched to accounts in the admin dashboard.
+export const PAYMENT_DETAILS = {
+  walletNumber: "081 652 8920",
+  walletLabel: "Pay2Cell or any wallet transfer",
+  bank: "FNB / RMB",
+  accountHolder: "Grace Shuuya",
+  accountType: "Bankwise Regular Account",
+  accountNumber: "62269784487",
+  branchCode: "282672",
+  cashWhatsapp: "0818093631",
+};
+
+// Usernames: lowercase letters, numbers, underscore and dot, 3–20 chars.
+// Kept tight so they stay usable as a payment reference and in a URL.
+export const USERNAME_RE = /^[a-z0-9._]{3,20}$/;
+
+export function normalizeUsername(value = "") {
+  return value.trim().toLowerCase().replace(/^@/, "");
+}
+
+export function usernameError(value) {
+  const name = normalizeUsername(value);
+  if (!name) return "Pick a username.";
+  if (!USERNAME_RE.test(name)) {
+    return "3–20 characters, lowercase letters, numbers, dots or underscores only.";
+  }
+  return null;
+}
+
 export function formatNAD(amount) {
   const n = Number(amount);
   if (Number.isNaN(n)) return "N$0";

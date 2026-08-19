@@ -1,8 +1,8 @@
 {
-  "name": "closet-bg",
+  "name": "closet-sales-namibia",
   "version": "1.0.0",
   "private": true,
-  "description": "Closet.bg (Closet By Grace) — a marketplace where Namibians buy and sell pre-loved clothes and shoes, in carousel drops.",
+  "description": "Closet Sales Namibia — a marketplace where Namibians buy and sell pre-loved clothes and shoes, in carousel drops.",
   "main": "server/index.js",
   "type": "commonjs",
   "engines": {

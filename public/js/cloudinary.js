@@ -7,7 +7,7 @@
 // anything. Deleting needs the API secret, which stays on the server —
 // see server/routes/media.js.
 
-// 🔑 Both values come from local-config.js, which is gitignored — copy
+// Both values come from local-config.js, which is gitignored — copy
 // local-config.example.js to local-config.js and fill it in. Dynamic
 // import so a missing file degrades to a clear error message rather than
 // taking down every page that imports this module.

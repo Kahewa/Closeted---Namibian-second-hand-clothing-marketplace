@@ -32,6 +32,35 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
 
   const card = el("article", { class: "carousel-card" });
 
+  // A drop that hasn't been approved yet is only ever rendered for its own
+  // seller (or the admin), so say plainly why nobody else can see it. The
+  // edit button lives here too: editing is allowed right up until approval
+  // and never after, so it's shown only on this banner.
+  if (carousel.status && carousel.status !== "approved") {
+    const pending = carousel.status === "pending";
+    const note = el("div", { class: `approval-note approval-note--${carousel.status}` }, [
+      el("strong", {}, [el("i", { class: `ico ico--${pending ? "hourglass" : "close"}`, "aria-hidden": "true" }), pending ? " Waiting for approval" : " Not approved"]),
+      el(
+        "span",
+        {},
+        pending
+          ? " — we're checking your N$150 payment. Your carousel goes live on the feed as soon as it clears."
+          : " — this carousel wasn't approved. Message us on WhatsApp if you think that's a mistake."
+      ),
+    ]);
+
+    if (isOwner) {
+      note.append(
+        el("div", { class: "approval-note__actions" }, [
+          el("a", { class: "btn btn--chrome btn--sm", href: `sell.html?edit=${carousel.id}` }, [el("i", { class: "ico ico--pencil", "aria-hidden": "true" }), " edit this carousel"]),
+          el("span", { class: "approval-note__lock" }, "editable until approved"),
+        ])
+      );
+    }
+
+    card.append(note);
+  }
+
   // ---- title bar -------------------------------------------------
   if (showSellerHeader) {
     const titlebar = el("header", { class: "carousel-card__titlebar" });
@@ -66,7 +95,7 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
               onDeleted?.();
             },
           },
-          "🗑️ Delete listing"
+          [el("i", { class: "ico ico--trash", "aria-hidden": "true" }), " Delete listing"]
         ),
       ]);
       trigger.addEventListener("click", (e) => {
@@ -124,10 +153,10 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
             } else if (!nowSold && existingStamp) {
               existingStamp.remove();
             }
-            toast(nowSold ? "Marked as sold ✅" : "Back on the rack ✨");
+            toast(nowSold ? "Marked as sold" : "Back on the rack");
           },
         },
-        item.sold ? "↺ Mark unsold" : "✓ Mark sold"
+        item.sold ? [el("i", { class: "ico ico--undo", "aria-hidden": "true" }), " Mark unsold"] : [el("i", { class: "ico ico--check", "aria-hidden": "true" }), " Mark sold"]
       );
       slide.append(soldBtn);
     }
@@ -215,7 +244,7 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
   // socials live.
   const waLink = whatsappHref(
     carousel.sellerWhatsapp,
-    `Hi${carousel.sellerName ? ` ${carousel.sellerName.split(" ")[0]}` : ""}! I saw your closet drop on Closet.bg. I'd like to enquire about a few items`
+    `Hi${carousel.sellerName ? ` ${carousel.sellerName.split(" ")[0]}` : ""}! I saw your closet drop on Closet Sales Namibia. I'd like to enquire about a few items`
   );
 
   card.append(
@@ -224,12 +253,12 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
         ? el(
             "a",
             { class: "btn btn--lime btn--sm", href: waLink, target: "_blank", rel: "noopener noreferrer" },
-            "💬 Message seller on WhatsApp"
+            [el("i", { class: "ico ico--chat", "aria-hidden": "true" }), " Message seller on WhatsApp"]
           )
         : el(
             "a",
             { class: "btn btn--outline btn--sm", href: `profile.html?uid=${carousel.sellerId}#contact` },
-            "💌 Message seller"
+            [el("i", { class: "ico ico--mail", "aria-hidden": "true" }), " Message seller"]
           ),
     ])
   );

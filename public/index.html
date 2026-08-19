@@ -3,59 +3,31 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closet.bg — buy &amp; sell pre-loved fashion in Namibia</title>
+<title>Closet Sales Namibia — buy &amp; sell pre-loved fashion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body data-page="home">
   <div class="page">
-    <div class="sparkle-field" aria-hidden="true">
-      <span class="sparkle" style="top:5%;left:-7%;"></span>
-      <span class="sparkle sparkle--sm" style="top:20%;right:-3%;animation-delay:1.4s;"></span>
-      <span class="sparkle sparkle--ink" style="top:46%;left:3%;animation-delay:2.2s;"></span>
-      <span class="sparkle" style="top:72%;right:-8%;animation-delay:0.8s;"></span>
-      <span class="sparkle sparkle--ink" style="top:90%;left:8%;animation-delay:3s;"></span>
-    </div>
-
-    <header class="navbar">
-      <div class="navbar__inner">
-        <a href="index.html" class="logo">
-          <span class="logo__closet">Closet</span><span class="logo__bg">.bg</span>
-        </a>
-        <nav class="navlinks">
-          <a href="sell.html" class="btn btn--primary btn--sm">Sell</a>
-          <span data-nav-auth></span>
-        </nav>
-      </div>
-    </header>
-
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker__track">
-        <span class="ticker__seg">NEW CLOSETS DROP DAILY · N$150 PER CAROUSEL · SWIPE TO SEE THE PRICE · YOUR CLOSET, YOUR CASH</span>
-        <span class="ticker__seg">NEW CLOSETS DROP DAILY · N$150 PER CAROUSEL · SWIPE TO SEE THE PRICE · YOUR CLOSET, YOUR CASH</span>
-      </div>
-    </div>
-
     <main>
       <section class="band band--pink">
         <div class="shell shell--wide">
           <section class="hero-label">
-          <span class="hero-label__eyebrow">Namibia's closet, online</span>
-          <h1 class="hero-label__title">swipe. shop. sell.</h1>
-          <p class="hero-label__body">
-            Every carousel below is one person's closet clean-out — one photo per piece, size and
-            price included. Find something? Their profile has their socials. Got clothes piling up?
-            Drop a carousel of your own.
-          </p>
+            <span class="hero-label__eyebrow">Namibia's Online Closet</span>
+            <h1 class="hero-label__title">Buy or Sell</h1>
+            <p class="hero-label__body">
+              Every carousel below is one person's closet clean-out!! Find something? Message them straight on WhatsApp. Got clothes piling
+              up? Drop a Closet Sale of your own.
+            </p>
             <div class="hero-label__actions">
-              <a href="sell.html" class="btn btn--lime">Sell your closet</a>
-              <a href="#feed-start" class="btn btn--outline">Start browsing ↓</a>
+              <a href="sell.html" class="btn btn--primary">sell your closet →</a>
+              <a href="#feed-start" class="btn btn--outline">start browsing ↓</a>
             </div>
           </section>
         </div>
@@ -63,31 +35,47 @@
 
       <section class="band band--white">
         <div class="shell shell--wide">
-          <h2 class="section-title">New drops</h2>
+          <h2 class="section-title">new drops</h2>
           <div class="heart-row" aria-hidden="true"></div>
 
-          <div class="frame">
-            <div class="empty-state" data-empty-state hidden>
-              <div class="empty-state__icon">🧦</div>
-              <p class="h3" data-empty-title>No closets dropped yet</p>
-              <p class="muted" data-empty-body style="margin-top:6px;">Be the first — your closet could be today's top drop.</p>
-              <a href="sell.html" class="btn btn--primary" style="margin-top:16px;">Sell your closet</a>
+          <div class="deck">
+            <aside class="deck__side">
+              <div class="note">
+                <p class="note__title">welcome babe! <i class="ico ico--heart ico--pink" aria-hidden="true"></i></p>
+                <p>thanks 4 stopping by!! hope u find something cute 2day</p>
+                <ul>
+                  <li>swipe each closet</li>
+                  <li>screenshot what you like</li>
+                  <li>msg the seller</li>
+                </ul>
+              </div>
+            </aside>
+
+            <div class="deck__main">
+              <div class="frame">
+                <div class="empty-state" data-empty-state hidden>
+                  <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
+                  <p class="h3" data-empty-title>No closets dropped yet</p>
+                  <p class="muted" data-empty-body style="margin-top:6px;">Be the first! your closet could be today's top drop.</p>
+                  <a href="sell.html" class="btn btn--primary" style="margin-top:16px;">sell your closet</a>
+                </div>
+
+                <div id="feed-start" data-feed></div>
+              </div>
+
+              <div class="text-center" style="margin-top:22px;">
+                <button type="button" class="btn btn--chrome" data-load-more>load more closets</button>
+              </div>
             </div>
-
-            <div id="feed-start" data-feed></div>
-          </div>
-
-          <div class="text-center" style="margin-top:24px;">
-            <button type="button" class="btn btn--chrome" data-load-more>Load more closets</button>
           </div>
         </div>
       </section>
-    </main>
 
-    <footer class="site-footer">Closet By Grace — made for Namibia's secondhand fashion scene 🇳🇦</footer>
+      <div class="checker-bar" aria-hidden="true"></div>
+    </main>
   </div>
 
-  <script type="module" src="js/nav.js"></script>
+  <script type="module" src="js/layout.js"></script>
   <script type="module" src="js/feed.js"></script>
 </body>
 </html>

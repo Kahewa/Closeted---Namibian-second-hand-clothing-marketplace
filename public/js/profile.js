@@ -12,11 +12,28 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { uploadImage } from "./cloudinary.js";
 import { renderCarouselCard } from "./carousel-card.js";
-import { ensureUserDoc } from "./auth.js";
-import { $, el, toast, initials, whatsappHref, isValidUrl } from "./utils.js";
+import {
+  ensureUserDoc,
+  claimUsername,
+  uidForUsername,
+  deleteOwnAccount,
+  isAdminUser,
+} from "./auth.js";
+import {
+  $,
+  el,
+  toast,
+  initials,
+  whatsappHref,
+  isValidUrl,
+  normalizeUsername,
+  usernameError,
+  PAYMENT_DETAILS,
+} from "./utils.js";
 
 const params = new URLSearchParams(location.search);
 let targetUid = params.get("uid");
+const targetUsername = params.get("u");
 let currentUser = null;
 let profileData = null;
 
@@ -28,6 +45,8 @@ const avatarImg = $("[data-avatar]");
 const avatarUploadLabel = $("[data-avatar-upload]");
 const avatarInput = $("[data-avatar-input]");
 const nameEl = $("[data-display-name]");
+const usernameView = $("[data-username-view]");
+const usernameEdit = $("[data-username-edit]");
 const bioView = $("[data-bio-view]");
 const bioEdit = $("[data-bio-edit]");
 const socialView = $("[data-social-view]");
@@ -39,13 +58,26 @@ const profileHeader = $("[data-profile-header]");
 const listingsHost = $("[data-listings]");
 const listingsEmpty = $("[data-listings-empty]");
 const sellCta = $("[data-sell-cta]");
+const pinnedPay = $("[data-pinned-pay]");
+const dangerZone = $("[data-danger-zone]");
 
 const socialFields = ["instagram", "tiktok", "facebook", "whatsapp"];
-const socialIcon = { instagram: "📸", tiktok: "🎵", facebook: "📘", whatsapp: "💬" };
+const socialIcon = { instagram: "instagram", tiktok: "tiktok", facebook: "facebook", whatsapp: "chat" };
 const socialLabel = { instagram: "Instagram", tiktok: "TikTok", facebook: "Facebook", whatsapp: "WhatsApp" };
 
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
+
+  // profile.html?u=grace.closet resolves the username to a uid first
+  if (!targetUid && targetUsername) {
+    targetUid = await uidForUsername(targetUsername);
+    if (!targetUid) {
+      loadingState.textContent = `No closet found for @${normalizeUsername(targetUsername)}.`;
+      return;
+    }
+    history.replaceState({}, "", `profile.html?uid=${targetUid}`);
+  }
+
   if (!targetUid) {
     if (!user) {
       loadingState.hidden = true;
@@ -100,6 +132,14 @@ function paintView() {
   avatarImg.parentElement.querySelector("[data-avatar-initials]").hidden = !!profileData.profilePicURL;
 
   nameEl.textContent = profileData.displayName || "Closet Seller";
+
+  usernameView.textContent = profileData.username
+    ? `@${profileData.username}`
+    : isOwner()
+      ? "no username yet — add one so people can find you"
+      : "";
+  usernameEdit.value = profileData.username || "";
+
   bioView.textContent = profileData.bio || (isOwner() ? "Add a bio so buyers know who they're shopping from." : "No bio yet.");
   bioEdit.value = profileData.bio || "";
 
@@ -115,22 +155,18 @@ function paintView() {
     const href = field === "whatsapp" ? whatsappHref(value) : isValidUrl(value) ? value : `https://${value.replace(/^https?:\/\//, "")}`;
     socialView.append(
       el("a", { class: "social-btn", href, target: "_blank", rel: "noopener noreferrer" }, [
-        el("span", {}, socialIcon[field]),
+        el("i", { class: `ico ico--${socialIcon[field]}`, "aria-hidden": "true" }),
         el("span", {}, socialLabel[field]),
       ])
     );
     editFormWrap.querySelector(`[name="${field}"]`).value = value;
   });
 
-  if (isOwner()) {
-    editToggleBtn.hidden = false;
-    avatarUploadLabel.hidden = false;
-    sellCta.hidden = false;
-  } else {
-    editToggleBtn.hidden = true;
-    avatarUploadLabel.hidden = true;
-    sellCta.hidden = true;
-  }
+  const owner = isOwner();
+  editToggleBtn.hidden = !owner;
+  avatarUploadLabel.hidden = !owner;
+  sellCta.hidden = !owner;
+  dangerZone.hidden = !owner;
 }
 
 editToggleBtn?.addEventListener("click", () => {
@@ -145,6 +181,14 @@ saveBtn?.addEventListener("click", async () => {
   saveBtn.disabled = true;
   saveBtn.textContent = "Saving…";
   try {
+    const wantedName = normalizeUsername(usernameEdit.value);
+    if (wantedName && wantedName !== (profileData.username || "")) {
+      const problem = usernameError(wantedName);
+      if (problem) throw new Error(problem);
+      await claimUsername(targetUid, wantedName, profileData.username);
+      profileData.username = wantedName;
+    }
+
     const socialLinks = {};
     socialFields.forEach((field) => {
       socialLinks[field] = editFormWrap.querySelector(`[name="${field}"]`).value.trim();
@@ -156,13 +200,13 @@ saveBtn?.addEventListener("click", async () => {
     profileData = { ...profileData, bio: bioEdit.value.trim().slice(0, 280), socialLinks };
     paintView();
     profileHeader.classList.remove("profile-header--editing");
-    toast("Profile updated ✨");
+    toast("Profile updated");
   } catch (err) {
     console.error(err);
-    toast("Couldn't save your profile. Please try again.", "error");
+    toast(err.message || "Couldn't save your profile. Please try again.", "error");
   } finally {
     saveBtn.disabled = false;
-    saveBtn.textContent = "💾 Save changes";
+    saveBtn.innerHTML = '<i class="ico ico--save" aria-hidden="true"></i> Save changes';
   }
 });
 
@@ -179,7 +223,7 @@ avatarInput?.addEventListener("change", async () => {
     await updateDoc(doc(db, "users", targetUid), { profilePicURL: url });
     profileData.profilePicURL = url;
     paintView();
-    toast("Profile picture updated ✨");
+    toast("Profile picture updated");
   } catch (err) {
     console.error(err);
     toast(err.message || "Couldn't upload that photo. Please try again.", "error");
@@ -188,13 +232,89 @@ avatarInput?.addEventListener("change", async () => {
   }
 });
 
+// ---------------------------------------------------------------------
+// Delete my account
+// ---------------------------------------------------------------------
+$("[data-delete-account]")?.addEventListener("click", async () => {
+  if (!isOwner() || !currentUser) return;
+  if (!confirm("Delete your account, your username and all of your carousels? This can't be undone.")) return;
+  if (!confirm("Really delete everything? Last chance.")) return;
+
+  try {
+    await deleteOwnAccount(currentUser);
+    alert("Your account has been deleted. Take care.");
+    location.href = "index.html";
+  } catch (err) {
+    console.error(err);
+    // Firebase refuses to delete an auth account on a stale session.
+    if (err?.code === "auth/requires-recent-login") {
+      toast("For security, log out and back in, then delete again.", "error");
+    } else {
+      toast(err.message || "Couldn't delete your account.", "error");
+    }
+  }
+});
+
+// ---------------------------------------------------------------------
+// Pinned payment details — shown to the owner while anything is pending
+// ---------------------------------------------------------------------
+function paintPinnedPayment(waitingCount) {
+  if (!isOwner() || waitingCount < 1) {
+    pinnedPay.hidden = true;
+    return;
+  }
+
+  const d = PAYMENT_DETAILS;
+  const ref = profileData.username ? `@${profileData.username}` : "— set a username —";
+  const set = (sel, value) => {
+    const node = pinnedPay.querySelector(sel);
+    if (node) node.textContent = value;
+  };
+
+  set("[data-approval-count]", waitingCount);
+  set("[data-pinned-ref]", ref);
+  set("[data-pay-wallet]", d.walletNumber);
+  set("[data-pay-bank]", d.bank);
+  set("[data-pay-holder]", d.accountHolder);
+  set("[data-pay-type]", d.accountType);
+  set("[data-pay-number]", d.accountNumber);
+  set("[data-pay-branch]", d.branchCode);
+  set("[data-pay-cash-number]", d.cashWhatsapp);
+
+  const cash = pinnedPay.querySelector("[data-pay-cash]");
+  if (cash) {
+    cash.href =
+      whatsappHref(
+        d.cashWhatsapp,
+        `Hi! I'd like to pay my N$150 carousel fee in cash. My username is ${ref}.`
+      ) || "#";
+  }
+
+  pinnedPay.hidden = false;
+}
+
+// ---------------------------------------------------------------------
+// Listings
+// ---------------------------------------------------------------------
 async function loadListings() {
   try {
     const snap = await getDocs(
       query(collection(db, "carousels"), where("sellerId", "==", targetUid), orderBy("createdAt", "desc"))
     );
+
+    // Only the owner (and the admin) see drops that aren't approved yet.
+    const canSeeAll = isOwner() || isAdminUser(currentUser);
+    const carousels = snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((c) => canSeeAll || (c.status || "approved") === "approved");
+
+    // Anything unpaid keeps the banking details pinned to the top of the
+    // page, so the seller never has to hunt for where to send the money.
+    const waiting = carousels.filter((c) => c.status === "pending").length;
+    paintPinnedPayment(waiting);
+
     listingsHost.innerHTML = "";
-    if (snap.empty) {
+    if (!carousels.length) {
       listingsEmpty.hidden = false;
       listingsEmpty.querySelector("[data-listings-empty-body]").textContent = isOwner()
         ? "You haven't dropped a carousel yet — your closet is waiting."
@@ -202,8 +322,7 @@ async function loadListings() {
       return;
     }
     listingsEmpty.hidden = true;
-    snap.forEach((docSnap) => {
-      const carousel = { id: docSnap.id, ...docSnap.data() };
+    carousels.forEach((carousel) => {
       listingsHost.append(renderCarouselCard(carousel, currentUser, { onDeleted: loadListings }));
     });
   } catch (err) {

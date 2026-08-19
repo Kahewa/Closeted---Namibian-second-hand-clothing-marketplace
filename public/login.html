@@ -3,29 +3,23 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Log in — Closet.bg</title>
+<title>Log in — Closet Sales Namibia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body data-page="login">
   <div class="page auth-page">
-    <div class="sparkle-field" aria-hidden="true">
-      <span class="sparkle" style="top:6%;left:-6%;"></span>
-      <span class="sparkle sparkle--sm" style="top:16%;right:-2%;animation-delay:1s;"></span>
-      <span class="sparkle sparkle--ink" style="top:70%;left:4%;animation-delay:2s;"></span>
-      <span class="sparkle" style="top:78%;right:-7%;animation-delay:1.6s;"></span>
-    </div>
 
     <div class="shell">
-      <div class="auth-card glass-card">
+      <div class="auth-card glass-card" data-win="sign in.html">
         <div class="logo logo--center">
-          <span class="logo__closet">Closet</span><span class="logo__bg">.bg</span>
+          <span class="logo__closet">closet sales</span><span class="logo__bg">namibia</span>
         </div>
         <p class="muted text-center" style="margin-top:-10px; margin-bottom:18px; font-size:14px;">
           Buy what's dropped. Sell what's collecting dust.
@@ -57,6 +51,14 @@
               <input id="signup-name" type="text" name="name" required autocomplete="name" />
             </div>
             <div class="field">
+              <label for="signup-username">Username</label>
+              <input id="signup-username" type="text" name="username" required maxlength="20" placeholder="grace.closet" autocomplete="off" />
+              <p class="muted" style="font-size:11px;">
+                3–20 characters: lowercase letters, numbers, dots or underscores. People search
+                for you by this, and it's your payment reference.
+              </p>
+            </div>
+            <div class="field">
               <label for="signup-email">Email</label>
               <input id="signup-email" type="email" name="email" required autocomplete="email" />
             </div>
@@ -81,6 +83,7 @@
     </div>
   </div>
 
+  <script type="module" src="js/layout.js"></script>
   <script type="module" src="js/login.js"></script>
 </body>
 </html>

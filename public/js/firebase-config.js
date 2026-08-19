@@ -8,7 +8,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/12.17.1/firebas
 // No Firebase Storage import: creating a bucket needs the paid Blaze plan,
 // so images live on Cloudinary instead — see public/js/cloudinary.js.
 
-// 🔑 The project's config lives in local-config.js, which is gitignored —
+// The project's config lives in local-config.js, which is gitignored —
 // copy local-config.example.js to local-config.js and fill it in.
 // Loaded with a dynamic import so a missing file shows the setup banner
 // below instead of killing the whole module (a static import that fails
@@ -39,7 +39,7 @@ export const isFirebaseConfigured = !Object.values(firebaseConfig).some(
 
 if (!isFirebaseConfigured) {
   console.warn(
-    "%cCloset.bg — Firebase isn't configured yet.",
+    "%cCloset Sales Namibia — Firebase isn't configured yet.",
     "font-weight:bold",
     "\nCopy public/js/local-config.example.js to local-config.js and fill it in."
   );

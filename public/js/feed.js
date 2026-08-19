@@ -2,6 +2,7 @@ import { db, auth } from "./firebase-config.js";
 import {
   collection,
   query,
+  where,
   orderBy,
   limit,
   startAfter,
@@ -45,7 +46,13 @@ async function loadPage() {
   loadMoreBtn.disabled = true;
 
   try {
-    const constraints = [orderBy("createdAt", "desc"), limit(PAGE_SIZE)];
+    // Only approved drops reach the feed. Pending ones are visible to
+    // their own seller on their profile, and to the admin dashboard.
+    const constraints = [
+      where("status", "==", "approved"),
+      orderBy("createdAt", "desc"),
+      limit(PAGE_SIZE),
+    ];
     if (lastDoc) constraints.push(startAfter(lastDoc));
     const snap = await getDocs(query(collection(db, "carousels"), ...constraints));
 
@@ -60,8 +67,9 @@ async function loadPage() {
     console.error("Couldn't load the feed:", err);
     emptyState.hidden = false;
     emptyState.querySelector("[data-empty-title]").textContent = "Couldn't load the feed";
-    emptyState.querySelector("[data-empty-body]").innerHTML =
-      `Double check your Firebase config in <code>public/js/firebase-config.js</code>.<br><small>${err.message}</small>`;
+    emptyState.querySelector("[data-empty-body]").innerHTML = /index/i.test(err.message)
+      ? `Firestore needs a one-time index (status + createdAt). Open the browser console and click the link Firebase printed, or deploy <code>firebase/firestore.indexes.json</code>.<br><small>${err.message}</small>`
+      : `Double check your config in <code>public/js/local-config.js</code>.<br><small>${err.message}</small>`;
   } finally {
     loading = false;
     loadMoreBtn.textContent = "Load more closets";

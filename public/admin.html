@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Closet Sales Namibia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap"
+  rel="stylesheet"
+/>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="admin">
+  <div class="page">
+    <main>
+      <div class="shell shell--wide" style="padding-top:22px;">
+        <p class="eyebrow">admin dashboard</p>
+        <h1 class="h1" style="margin-top:6px;">Hi Grace</h1>
+
+        <div class="admin-tabs" role="tablist">
+          <button type="button" class="admin-tab admin-tab--active" data-tab="pending">
+            waiting for approval <span class="admin-tab__count" data-count-pending>0</span>
+          </button>
+          <button type="button" class="admin-tab" data-tab="live">live feed</button>
+          <button type="button" class="admin-tab" data-tab="accounts">
+            accounts <span class="admin-tab__count" data-count-users>0</span>
+          </button>
+        </div>
+
+        <!-- carousels saved before the approval system existed -->
+        <div class="legacy-fix" data-legacy hidden>
+          <p class="legacy-fix__title">
+            <span data-legacy-count>0</span> older carousel(s) have no approval status
+          </p>
+          <p class="legacy-fix__body">
+            These were posted before approvals existed, so they show up nowhere — not on the feed,
+            not in the queue below. Choose what to do with them.
+          </p>
+          <div class="legacy-fix__actions">
+            <button type="button" class="btn btn--primary btn--sm" data-legacy-approve>
+              <i class="ico ico--check" aria-hidden="true"></i> put them live
+            </button>
+            <button type="button" class="btn btn--outline btn--sm" data-legacy-pending>
+              <i class="ico ico--hourglass" aria-hidden="true"></i> send to the queue
+            </button>
+          </div>
+        </div>
+
+        <!-- pending approvals -->
+        <section data-panel="pending">
+          <p class="muted" style="font-size:13px;margin-bottom:14px;">
+            Each carousel below is waiting on a N$150 payment being confirmed. Check the reference
+            against your bank or wallet, then approve or reject.
+          </p>
+          <p class="text-center muted" data-pending-loading>Loading…</p>
+          <div class="empty-state" data-pending-empty hidden>
+            <div class="empty-state__icon"><i class="ico ico--check ico--xl" aria-hidden="true"></i></div>
+            <p class="h3">Nothing waiting</p>
+            <p class="muted" style="margin-top:6px;">Every carousel has been reviewed.</p>
+          </div>
+          <div data-pending-list></div>
+        </section>
+
+        <!-- live feed -->
+        <section data-panel="live" hidden>
+          <p class="muted" style="font-size:13px;margin-bottom:14px;">
+            Everything currently visible on the feed. You can pull any of these back down.
+          </p>
+          <p class="text-center muted" data-live-loading>Loading…</p>
+          <div class="empty-state" data-live-empty hidden>
+            <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
+            <p class="h3">Nothing live yet</p>
+          </div>
+          <div data-live-list></div>
+        </section>
+
+        <!-- accounts -->
+        <section data-panel="accounts" hidden>
+          <p class="muted" style="font-size:13px;margin-bottom:14px;">
+            Everyone who has signed up. Banning blocks new carousels and locks them out of the
+            sell page; deleting also wipes their listings.
+          </p>
+          <div class="field" style="max-width:320px;">
+            <label for="account-search">Search by name or username</label>
+            <input id="account-search" type="text" data-account-search placeholder="grace…" autocomplete="off" />
+          </div>
+          <p class="text-center muted" data-users-loading>Loading…</p>
+          <div data-users-list></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

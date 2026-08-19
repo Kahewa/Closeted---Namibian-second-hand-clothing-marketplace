@@ -28,5 +28,5 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✨ Closet.bg is running at http://localhost:${PORT}`);
+  console.log(`✨ Closet Sales Namibia is running at http://localhost:${PORT}`);
 });
