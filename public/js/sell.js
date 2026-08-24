@@ -431,7 +431,15 @@ form.addEventListener("submit", async (e) => {
     }
   } catch (err) {
     console.error(err);
-    toast(err.message || "Couldn't save your carousel. Please try again.", "error");
+    // "Missing or insufficient permissions" on its own tells the seller
+    // nothing, so name the two things that actually cause it.
+    const denied = err?.code === "permission-denied" || /insufficient permissions/i.test(err?.message || "");
+    toast(
+      denied
+        ? "Firestore turned that down. Either this account is banned, or the security rules need redeploying (firebase deploy --only firestore:rules)."
+        : err.message || "Couldn't save your carousel. Please try again.",
+      "error"
+    );
   } finally {
     submitBtn.disabled = false;
     submitBtn.classList.remove("btn--loading");

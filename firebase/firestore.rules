@@ -21,10 +21,13 @@ service cloud.firestore {
 
     // A banned user keeps their login but can't write anything new.
     // Costs one extra read, so it's only checked on carousel creation.
+    // `.get(field, default)` rather than `.field`: reading a key that isn't
+    // on the document raises an error and fails the whole rule, which would
+    // lock out every account created before `banned` was added.
     function notBanned() {
       return isSignedIn() && (
         !exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.banned != true
+        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('banned', false) != true
       );
     }
 
@@ -73,10 +76,12 @@ service cloud.firestore {
 
       // Sellers can edit their own listing (mark items sold) but must not
       // change `status` — that's what would let them approve themselves.
+      // Defaulted reads again, so carousels posted before `status` existed
+      // stay editable by their owner instead of erroring.
       allow update: if isAdmin()
         || (isSignedIn()
             && resource.data.sellerId == request.auth.uid
-            && request.resource.data.status == resource.data.status);
+            && request.resource.data.get('status', '') == resource.data.get('status', ''));
 
       allow delete: if isAdmin() || (isSignedIn() && resource.data.sellerId == request.auth.uid);
     }

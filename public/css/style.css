@@ -741,6 +741,95 @@ code {
 .carousel-card__footer { padding: 0 14px 14px; }
 .carousel-card__footer .btn { width: 100%; }
 
+/* ---- shop grid -----------------------------------------------------------*/
+/* Three small squares to a row at every width. The grid is capped rather
+   than stretched on desktop, so the tiles stay thumbnail-sized instead of
+   growing into three enormous panels. */
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  text-align: left;
+  background: var(--white);
+  border: var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-hard-sm);
+  overflow: hidden;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.tile:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-hard); }
+.tile:active { transform: translate(1px, 1px); box-shadow: 0 0 0 var(--ink); }
+
+.tile__media { position: relative; display: block; aspect-ratio: 1; background: var(--paper-200); }
+.tile__img { width: 100%; height: 100%; object-fit: cover; }
+.tile__img--none { display: block; width: 100%; height: 100%; background: var(--lav-soft); }
+
+/* how many pieces are in this closet */
+.tile__count {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  min-width: 20px;
+  padding: 1px 6px;
+  border: var(--line-thin);
+  border-radius: var(--radius-full);
+  background: var(--pink);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  text-align: center;
+}
+.tile__sold {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 3px 0;
+  background: var(--ink);
+  color: var(--white);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+
+.tile__meta { display: block; padding: 6px 7px 7px; border-top: var(--line-thin); }
+.tile__who {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tile__price { display: block; font-size: 10px; color: var(--ink-700); }
+
+/* ---- lightbox ------------------------------------------------------------*/
+.lightbox__panel {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.lightbox__panel .carousel-card { margin-bottom: 0; }
+.lightbox__x {
+  top: -14px;
+  right: -6px;
+  z-index: 2;
+  background: var(--white);
+  box-shadow: var(--shadow-hard-sm);
+}
+
 /* ---- forms ------------------------------------------------------------------*/
 .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
 .field label { font-family: var(--font-display); font-weight: 600; font-size: 13px; }
@@ -1254,6 +1343,10 @@ input::placeholder, textarea::placeholder { color: var(--ink-600); }
   .item-row__grid { grid-template-columns: 1fr 1fr 1fr; }
   .shell { padding: 0 24px; }
   .footer-cols { grid-template-columns: 1.4fr 1fr 1fr; }
+}
+
+@media (min-width: 640px) {
+  .tile-grid { gap: 14px; }
 }
 
 @media (min-width: 900px) {

@@ -21,6 +21,7 @@ const status = $("[data-search-status]");
 const HIGH = "";
 
 async function runSearch(term) {
+  const q = normalizeUsername(term);
   results.innerHTML = "";
 
   if (q.length < 2) {

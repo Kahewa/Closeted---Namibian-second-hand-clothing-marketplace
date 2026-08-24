@@ -19,7 +19,7 @@ const TICKER =
 
 const NAV = [
   { key: "home", href: "index.html", icon: "home", label: "home" },
-  { key: "shop", href: "index.html#feed-start", icon: "shirt", label: "shop" },
+  { key: "shop", href: "shop.html", icon: "shirt", label: "shop" },
   { key: "sell", href: "sell.html", icon: "tag", label: "sell" },
   { key: "profile", href: "profile.html", icon: "mail", label: "profile" },
   { key: "people", href: "search.html", icon: "search", label: "people" },
@@ -29,7 +29,7 @@ const FOOTER_COLS = [
   {
     title: "shop",
     links: [
-      { href: "index.html", label: "all closets" },
+      { href: "shop.html", label: "all closets" },
       { href: "index.html#feed-start", label: "new drops" },
       { href: "sell.html", label: "sell yours" },
     ],
@@ -57,6 +57,7 @@ const FOOTER_SOCIALS = ["instagram", "tiktok", "facebook", "chat"];
 // "open window". `chrome: false` means the page draws its own thing.
 const PAGES = {
   home: { nav: "home", window: "welcome 2 my closet.html", windowIcon: "home" },
+  shop: { nav: "shop", window: "shop all closets.html", windowIcon: "shirt" },
   sell: { nav: "sell", window: "sell my closet.html", windowIcon: "tag" },
   profile: { nav: "profile", window: "my profile.html", windowIcon: "mail" },
   people: { nav: "people", window: "find people.html", windowIcon: "search" },
