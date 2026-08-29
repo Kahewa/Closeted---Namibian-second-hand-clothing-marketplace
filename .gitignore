@@ -1,6 +1,9 @@
 node_modules/
 .env
 serviceAccountKey.json
-public/js/local-config.js
+# public/js/local-config.js is intentionally COMMITTED. Firebase web
+# config and an unsigned Cloudinary preset are public by design - the
+# browser needs them. Access is controlled by firebase/firestore.rules.
+# The real secrets stay out: .env and serviceAccountKey.json below.
 .DS_Store
 npm-debug.log*
