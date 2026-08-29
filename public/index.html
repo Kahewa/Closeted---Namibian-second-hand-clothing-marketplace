@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closet Sales Namibia — buy &amp; sell pre-loved fashion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap"
+  rel="stylesheet"
+/>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="home">
+  <div class="page">
+    <main>
+      <section class="band band--pink">
+        <div class="shell shell--wide">
+          <section class="hero-label">
+            <span class="hero-label__eyebrow">Namibia's Online Closet</span>
+            <h1 class="hero-label__title">Buy or Sell</h1>
+            <p class="hero-label__body">
+              Every carousel below is one person's closet clean-out!! Find something? Message them straight on WhatsApp. Got clothes piling
+              up? Drop a Closet Sale of your own.
+            </p>
+            <div class="hero-label__actions">
+              <a href="sell.html" class="btn btn--primary">sell your closet →</a>
+              <a href="#feed-start" class="btn btn--outline">start browsing ↓</a>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="band band--white">
+        <div class="shell shell--wide">
+          <h2 class="section-title">new drops</h2>
+          <div class="heart-row" aria-hidden="true"></div>
+
+          <div class="deck">
+            <aside class="deck__side">
+              <div class="note">
+                <p class="note__title">welcome babe! <i class="ico ico--heart ico--pink" aria-hidden="true"></i></p>
+                <p>thanks 4 stopping by!! hope u find something cute 2day</p>
+                <ul>
+                  <li>swipe each closet</li>
+                  <li>screenshot what you like</li>
+                  <li>msg the seller</li>
+                </ul>
+              </div>
+            </aside>
+
+            <div class="deck__main">
+              <div class="frame">
+                <div class="empty-state" data-empty-state hidden>
+                  <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
+                  <p class="h3" data-empty-title>No closets dropped yet</p>
+                  <p class="muted" data-empty-body style="margin-top:6px;">Be the first! your closet could be today's top drop.</p>
+                  <a href="sell.html" class="btn btn--primary" style="margin-top:16px;">sell your closet</a>
+                </div>
+
+                <div id="feed-start" data-feed></div>
+              </div>
+
+              <div class="text-center" style="margin-top:22px;">
+                <button type="button" class="btn btn--chrome" data-load-more>load more closets</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="checker-bar" aria-hidden="true"></div>
+    </main>
+  </div>
+
+  <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/feed.js"></script>
+</body>
+</html>

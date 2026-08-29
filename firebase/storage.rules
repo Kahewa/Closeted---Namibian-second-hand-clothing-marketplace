@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// ⚠️ NOT IN USE. Firebase requires the paid Blaze plan to create a Storage
+// bucket on new projects, so photos go to Cloudinary instead — see
+// public/js/cloudinary.js and server/routes/media.js. This file is kept
+// only so the app can be moved back onto Firebase Storage later: swap the
+// uploads back, re-add the "storage" block to firebase.json, then deploy
+// with `firebase deploy --only storage`.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // NOTE: `write` covers create, update AND delete, but on a delete
+    // `request.resource` is null — so a size/contentType check inside a
+    // `write` rule can never pass for a delete. That silently blocked
+    // deleteObject() when a seller removed a carousel, leaving orphaned
+    // files in the bucket. Hence create/update and delete are split.
+
+    // Profile pictures — one per user, 5MB cap, images only.
+    match /profile-pics/{uid}/{fileName} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Carousel item photos — 8MB cap per photo, images only.
+    match /carousels/{uid}/{carouselId}/{fileName} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
