@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&amp;family=Jost:wght@400;500;600&amp;family=Sacramento&amp;display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -16,62 +16,68 @@
 <body data-page="home">
   <div class="page">
     <main>
-      <section class="band band--pink">
-        <div class="shell shell--wide">
-          <section class="hero-label">
-            <span class="hero-label__eyebrow">Namibia's Online Closet</span>
-            <h1 class="hero-label__title">Buy or Sell</h1>
-            <p class="hero-label__body">
-              Every carousel below is one person's closet clean-out!! Find something? Message them straight on WhatsApp. Got clothes piling
-              up? Drop a Closet Sale of your own.
-            </p>
-            <div class="hero-label__actions">
-              <a href="sell.html" class="btn btn--primary">sell your closet →</a>
-              <a href="#feed-start" class="btn btn--outline">start browsing ↓</a>
-            </div>
-          </section>
+      <!-- opens straight on the story -->
+      <section class="band band--white intro">
+        <div class="shell">
+          <p class="eyebrow text-center">Namibia's online closet</p>
+          <h1 class="split__title text-center">About The <span class="script">Closet</span></h1>
+
+          <p>
+            Closet Sales Namibia was created with one idea in mind — that good clothes
+            deserve a second life. Every listing here is somebody's real wardrobe
+            clear-out, photographed piece by piece, priced honestly.
+          </p>
+          <p>
+            Sellers pay one flat fee to post a whole closet, however many pieces it
+            holds. Buyers browse, find something they love, and message the seller
+            directly on WhatsApp. No middlemen, no commission, no fuss.
+          </p>
+
+          <div class="cta-row">
+            <a href="shop.html" class="btn btn--primary">Shop the closets</a>
+            <a href="sell.html" class="btn btn--lime">Sell yours</a>
+          </div>
         </div>
       </section>
 
+      <!-- the pinboard -->
       <section class="band band--white">
         <div class="shell shell--wide">
-          <h2 class="section-title">new drops</h2>
+          <h2 class="section-title">Explore Our Closet</h2>
           <div class="heart-row" aria-hidden="true"></div>
 
           <div class="deck">
-            <aside class="deck__side">
-              <div class="note">
-                <p class="note__title">welcome babe! <i class="ico ico--heart ico--pink" aria-hidden="true"></i></p>
-                <p>thanks 4 stopping by!! hope u find something cute 2day</p>
-                <ul>
-                  <li>swipe each closet</li>
-                  <li>screenshot what you like</li>
-                  <li>msg the seller</li>
-                </ul>
-              </div>
-            </aside>
-
             <div class="deck__main">
               <div class="frame">
                 <div class="empty-state" data-empty-state hidden>
                   <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
                   <p class="h3" data-empty-title>No closets dropped yet</p>
-                  <p class="muted" data-empty-body style="margin-top:6px;">Be the first! your closet could be today's top drop.</p>
-                  <a href="sell.html" class="btn btn--primary" style="margin-top:16px;">sell your closet</a>
+                  <p class="muted" data-empty-body style="margin-top:6px;">Be the first — your closet could be today's top drop.</p>
+                  <a href="sell.html" class="btn btn--primary" style="margin-top:20px;">Sell your closet</a>
                 </div>
 
                 <div id="feed-start" data-feed></div>
               </div>
 
-              <div class="text-center" style="margin-top:22px;">
-                <button type="button" class="btn btn--chrome" data-load-more>load more closets</button>
+              <div class="text-center" style="margin-top:36px;">
+                <button type="button" class="btn btn--chrome" data-load-more>Load more closets</button>
               </div>
             </div>
+
+            <aside class="deck__side">
+              <div class="note">
+                <p class="note__title">How it works</p>
+                <ul>
+                  <li>Swipe through each closet</li>
+                  <li>Tap the price for the details</li>
+                  <li>Message the seller on WhatsApp</li>
+                  <li>Arrange your own collection</li>
+                </ul>
+              </div>
+            </aside>
           </div>
         </div>
       </section>
-
-      <div class="checker-bar" aria-hidden="true"></div>
     </main>
   </div>
 
