@@ -258,7 +258,10 @@ export function renderNavAuth(user) {
   if (!authArea) return;
 
   if (!user) {
-    authArea.innerHTML = `<a class="btn btn--chrome btn--sm" href="login.html">sign in</a>`;
+    // an icon rather than a button, to balance the search icon opposite
+    authArea.innerHTML =
+      `<a href="login.html" aria-label="Log in">` +
+      `<i class="ico ico--user" aria-hidden="true"></i></a>`;
     return;
   }
 

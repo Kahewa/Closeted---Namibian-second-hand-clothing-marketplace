@@ -20,11 +20,10 @@ const TICKER =
 // `authOnly` items render hidden and are revealed once we know somebody is
 // signed in — a profile link means nothing to a signed-out visitor.
 const NAV = [
-  { key: "home", href: "index.html", icon: "home", label: "closets" },
-  { key: "sellers", href: "shop.html", icon: "search", label: "view sellers" },
-  { key: "how", href: "how.html", icon: "note", label: "how it works" },
-  { key: "sell", href: "sell.html", icon: "tag", label: "sell your closet" },
-  { key: "profile", href: "profile.html", icon: "user", label: "profile", authOnly: true },
+  { key: "home", href: "index.html", label: "home" },
+  { key: "how", href: "how.html", label: "how it works" },
+  { key: "sell", href: "sell.html", label: "sell your closet" },
+  { key: "profile", href: "profile.html", label: "profile", authOnly: true },
 ];
 
 const FOOTER_COLS = [
@@ -99,35 +98,33 @@ const topbar = () => `
 
 function navbar(cfg) {
   const isAdmin = cfg.variant === "admin";
+
   const logo = `
-    <a href="${isAdmin ? "admin.html" : "index.html"}" class="logo">
-      <span class="logo__closet">${BRAND.first}</span><span class="logo__bg">${isAdmin ? "admin" : BRAND.second}</span>
-    </a>`;
+      <a href="${isAdmin ? "admin.html" : "index.html"}" class="logo">
+        <span class="logo__closet">${BRAND.first}</span><span class="logo__bg">${BRAND.second}</span>
+      </a>`;
 
   const iconnav = isAdmin
-    ? ""
+    ? `<nav class="iconnav"><a href="sell.html" class="iconnav__item">post a carousel</a></nav>`
     : `
-    <nav class="iconnav">
-      ${NAV.map(
-        (item) =>
-          `<a href="${item.href}" class="iconnav__item${item.key === cfg.nav ? " iconnav__item--on" : ""}"` +
-          `${item.authOnly ? " data-auth-only hidden" : ""}>` +
-          `<span>${ico(item.icon)}</span>${item.label}</a>`
-      ).join("\n      ")}
-    </nav>`;
+      <nav class="iconnav">
+        ${NAV.map(
+          (item) =>
+            `<a href="${item.href}" class="iconnav__item${item.key === cfg.nav ? " iconnav__item--on" : ""}"` +
+            `${item.authOnly ? " data-auth-only hidden" : ""}>${item.label}</a>`
+        ).join("\n        ")}
+      </nav>`;
 
-  const extra = isAdmin ? `<a href="sell.html">post a carousel</a>` : "";
-
+  // Three slots on the top row so the wordmark stays optically centred
+  // whatever sits either side of it.
   return `
   <header class="navbar">
-    <div class="navbar__inner">
+    <div class="navbar__top">
+      <a class="navbar__icon" href="shop.html" aria-label="Search sellers">${ico("search")}</a>
       ${logo}
-      ${iconnav}
-      <nav class="navlinks">
-        ${extra}
-        <span data-nav-auth></span>
-      </nav>
+      <span class="navbar__icon navbar__icon--end" data-nav-auth></span>
     </div>
+    ${iconnav}
   </header>`;
 }
 

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Jost:wght@400;500;600&amp;family=Sacramento&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Jost:wght@500;600;700&amp;family=Sacramento&amp;display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -16,24 +16,40 @@
 <body data-page="home">
   <div class="page">
     <main>
-      <!-- the pinboard -->
+      <!-- hero, on cheetah print -->
+      <section class="hero">
+        <div class="hero__inner">
+          <h1 class="hero__title">Closet Sales Namibia</h1>
+          <a href="#browse" class="btn btn--chrome hero__cta">Shop now</a>
+        </div>
+      </section>
+
+      <!-- who posted most recently -->
       <section class="band band--white">
         <div class="shell shell--wide">
-          <h2 class="section-title">Explore Our Closet</h2>
+          <h2 class="section-title">Newest Closet Sellers</h2>
           <div class="heart-row" aria-hidden="true"></div>
 
-          <div class="frame">
-            <div class="empty-state" data-empty-state hidden>
-              <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
-              <p class="h3" data-empty-title>No closets dropped yet</p>
-              <p class="muted" data-empty-body style="margin-top:6px;">Be the first — your closet could be today's top drop.</p>
-              <a href="sell.html" class="btn btn--primary" style="margin-top:20px;">Sell your closet</a>
-            </div>
+          <p class="text-center muted" data-newest-status>Loading sellers…</p>
+          <div class="seller-row" data-newest></div>
+        </div>
+      </section>
 
-            <div id="feed-start" data-feed></div>
+      <!-- browse: cheetah print carries on behind the closets -->
+      <section class="browse" id="browse">
+        <div class="shell shell--wide">
+          <h2 class="browse__title">Browse Closets</h2>
+
+          <div class="empty-state" data-empty-state hidden>
+            <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
+            <p class="h3" data-empty-title>No closets dropped yet</p>
+            <p class="muted" data-empty-body style="margin-top:6px;">Be the first — your closet could be today's top drop.</p>
+            <a href="sell.html" class="btn btn--primary" style="margin-top:20px;">Sell your closet</a>
           </div>
 
-          <div class="text-center" style="margin-top:36px;">
+          <div id="feed-start" data-feed></div>
+
+          <div class="text-center" style="margin-top:40px;">
             <button type="button" class="btn btn--chrome" data-load-more>Load more closets</button>
           </div>
         </div>
@@ -63,7 +79,7 @@
         </p>
 
         <div class="cta-row">
-          <a href="shop.html" class="btn btn--primary">Explore the closets</a>
+          <a href="#browse" class="btn btn--primary" data-welcome-close>Explore the closets</a>
           <a href="sell.html" class="btn btn--lime">Sell your closet</a>
         </div>
       </div>
@@ -71,6 +87,7 @@
   </div>
 
   <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/newest.js"></script>
   <script type="module" src="js/feed.js"></script>
   <script type="module" src="js/welcome.js"></script>
 </body>
