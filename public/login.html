@@ -21,20 +21,35 @@
         <div class="logo logo--center">
           <span class="logo__closet">closet sales</span><span class="logo__bg">namibia</span>
         </div>
-        <p class="muted text-center" style="margin-top:-10px; margin-bottom:18px; font-size:14px;">
-          Log in to post and manage your closet.
+        <p class="muted text-center auth-lead" data-auth-lead>
+          Namibia's invite-only closet sale.
         </p>
 
-        <!-- Only somebody arriving on an invite link sees these; login.js
-             unhides them once it has checked the code. -->
+        <!-- filled in by login.js once it has checked an invite code -->
         <p class="invite-note" data-invite-note hidden></p>
 
-        <div class="auth-tabs" data-auth-tabs hidden>
-          <button type="button" class="auth-tab auth-tab--active" data-tab="signin">Log in</button>
-          <button type="button" class="auth-tab" data-tab="signup">Set up account</button>
+        <!-- What most people landing here need: a way to ask for a link.
+             The log-in form is a toggle away rather than the front door,
+             since sellers who already have an account arrive far less
+             often than people wondering how to get one. -->
+        <div data-panel="ask">
+          <div class="ask">
+            <p class="ask__lead">
+              Selling here is by invitation. Message us and we'll send you a
+              link to set up your account.
+            </p>
+            <a class="btn btn--primary btn--block ask__btn"
+               href="https://wa.me/264818093631?text=Hi!%20I%27d%20like%20an%20invite%20to%20sell%20on%20Closet%20Sales%20Namibia."
+               target="_blank" rel="noopener">
+              <i class="ico ico--chat" aria-hidden="true"></i> Send WhatsApp message
+            </a>
+          </div>
+          <p class="auth-switch">
+            Have an account? <button type="button" data-go="signin">Log in</button>
+          </p>
         </div>
 
-        <div data-panel="signin">
+        <div data-panel="signin" hidden>
           <form data-signin-form novalidate>
             <div class="field">
               <label for="signin-email">Email</label>
@@ -46,14 +61,21 @@
             </div>
             <button class="btn btn--primary btn--block" type="submit">Log in</button>
           </form>
+
+          <div class="divider-or">or</div>
+
+          <button type="button" class="btn btn--google btn--block" data-google-btn>
+            <span class="google-g">G</span> Continue with Google
+          </button>
+
+          <p class="auth-switch">
+            No account yet? <button type="button" data-go="ask">Ask for an invite</button>
+          </p>
         </div>
 
+        <!-- reached only from a valid invite link -->
         <div data-panel="signup" hidden>
           <form data-signup-form novalidate>
-            <div class="field">
-              <label for="signup-name">Your name</label>
-              <input id="signup-name" type="text" name="name" required autocomplete="name" />
-            </div>
             <div class="field">
               <label for="signup-username">Username</label>
               <input id="signup-username" type="text" name="username" required maxlength="20" placeholder="grace.closet" autocomplete="off" />
@@ -61,6 +83,10 @@
                 3–20 characters: lowercase letters, numbers, dots or underscores. People search
                 for you by this, and it's your payment reference.
               </p>
+            </div>
+            <div class="field">
+              <label for="signup-name">Your name <span class="field__optional">optional</span></label>
+              <input id="signup-name" type="text" name="name" autocomplete="name" placeholder="leave it blank to go by your username" />
             </div>
             <div class="field">
               <label for="signup-email">Email</label>
@@ -72,22 +98,35 @@
             </div>
             <button class="btn btn--primary btn--block" type="submit">Create my account</button>
           </form>
+
+          <div class="divider-or">or</div>
+
+          <button type="button" class="btn btn--google btn--block" data-google-invite>
+            <span class="google-g">G</span> Continue with Google
+          </button>
         </div>
 
-        <div class="divider-or">or</div>
+        <!-- Google gets us an email and nothing else, so the username still
+             has to be asked for before the account exists. -->
+        <div data-panel="username" hidden>
+          <form data-username-form novalidate>
+            <div class="field">
+              <label for="pick-username">Pick your username</label>
+              <input id="pick-username" type="text" name="username" required maxlength="20" placeholder="grace.closet" autocomplete="off" />
+              <p class="muted" style="font-size:11px;">
+                3–20 characters: lowercase letters, numbers, dots or underscores. People search
+                for you by this, and it's your payment reference.
+              </p>
+            </div>
+            <div class="field">
+              <label for="pick-name">Your name <span class="field__optional">optional</span></label>
+              <input id="pick-name" type="text" name="name" autocomplete="name" placeholder="leave it blank to go by your username" />
+            </div>
+            <button class="btn btn--primary btn--block" type="submit">Finish setting up</button>
+          </form>
+        </div>
 
-        <button type="button" class="btn btn--google btn--block" data-google-btn>
-          <span class="google-g">G</span> Continue with Google
-        </button>
-
-        <p class="auth-foot">
-          Selling here is by invitation. If you'd like to post a closet,
-          <a href="https://wa.me/264818093631?text=Hi!%20I%27d%20like%20an%20invite%20to%20sell%20on%20Closet%20Sales%20Namibia."
-             target="_blank" rel="noopener">message us on WhatsApp</a>
-          and we'll send you a link.
-        </p>
-
-        <p class="muted text-center" style="margin-top:14px; font-size:13px;">
+        <p class="muted text-center" style="margin-top:22px; font-size:13px;">
           <a href="index.html">← Back to browsing</a>
         </p>
       </div>

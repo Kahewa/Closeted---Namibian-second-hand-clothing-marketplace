@@ -1225,21 +1225,6 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 /* ---- auth ----------------------------------------------------------------*/
 .auth-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 60px 24px; background: var(--blush-pale); }
 .auth-card { width: 100%; max-width: 460px; }
-.auth-tabs { display: flex; margin-bottom: 32px; border-bottom: 1px solid rgba(64, 38, 48, 0.14); }
-.auth-tab {
-  flex: 1;
-  padding: 14px 0;
-  background: none;
-  border-bottom: 1px solid transparent;
-  margin-bottom: -1px;
-  font-size: 12px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--plum-faint);
-  transition: color var(--t-mid) var(--ease), border-color var(--t-mid) var(--ease);
-}
-.auth-tab + .auth-tab { border-left: none; }
-.auth-tab--active { color: var(--plum); border-bottom-color: var(--rose-deep); background: none; box-shadow: none; }
 .divider-or {
   display: flex; align-items: center; gap: 18px;
   margin: 28px 0;
@@ -1666,15 +1651,34 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
    Accounts are handed out, not signed up for. These are the admin's tools
    for issuing links, plus the note that greets somebody arriving on one. */
 .invite-new {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding: 22px;
+  padding: 24px;
   margin-bottom: 24px;
   background: var(--blush-pale);
+  text-align: center;
 }
-.invite-new .field { margin-bottom: 0; }
+.invite-new__btn { padding: 16px 34px; font-size: 13px; }
+.invite-new__btn .ico { margin-right: 8px; vertical-align: -2px; }
+.invite-new__hint {
+  max-width: 440px;
+  margin: 12px auto 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--plum-soft);
+}
+.invite-new__note { max-width: 380px; margin: 18px auto 0; text-align: left; }
+.invite-new__note .field { margin-bottom: 0; }
+/* the freshly-made link, so it can be selected by hand if the clipboard
+   call was blocked */
+.invite-new__latest {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: var(--white);
+  border: var(--line-thin);
+  font-size: 12.5px;
+  color: var(--plum);
+  word-break: break-all;
+  user-select: all;
+}
 
 .invite-row {
   display: flex;
@@ -1729,16 +1733,63 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 }
 .invite-note--bad { border-left-color: var(--plum); }
 
-.auth-foot {
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: var(--line-thin);
-  font-size: 13px;
+.auth-lead {
+  margin-top: -10px;
+  margin-bottom: 22px;
+  font-size: 14px;
+}
+
+/* The front door for anyone who isn't already a seller. Deliberately the
+   biggest thing on the card: asking for a link is the action almost every
+   new arrival wants, and logging in is one toggle away. */
+.ask {
+  padding: 26px 22px;
+  background: var(--blush-pale);
+  border-left: 3px solid var(--rose-deep);
+  text-align: center;
+}
+.ask__lead {
+  font-size: 16px;
+  font-weight: 600;
   line-height: 1.6;
+  color: var(--plum);
+}
+.ask__btn {
+  margin-top: 20px;
+  padding-top: 17px;
+  padding-bottom: 17px;
+  font-size: 14px;
+}
+.ask__btn .ico { margin-right: 8px; vertical-align: -2px; }
+
+.auth-switch {
+  margin-top: 22px;
+  font-size: 13.5px;
   color: var(--plum-soft);
   text-align: center;
 }
-.auth-foot a { color: var(--rose-dark); font-weight: 700; }
+.auth-switch button {
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--rose-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.auth-switch button:hover { color: var(--plum); }
+
+.field__optional {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--plum-faint);
+}
 
 @media (max-width: 560px) {
   .invite-row { align-items: stretch; }

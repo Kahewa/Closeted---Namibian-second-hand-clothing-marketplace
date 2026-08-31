@@ -103,13 +103,18 @@
           </p>
 
           <div class="invite-new">
-            <div class="field" style="flex:1 1 240px;min-width:0;">
-              <label for="invite-note">Who is this for? (just for your own notes)</label>
+            <button type="button" class="btn btn--primary invite-new__btn" data-invite-create>
+              <i class="ico ico--tag" aria-hidden="true"></i> Generate link &amp; copy
+            </button>
+            <p class="invite-new__hint">
+              Each click makes a fresh link and puts it on your clipboard, ready to paste.
+              The previous one still works until it's used or you cancel it.
+            </p>
+            <div class="field invite-new__note">
+              <label for="invite-note">Who's it for? <span class="field__optional">optional, for your notes</span></label>
               <input id="invite-note" type="text" data-invite-for placeholder="Tuli from the Thursday market" autocomplete="off" />
             </div>
-            <button type="button" class="btn btn--primary" data-invite-create>
-              <i class="ico ico--tag" aria-hidden="true"></i> Create invite link
-            </button>
+            <p class="invite-new__latest" data-invite-latest hidden></p>
           </div>
 
           <p class="text-center muted" data-invites-loading>Loading…</p>

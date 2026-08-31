@@ -1,15 +1,22 @@
 import { auth } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { signUpWithEmail, signInWithEmail, signInWithGoogle, inviteProblem } from "./auth.js";
+import {
+  signUpWithEmail,
+  signInWithEmail,
+  signInWithGoogle,
+  googleForInvite,
+  claimInvite,
+  inviteProblem,
+} from "./auth.js";
 import { $, $all, toast, isAdminUser } from "./utils.js";
 
 const redirectTarget = new URLSearchParams(location.search).get("redirect") || "index.html";
 
-// createUserWithEmailAndPassword signs the user in immediately, so this
-// listener fires while signUpWithEmail is still writing the profile doc
-// and claiming the username. Navigating away at that moment would leave
-// an account with no username. `busy` holds the redirect until the whole
-// sign-up finishes, and the handlers below navigate themselves.
+// Signing up signs you in immediately, so the auth listener below fires
+// while the profile doc and username claim are still being written — and
+// mid-way through the Google flow, before we've even asked for a username.
+// Navigating then would leave an account with no profile. `busy` holds the
+// redirect; the handlers navigate themselves once they're finished.
 let busy = false;
 
 function goHome(user) {
@@ -22,47 +29,69 @@ onAuthStateChanged(auth, (user) => {
   goHome(user);
 });
 
-const tabs = $all("[data-tab]");
-const panels = { signin: $("[data-panel='signin']"), signup: $("[data-panel='signup']") };
+// ---------------------------------------------------------------------
+// Panels
+//
+// The card is only ever showing one of these: "ask" (how do I get in?),
+// "signin", "signup" (arrived on an invite), or "username" (came in with
+// Google and still owes us a handle).
+// ---------------------------------------------------------------------
+const panels = {
+  ask: $("[data-panel='ask']"),
+  signin: $("[data-panel='signin']"),
+  signup: $("[data-panel='signup']"),
+  username: $("[data-panel='username']"),
+};
+
+const LEADS = {
+  ask: "Namibia's invite-only closet sale.",
+  signin: "Log in to post and manage your closet.",
+  signup: "You're invited. Set up your account below.",
+  username: "One last thing before your closet exists.",
+};
 
 function showPanel(which) {
-  tabs.forEach((t) => t.classList.toggle("auth-tab--active", t.dataset.tab === which));
   Object.entries(panels).forEach(([key, panel]) => {
     panel.hidden = key !== which;
   });
+  $("[data-auth-lead]").textContent = LEADS[which];
 }
 
-tabs.forEach((tab) => tab.addEventListener("click", () => showPanel(tab.dataset.tab)));
+$all("[data-go]").forEach((btn) =>
+  btn.addEventListener("click", () => showPanel(btn.dataset.go))
+);
 
 // ---------------------------------------------------------------------
-// Making an account is by invitation only. Without a valid ?invite= code
-// this page is a log-in page and nothing else: no tabs, no sign-up form.
-// The real gate is in the Firestore rules — this just decides what to
-// show somebody, and tells them plainly why they can't sign up.
+// Invite links
+//
+// Without a valid ?invite= code there is no way to make an account from
+// this page at all. The real gate is in the Firestore rules; this decides
+// what somebody sees, and tells them plainly when a link is spent.
 // ---------------------------------------------------------------------
 const inviteCode = new URLSearchParams(location.search).get("invite");
+const inviteNote = $("[data-invite-note]");
 
 async function openInvite() {
   if (!inviteCode) return;
 
-  const note = $("[data-invite-note]");
   const problem = await inviteProblem(inviteCode);
-
   if (problem) {
-    note.textContent = problem;
-    note.classList.add("invite-note--bad");
-    note.hidden = false;
+    inviteNote.textContent = problem;
+    inviteNote.classList.add("invite-note--bad");
+    inviteNote.hidden = false;
     return;
   }
 
-  note.textContent = "You've been invited to sell on Closet Sales Namibia. Set up your account below.";
-  note.hidden = false;
-  $("[data-auth-tabs]").hidden = false;
+  inviteNote.textContent = "You've been invited to sell on Closet Sales Namibia.";
+  inviteNote.hidden = false;
   showPanel("signup");
 }
 
 openInvite();
 
+// ---------------------------------------------------------------------
+// Log in
+// ---------------------------------------------------------------------
 $("[data-signin-form]").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
@@ -78,6 +107,19 @@ $("[data-signin-form]").addEventListener("submit", async (e) => {
   }
 });
 
+$all("[data-google-btn]").forEach((btn) =>
+  btn.addEventListener("click", async () => {
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      toast(friendlyAuthError(err), "error");
+    }
+  })
+);
+
+// ---------------------------------------------------------------------
+// Sign up, with an invite in hand
+// ---------------------------------------------------------------------
 $("[data-signup-form]").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
@@ -87,7 +129,7 @@ $("[data-signup-form]").addEventListener("submit", async (e) => {
     return;
   }
   btn.disabled = true;
-  btn.textContent = "Creating your closet…";
+  btn.textContent = "Setting up your closet…";
   busy = true;
   try {
     const user = await signUpWithEmail(
@@ -103,24 +145,60 @@ $("[data-signup-form]").addEventListener("submit", async (e) => {
     busy = false;
     toast(friendlyAuthError(err), "error");
     btn.disabled = false;
-    btn.textContent = "Sign up";
+    btn.textContent = "Create my account";
   }
 });
 
-$all("[data-google-btn]").forEach((btn) =>
-  btn.addEventListener("click", async () => {
-    try {
-      await signInWithGoogle();
-    } catch (err) {
-      toast(friendlyAuthError(err), "error");
+// Google on an invite page. The popup only tells us an email address, so
+// the username still has to be asked for before there's an account.
+let googleUser = null;
+
+$("[data-google-invite]").addEventListener("click", async (e) => {
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  busy = true;
+  try {
+    const { user, needsUsername } = await googleForInvite(inviteCode);
+    if (!needsUsername) {
+      // already a member — this link isn't for them, but they're in
+      busy = false;
+      goHome(user);
+      return;
     }
-  })
-);
+    googleUser = user;
+    inviteNote.hidden = true;
+    showPanel("username");
+    $("#pick-username").focus();
+  } catch (err) {
+    busy = false;
+    toast(friendlyAuthError(err), "error");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("[data-username-form]").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector("button[type='submit']");
+  if (!googleUser) return;
+
+  btn.disabled = true;
+  btn.textContent = "Setting up your closet…";
+  try {
+    await claimInvite(googleUser, form.name.value.trim(), form.username.value, inviteCode);
+    busy = false;
+    goHome(googleUser);
+  } catch (err) {
+    toast(friendlyAuthError(err), "error");
+    btn.disabled = false;
+    btn.textContent = "Finish setting up";
+  }
+});
 
 function friendlyAuthError(err) {
   const code = err?.code || "";
   if (code.includes("email-already-in-use")) return "That email already has a closet. Try logging in instead.";
-  if (code.includes("operation-not-allowed")) return "Sign-ups are closed. You need an invite link to join.";
   if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found"))
     return "Email or password didn't match. Try again.";
   if (code.includes("weak-password")) return "Password needs to be at least 6 characters.";

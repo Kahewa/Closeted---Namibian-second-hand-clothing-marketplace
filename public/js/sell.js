@@ -25,6 +25,10 @@ import {
   PAYMENT_DETAILS,
 } from "./utils.js";
 
+// WhatsApp is how buyers make contact, so it doesn't count as proof of
+// anyone. A seller needs at least one of these before they can post.
+const SOCIALS = ["instagram", "tiktok", "facebook"];
+
 const MAX_ITEMS = 30;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
@@ -55,6 +59,42 @@ let isAdmin = false;
 let rowIndex = 0;
 let editing = null; // the carousel doc being edited, if any
 
+const socialsBlock = $("[data-socials-block]");
+
+/** True once the seller has somewhere buyers can look them up. */
+function hasSocialLink() {
+  return SOCIALS.some((key) => (profile.socialLinks?.[key] || "").trim());
+}
+
+$("[data-socials-save]")?.addEventListener("click", async (e) => {
+  const btn = e.currentTarget;
+  const entered = {};
+  SOCIALS.forEach((key) => {
+    entered[key] = ($(`[data-social="${key}"]`)?.value || "").trim();
+  });
+
+  if (!SOCIALS.some((key) => entered[key])) {
+    toast("Add at least one of Instagram, TikTok or Facebook.", "error");
+    return;
+  }
+
+  btn.disabled = true;
+  try {
+    await setDoc(
+      doc(db, "users", currentUser.uid),
+      { socialLinks: { ...(profile.socialLinks || {}), ...entered } },
+      { merge: true }
+    );
+    profile.socialLinks = { ...(profile.socialLinks || {}), ...entered };
+    socialsBlock.hidden = true;
+    toast("Saved. Buyers can find you now.", "success");
+  } catch (err) {
+    toast(`Couldn't save those: ${err.message}`, "error");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 requireAuth(async (user, loaded) => {
   currentUser = user;
   profile = loaded || {};
@@ -62,6 +102,12 @@ requireAuth(async (user, loaded) => {
 
   adminNote.hidden = !isAdmin;
   usernameBlock.hidden = isAdmin || !!profile.username;
+
+  SOCIALS.forEach((key) => {
+    const input = $(`[data-social="${key}"]`);
+    if (input) input.value = profile.socialLinks?.[key] || "";
+  });
+  socialsBlock.hidden = isAdmin || hasSocialLink();
 
   if (profile.socialLinks?.whatsapp && !whatsappInput.value) {
     whatsappInput.value = profile.socialLinks.whatsapp;
@@ -314,6 +360,13 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+  if (!isAdmin && !hasSocialLink()) {
+    socialsBlock.hidden = false;
+    socialsBlock.scrollIntoView({ behavior: "smooth", block: "center" });
+    toast("Add one social link before posting. WhatsApp on its own isn't enough.", "error");
+    return;
+  }
+
   const rows = Array.from(rowsHost.children);
   if (!rows.length) {
     toast("Add at least one item.", "error");
@@ -396,7 +449,9 @@ form.addEventListener("submit", async (e) => {
     } else {
       await setDoc(carouselRef, {
         sellerId: currentUser.uid,
-        sellerName: latest.displayName || currentUser.displayName || "Closet Seller",
+        // not currentUser.displayName: for a Google login that's their Google
+        // account name, which they never chose to publish here
+        sellerName: latest.displayName || (latest.username ? `@${latest.username}` : "Closet Seller"),
         sellerUsername: latest.username || "",
         sellerPhotoURL: latest.profilePicURL || "",
         sellerWhatsapp: whatsapp,

@@ -35,6 +35,29 @@
         <section data-step="items" style="margin-top:22px;">
           <span class="item-count-badge" data-item-count>0 items in this carousel</span>
 
+          <!-- shown until this account has a social link that isn't WhatsApp.
+               Buyers use it to check a seller is real before they send money. -->
+          <div class="username-claim" data-socials-block hidden>
+            <p class="h3">Add a social link first</p>
+            <p class="muted" style="font-size:13px;margin:6px 0 12px;">
+              Buyers want to see who they're buying from. Add at least one of these
+              (your WhatsApp number doesn't count) and you're set.
+            </p>
+            <div class="field">
+              <label for="sell-instagram"><i class="ico ico--instagram" aria-hidden="true"></i> Instagram</label>
+              <input id="sell-instagram" type="text" data-social="instagram" placeholder="yourhandle" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="sell-tiktok"><i class="ico ico--tiktok" aria-hidden="true"></i> TikTok</label>
+              <input id="sell-tiktok" type="text" data-social="tiktok" placeholder="yourhandle" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="sell-facebook"><i class="ico ico--facebook" aria-hidden="true"></i> Facebook</label>
+              <input id="sell-facebook" type="text" data-social="facebook" placeholder="your profile or page" autocomplete="off" />
+            </div>
+            <button type="button" class="btn btn--lime" data-socials-save>save my links</button>
+          </div>
+
           <!-- shown only if this account hasn't picked a username yet -->
           <div class="username-claim" data-username-block hidden>
             <p class="h3">Pick your username first</p>

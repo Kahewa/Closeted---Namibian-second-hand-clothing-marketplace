@@ -38,11 +38,14 @@ export async function ensureUserDoc(user, extra = {}) {
   if (!snap.exists()) {
     await setDoc(ref, {
       uid: user.uid,
-      displayName: user.displayName || extra.displayName || "Closet Seller",
+      // Deliberately not user.displayName / user.photoURL: signing in with
+      // Google shouldn't quietly publish the name and picture off somebody's
+      // Google account. They fill those in themselves.
+      displayName: extra.displayName || "",
       email: user.email || "",
       username: "",
       bio: "",
-      profilePicURL: user.photoURL || "",
+      profilePicURL: "",
       socialLinks: { instagram: "", tiktok: "", facebook: "", whatsapp: "" },
       banned: false,
       createdAt: serverTimestamp(),
@@ -142,7 +145,18 @@ export async function inviteProblem(code) {
 // Sign in / up / out
 // ---------------------------------------------------------------------
 
-export async function signUpWithEmail(name, email, password, username, inviteCode) {
+/**
+ * Turns an invite into a real member: writes the profile, claims the
+ * username, and burns the invite.
+ *
+ * All three go in one batch. The rules read the invite as it will be
+ * *after* the batch commits, so a profile can only exist next to an
+ * invite stamped with that same uid — that's what makes invite-only true
+ * at the database rather than just hidden in the UI. It's also what makes
+ * a link single-use: the second person to open it finds usedBy already
+ * set, and the rules refuse to let them overwrite it.
+ */
+export async function claimInvite(user, name, username, inviteCode) {
   const clean = normalizeUsername(username);
   const problem = usernameError(clean);
   if (problem) throw new Error(problem);
@@ -153,18 +167,11 @@ export async function signUpWithEmail(name, email, password, username, inviteCod
 
   if (!(await isUsernameFree(clean))) throw new Error(`@${clean} is already taken. Try another one.`);
 
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
-  await updateProfile(cred.user, { displayName: name });
-
-  // Profile, username claim and invite go in one batch. The rules read the
-  // invite as it will be *after* the batch commits, so a profile can only
-  // exist next to an invite stamped with that same uid. That's what makes
-  // invite-only true at the database, rather than just hidden in the UI.
   const batch = writeBatch(db);
-  batch.set(doc(db, "users", cred.user.uid), {
-    uid: cred.user.uid,
-    displayName: name || "Closet Seller",
-    email: cred.user.email || "",
+  batch.set(doc(db, "users", user.uid), {
+    uid: user.uid,
+    displayName: (name || "").trim(),   // optional; the site falls back to the username
+    email: user.email || "",
     username: clean,
     inviteCode: code,
     bio: "",
@@ -173,18 +180,48 @@ export async function signUpWithEmail(name, email, password, username, inviteCod
     banned: false,
     createdAt: serverTimestamp(),
   });
-  batch.set(doc(db, "usernames", clean), { uid: cred.user.uid });
-  batch.update(doc(db, "invites", code), { usedBy: cred.user.uid, usedAt: serverTimestamp() });
+  batch.set(doc(db, "usernames", clean), { uid: user.uid });
+  batch.update(doc(db, "invites", code), { usedBy: user.uid, usedAt: serverTimestamp() });
 
   try {
     await batch.commit();
   } catch (err) {
     if (err?.code === "permission-denied") {
-      throw new Error(`@${clean} was just taken, or that invite was used a moment ago.`);
+      throw new Error(`@${clean} was just taken, or that link was used a moment ago.`);
     }
     throw err;
   }
+}
+
+export async function signUpWithEmail(name, email, password, username, inviteCode) {
+  const clean = normalizeUsername(username);
+  const problem = usernameError(clean);
+  if (problem) throw new Error(problem);
+
+  const inviteIssue = await inviteProblem(inviteCode);
+  if (inviteIssue) throw new Error(inviteIssue);
+
+  if (!(await isUsernameFree(clean))) throw new Error(`@${clean} is already taken. Try another one.`);
+
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  if (name) await updateProfile(cred.user, { displayName: name });
+  await claimInvite(cred.user, name, clean, inviteCode);
   return cred.user;
+}
+
+/**
+ * Google, on a page that's holding an invite. The popup gets us a signed-in
+ * user but not a member: we still need a username off them, so this reports
+ * whether one is outstanding rather than finishing the job itself.
+ */
+export async function googleForInvite(inviteCode) {
+  const inviteIssue = await inviteProblem(inviteCode);
+  if (inviteIssue) throw new Error(inviteIssue);
+
+  const provider = new GoogleAuthProvider();
+  const cred = await signInWithPopup(auth, provider);
+  const profile = await loadProfile(cred.user.uid);
+  return { user: cred.user, needsUsername: !profile };
 }
 
 export async function signInWithEmail(email, password) {

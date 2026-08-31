@@ -84,6 +84,30 @@ service cloud.firestore {
       allow update: if false;              // release and re-claim instead
     }
 
+    // A WhatsApp number is how buyers make contact, not evidence of who
+    // anyone is, so posting a closet needs somewhere buyers can actually
+    // look the seller up. Defaulted reads throughout: a profile written
+    // before socialLinks existed must fail this check, not error on it.
+    function socialLinks() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid))
+        .data.get('socialLinks', {});
+    }
+
+    // `is string` before trim(): an old profile could hold a null here, and
+    // calling trim() on it would raise rather than simply fail the check.
+    function filledIn(links, key) {
+      return links.get(key, '') is string && links.get(key, '').trim() != '';
+    }
+
+    function hasSocialProof() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && (
+          filledIn(socialLinks(), 'instagram')
+          || filledIn(socialLinks(), 'tiktok')
+          || filledIn(socialLinks(), 'facebook')
+        );
+    }
+
     // ---------------------------------------------------------------
     // carousels/{carouselId} — a seller's closet drop.
     // The N$150 fee is paid manually (bank transfer / wallet), so a new
@@ -96,6 +120,7 @@ service cloud.firestore {
 
       allow create: if isSignedIn()
         && notBanned()
+        && (isAdmin() || hasSocialProof())
         && request.resource.data.sellerId == request.auth.uid
         && request.resource.data.keys().hasAll(['sellerId', 'items', 'createdAt', 'status'])
         // admin posts go live immediately; everyone else waits for approval

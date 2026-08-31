@@ -508,9 +508,15 @@ function inviteRow(invite) {
   ]);
 }
 
+// One button: mint a code, copy the link, show it. Clicking again renews
+// it — a fresh single-use link for the next person, so the admin never has
+// to think about which link went where.
 $("[data-invite-create]")?.addEventListener("click", async (e) => {
   const btn = e.currentTarget;
   const noteField = $("[data-invite-for]");
+  const latest = $("[data-invite-latest]");
+  const label = btn.innerHTML;
+
   btn.disabled = true;
   try {
     const code = newCode();
@@ -522,16 +528,29 @@ $("[data-invite-create]")?.addEventListener("click", async (e) => {
       revoked: false,
     });
     noteField.value = "";
+
+    const link = inviteLink(code);
+    latest.textContent = link;
+    latest.hidden = false;
+
     try {
-      await navigator.clipboard.writeText(inviteLink(code));
-      toast("Invite created and the link is on your clipboard.", "success");
+      await navigator.clipboard.writeText(link);
+      toast("New link copied. Paste it to whoever you're inviting.", "success");
     } catch {
-      toast("Invite created. Use Copy link below to grab it.", "success");
+      // clipboard is blocked on insecure origins and in some browsers
+      toast("Link created. Copy it from the row below.", "success");
     }
+
+    btn.innerHTML = '<i class="ico ico--check" aria-hidden="true"></i> Copied, generate another';
+    setTimeout(() => {
+      btn.innerHTML = label;
+    }, 2600);
+
     await loadInvites();
   } catch (err) {
     console.error(err);
     toast(`Couldn't create the invite: ${err.message}`, "error");
+    btn.innerHTML = label;
   } finally {
     btn.disabled = false;
   }

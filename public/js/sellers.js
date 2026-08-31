@@ -71,7 +71,11 @@ function tile(seller) {
   return el("a", { class: "tile", href: `profile.html?uid=${seller.uid}` }, [
     media,
     el("span", { class: "tile__meta" }, [
-      el("span", { class: "tile__who" }, seller.displayName || "Closet Seller"),
+      el(
+        "span",
+        { class: "tile__who" },
+        seller.displayName || (seller.username ? `@${seller.username}` : "Closet Seller")
+      ),
       el("span", { class: "tile__price" }, `@${seller.username}`),
     ]),
   ]);

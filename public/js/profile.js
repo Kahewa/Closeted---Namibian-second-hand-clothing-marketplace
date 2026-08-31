@@ -130,7 +130,8 @@ function paintView() {
   avatarImg.parentElement.querySelector("[data-avatar-initials]").textContent = initials(profileData.displayName);
   avatarImg.parentElement.querySelector("[data-avatar-initials]").hidden = !!profileData.profilePicURL;
 
-  nameEl.textContent = profileData.displayName || "Closet Seller";
+  nameEl.textContent =
+    profileData.displayName || (profileData.username ? `@${profileData.username}` : "Closet Seller");
 
   usernameView.textContent = profileData.username
     ? `@${profileData.username}`
