@@ -17,13 +17,19 @@ app.use(express.json());
 // listing-fee flow below (and, eventually, real payment webhooks).
 app.use(
   express.static(path.join(__dirname, "..", "public"), {
-    // The HTML is revalidated every time so a deploy is picked up at once;
-    // CSS/JS/images are fingerprint-free, so a week with revalidation keeps
-    // repeat visits cheap without serving stale code after a change.
+    // Nothing here is fingerprinted — style.css keeps its name through every
+    // change — so a long max-age would pin browsers to an old stylesheet
+    // until it expired. `no-cache` doesn't mean "don't store": the file is
+    // still cached, the browser just asks first, and an unchanged file comes
+    // back as an empty 304. Cheap, and a deploy is visible immediately.
+    //
+    // Long-lived caching belongs here only once filenames carry a content
+    // hash (style.a1b2c3.css), which would need a build step.
     setHeaders(res, filePath) {
+      const immutable = /\.(woff2?|png|jpe?g|webp|avif|svg|ico)$/i.test(filePath);
       res.setHeader(
         "Cache-Control",
-        filePath.endsWith(".html") ? "no-cache" : "public, max-age=604800, must-revalidate"
+        immutable ? "public, max-age=604800" : "no-cache"
       );
     },
   })
