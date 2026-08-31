@@ -7,7 +7,7 @@ import {
   setDoc,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { uploadImage } from "./cloudinary.js";
+import { uploadImage, sized } from "./cloudinary.js";
 import { requireAuth, claimUsername, isAdminUser } from "./auth.js";
 import {
   $,
@@ -17,6 +17,8 @@ import {
   whatsappHref,
   normalizeUsername,
   usernameError,
+  openModal,
+  closeModal,
   CATEGORIES,
   CONDITIONS,
   CAROUSEL_FEE,
@@ -125,14 +127,6 @@ async function loadForEditing() {
 // ---------------------------------------------------------------------
 // Modals
 // ---------------------------------------------------------------------
-function openModal(node) {
-  node.hidden = false;
-  document.body.style.overflow = "hidden";
-}
-function closeModal(node) {
-  node.hidden = true;
-  document.body.style.overflow = "";
-}
 
 document.querySelectorAll("[data-intro-close]").forEach((n) =>
   n.addEventListener("click", () => closeModal(introModal))
@@ -241,7 +235,7 @@ function addRow(existing = null) {
     "div",
     { class: "item-row__preview" },
     existing?.imageURL
-      ? el("img", { src: existing.imageURL, alt: "Current photo" })
+      ? el("img", { src: sized(existing.imageURL, 220, { square: true }), alt: "Current photo", decoding: "async" })
       : el("i", { class: "ico ico--camera ico--lg", "aria-hidden": "true" })
   );
 

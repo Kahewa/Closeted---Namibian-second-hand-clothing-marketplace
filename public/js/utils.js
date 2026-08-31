@@ -166,3 +166,44 @@ export function isValidUrl(value = "") {
     return false;
   }
 }
+
+// ---------------------------------------------------------------------
+// Modals
+// ---------------------------------------------------------------------
+// Opening was animated by CSS, but closing just flipped `hidden` and the
+// panel vanished mid-frame. These play the exit first, then hide.
+
+export function openModal(node) {
+  if (!node) return;
+  node.classList.remove("modal--closing");
+  node.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+export function closeModal(node) {
+  if (!node || node.hidden) return;
+
+  const finish = () => {
+    node.hidden = true;
+    node.classList.remove("modal--closing");
+    document.body.style.overflow = "";
+  };
+
+  const panel = node.querySelector(".modal__panel, .lightbox__panel");
+  const wantsMotion = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+  if (!panel || !wantsMotion) return finish();
+
+  node.classList.add("modal--closing");
+
+  // animationend is the signal, but a timeout backs it up — a modal that
+  // never closes because an event didn't fire is far worse than one that
+  // closes a frame early.
+  let done = false;
+  const once = () => {
+    if (done) return;
+    done = true;
+    finish();
+  };
+  panel.addEventListener("animationend", once, { once: true });
+  setTimeout(once, 400);
+}

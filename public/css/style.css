@@ -273,8 +273,6 @@ main { flex: 1; }
 .band--pink .h2,
 .band--pink .h3 { color: var(--white); }
 
-.deck { display: block; }
-.deck__main { min-width: 0; }
 
 /* ---- typography -------------------------------------------------------- */
 .h1, .h2, .h3 {
@@ -347,8 +345,7 @@ code {
   z-index: 31;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: center;
   padding: 11px 26px;
   font-size: 9.5px;
   font-weight: 500;
@@ -357,9 +354,6 @@ code {
   color: var(--white);
   background: var(--rose-deep);
 }
-.topbar__links { display: flex; gap: 22px; flex-shrink: 0; }
-.topbar__links a { transition: opacity var(--t-fast) var(--ease); }
-.topbar__links a:hover { opacity: 0.7; }
 
 .ticker { flex: 1; overflow: hidden; min-width: 0; }
 .ticker__track { display: flex; width: max-content; animation: ticker-scroll 42s linear infinite; }
@@ -719,19 +713,22 @@ code {
 .carousel-card__img { width: 100%; height: 100%; object-fit: cover; }
 .carousel-card__slide--sold .carousel-card__img { filter: grayscale(1); opacity: 0.72; }
 
+/* sold sits square in the middle of the piece it applies to */
 .carousel-card__sold-stamp {
   position: absolute;
-  top: 22px;
-  left: -36px;
-  width: 164px;
-  transform: rotate(-32deg);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 26px;
   background: var(--plum);
   color: var(--white);
   text-align: center;
-  font-size: 9px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.4em;
-  padding: 7px 0 7px 6px;
+  text-indent: 0.4em;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(64, 38, 48, 0.35);
 }
 .carousel-card__sold-toggle {
   position: absolute;
@@ -767,23 +764,28 @@ code {
 .carousel-card__arrow:focus-visible { opacity: 1; }
 .carousel-card__arrow:hover { background: var(--white); }
 .carousel-card__arrow--prev { left: 0; }
+/* the price bar owns the top strip, so keep the controls below it */
 .carousel-card__arrow--next { right: 0; }
 
 /* price — a small rose label, bottom-left of the photo */
+/* the price runs as a bar across the top of each piece */
 .price-tag {
   position: absolute;
+  top: 0;
   left: 0;
-  bottom: 0;
-  top: auto; right: auto;
+  right: 0;
+  bottom: auto;
   width: auto; height: auto;
-  padding: 9px 16px;
-  display: inline-flex;
+  padding: 11px 16px;
+  display: flex;
   align-items: center;
+  justify-content: center;
   border: none;
   border-radius: 0;
   background: var(--rose-deep);
   box-shadow: none;
   transform: none;
+  z-index: 2;
   transition: background var(--t-fast) var(--ease);
 }
 .price-tag::before { content: none; }
@@ -920,13 +922,92 @@ code {
 }
 .tile__price { display: block; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--rose-dark); margin-top: 3px; }
 
+/* ---- seller directory ----------------------------------------------------*/
+.seller-search {
+  display: flex;
+  gap: 12px;
+  max-width: 520px;
+  margin: 0 auto 22px;
+}
+.seller-search input {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+.seller-count {
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--plum-faint);
+  margin-bottom: 18px;
+}
+/* a seller with no photo still needs a face on the board */
+.tile__initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--blush);
+  color: var(--rose-dark);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 28px;
+}
+
+/* ---- how it works --------------------------------------------------------*/
+.how-intro { max-width: 60ch; margin: 0 auto 44px; }
+.how-single { max-width: 640px; margin: 0 auto; }
+.how-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  margin: 10px 0 26px;
+}
+.how-steps { counter-reset: step; display: flex; flex-direction: column; gap: 22px; }
+.how-steps li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 46px;
+}
+/* the serif numeral does the work a bullet would */
+.how-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: -2px;
+  width: 30px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--rose);
+}
+.how-steps strong {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 3px;
+}
+.how-steps span { display: block; font-size: 13.5px; color: var(--plum-soft); line-height: 1.7; }
+
+.how-cta__lead { color: rgba(255, 255, 255, 0.9); margin: 14px auto 30px; max-width: 46ch; }
+/* a filled rose button would vanish on the rose band */
+.band--pink .btn--primary {
+  background: var(--white);
+  border-color: var(--white);
+  color: var(--rose-dark);
+}
+.band--pink .btn--primary:hover { background: var(--blush); border-color: var(--blush); }
+
 /* ---- white panels --------------------------------------------------------*/
 .window,
 .chrome-card,
 .glass-card,
 .profile-header,
 .item-row,
-.note,
 .review,
 .account,
 .joinbox,
@@ -949,6 +1030,11 @@ code {
 .glass-card { padding: 40px 34px; }
 
 [data-win] { position: relative; padding-top: 52px; }
+/* padding shorthands elsewhere (including inside media queries) would
+   otherwise reclaim this space and collide with the caption */
+.chrome-card[data-win],
+.glass-card[data-win],
+.window[data-win] { padding-top: 52px; }
 [data-win]::after {
   content: attr(data-win);
   position: absolute;
@@ -960,12 +1046,6 @@ code {
   color: var(--rose-dark);
   pointer-events: none;
 }
-
-.note { padding: 28px; }
-.note__title { font-family: var(--font-display); font-weight: 600; font-size: 19px; margin-bottom: 10px; }
-.note ul { margin-top: 14px; display: flex; flex-direction: column; gap: 9px; }
-.note li { display: flex; align-items: baseline; gap: 12px; color: var(--plum-soft); font-size: 13px; }
-.note li::before { content: ""; width: 14px; height: 1px; background: var(--rose-deep); flex-shrink: 0; }
 
 /* ---- forms ---------------------------------------------------------------*/
 .field { display: flex; flex-direction: column; gap: 9px; margin-bottom: 24px; }
@@ -1354,10 +1434,8 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 
 /* ---- motion --------------------------------------------------------------*/
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes rise-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; } }
 @keyframes pop-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
 
-.review, .account { animation: rise-in 0.5s var(--ease-out) both; }
 .modal__panel, .lightbox__panel { animation: pop-in 0.35s var(--ease-out) both; }
 
 /* ---- scrollbars + selection ----------------------------------------------*/
@@ -1389,9 +1467,6 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   [data-feed] .carousel-card,
   [data-listings] .carousel-card { margin-bottom: 0; }
 
-  .deck { display: grid; grid-template-columns: 1fr 300px; gap: 44px; align-items: start; }
-  .deck__side { order: 2; position: sticky; top: 120px; }
-  .deck__main { order: 1; }
 
   .social-edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .empty-state { grid-column: 1 / -1; }
@@ -1411,6 +1486,10 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   .band { padding: 54px 0; }
   .intro { padding-top: 48px; }
   .chrome-card, .glass-card { padding: 26px 20px; }
+  .chrome-card[data-win],
+  .glass-card[data-win],
+  .window[data-win] { padding-top: 46px; }
+  [data-win]::after { top: 20px; left: 20px; }
   .frame { padding: 40px 18px 30px; }
   .tile-grid { gap: 24px 12px; }
   .topbar { font-size: 8px; letter-spacing: 0.2em; padding: 9px 14px; }
@@ -1419,6 +1498,106 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 
 [id] { scroll-margin-top: 100px; }
 html { scroll-behavior: smooth; }
+
+/* ---- welcome card --------------------------------------------------------*/
+/* Grows onto the page rather than snapping in — a wider scale range and a
+   slower curve than the utility modals, because this one is a greeting. */
+.welcome .modal__panel {
+  max-width: 560px;
+  padding: 48px 44px 40px;
+  animation: grow-in 0.5s var(--ease-out) both;
+}
+@keyframes grow-in {
+  from { opacity: 0; transform: scale(0.86) translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+.welcome .modal__backdrop { animation: fade-in 0.45s var(--ease) both; }
+.welcome .split__title { margin: 14px 0 26px; }
+.welcome p {
+  color: var(--plum-soft);
+  font-size: 14.5px;
+  text-align: center;
+  margin: 0 auto 18px;
+  max-width: 52ch;
+}
+.welcome .cta-row { margin-top: 30px; }
+
+@media (max-width: 560px) {
+  .welcome .modal__panel { padding: 40px 24px 32px; }
+}
+
+/* ---- page + modal transitions --------------------------------------------*/
+/* Cross-document view transitions: one declaration, and browsers that
+   don't support it simply navigate as before. The masthead and footer are
+   named so they hold still while the content underneath cross-fades,
+   instead of the whole page flashing. */
+@view-transition { navigation: auto; }
+
+.topbar { view-transition-name: strip; }
+.navbar { view-transition-name: masthead; }
+.site-footer { view-transition-name: footing; }
+
+::view-transition-old(root) { animation: page-out 0.3s var(--ease) both; }
+::view-transition-new(root) { animation: page-in 0.55s var(--ease-out) both; }
+
+@keyframes page-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes page-in { from { opacity: 0; transform: translateY(8px); } }
+
+/* Everywhere else, settle the content in on load. Scoped so supporting
+   browsers don't run this and the view transition on top of each other. */
+/* leaving the page: everything lifts away together */
+html.is-leaving main {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.19s var(--ease), transform 0.19s var(--ease);
+}
+
+/* the chrome is injected by layout.js, so ease it in rather than letting
+   it appear a frame late */
+.topbar, .navbar, .site-footer { animation: fade-in 0.4s var(--ease) both; }
+
+/* modals leave the way they arrived */
+.modal--closing .modal__panel,
+.modal--closing .lightbox__panel { animation: pop-out 0.26s var(--ease) both; }
+.modal--closing .modal__backdrop { animation: fade-out 0.26s var(--ease) both; }
+.welcome.modal--closing .modal__panel { animation: grow-out 0.28s var(--ease) both; }
+
+@keyframes pop-out { to { opacity: 0; transform: scale(0.96) translateY(8px); } }
+@keyframes grow-out { to { opacity: 0; transform: scale(0.9) translateY(12px); } }
+@keyframes fade-out { to { opacity: 0; } }
+
+
+/* ---- slide-in reveals ----------------------------------------------------*/
+/* layout.js adds .reveal, then .is-in when the element reaches the
+   viewport. Kept as a transition rather than an animation so a staggered
+   transition-delay can be set per element without redefining keyframes. */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.65s var(--ease-out), transform 0.65s var(--ease-out);
+  /* no will-change: it was promoting every card to its own GPU layer for
+     the life of the page, to buy one 0.65s transition */
+}
+.reveal.is-in { opacity: 1; transform: none; }
+
+/* the pinned polaroids keep their tilt while they arrive */
+.carousel-card.reveal { transform: translateY(26px) rotate(-1.4deg); }
+[data-feed] .carousel-card.reveal:nth-child(3n + 2),
+[data-listings] .carousel-card.reveal:nth-child(3n + 2) { transform: translateY(26px) rotate(1.1deg); }
+[data-feed] .carousel-card.reveal:nth-child(3n),
+[data-listings] .carousel-card.reveal:nth-child(3n) { transform: translateY(26px) rotate(-0.5deg); }
+.carousel-card.reveal.is-in { transform: rotate(-1.4deg); }
+[data-feed] .carousel-card.reveal.is-in:nth-child(3n + 2),
+[data-listings] .carousel-card.reveal.is-in:nth-child(3n + 2) { transform: rotate(1.1deg); }
+[data-feed] .carousel-card.reveal.is-in:nth-child(3n),
+[data-listings] .carousel-card.reveal.is-in:nth-child(3n) { transform: rotate(-0.5deg); }
+
+.tile.reveal { transform: translateY(26px) rotate(-1.2deg); }
+.tile.reveal:nth-child(3n + 2) { transform: translateY(26px) rotate(1deg); }
+.tile.reveal:nth-child(3n) { transform: translateY(26px) rotate(-0.4deg); }
+.tile.reveal.is-in { transform: rotate(-1.2deg); }
+.tile.reveal.is-in:nth-child(3n + 2) { transform: rotate(1deg); }
+.tile.reveal.is-in:nth-child(3n) { transform: rotate(-0.4deg); }
 
 /* ---- accessibility -------------------------------------------------------*/
 :focus-visible { outline: none; }
@@ -1430,6 +1609,10 @@ textarea:focus-visible { box-shadow: 0 0 0 3px rgba(201, 127, 161, 0.45); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  html.is-leaving main { opacity: 1; transform: none; }
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .welcome .modal__panel { animation: fade-in 0.001ms both; }
   .carousel-card, .tile { transform: none !important; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

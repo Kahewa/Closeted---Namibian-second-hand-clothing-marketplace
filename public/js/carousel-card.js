@@ -4,7 +4,7 @@ import {
   updateDoc,
   deleteDoc,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { deleteImages } from "./cloudinary.js";
+import { deleteImages, sized } from "./cloudinary.js";
 import { el, initials, formatNAD, timeAgo, toFirestoreDate, toast, whatsappHref } from "./utils.js";
 
 const CONDITION_CLASS = {
@@ -21,7 +21,8 @@ const CONDITION_CLASS = {
  * people's) and the profile page (one seller's own, maybe with owner
  * controls).
  *
- * @param {object} carousel - { id, sellerId, sellerName, sellerPhotoURL, createdAt, items }
+ * @param {object} carousel - { id, sellerId, sellerName, sellerUsername,
+ *   sellerPhotoURL, createdAt, items }
  * @param {import("firebase/auth").User|null} currentUser
  * @param {{ showSellerHeader?: boolean, onDeleted?: () => void }} options
  */
@@ -70,10 +71,17 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
       { class: "carousel-card__seller", href: `profile.html?uid=${carousel.sellerId}` },
       [
         carousel.sellerPhotoURL
-          ? el("img", { class: "avatar-bubble avatar-bubble--sm", src: carousel.sellerPhotoURL, alt: carousel.sellerName || "Seller" })
+          ? el("img", { class: "avatar-bubble avatar-bubble--sm", src: sized(carousel.sellerPhotoURL, 72, { square: true }), alt: carousel.sellerName || "Seller", loading: "lazy", decoding: "async" })
           : el("span", { class: "avatar-bubble avatar-bubble--sm" }, initials(carousel.sellerName)),
         el("span", { class: "carousel-card__meta" }, [
-          el("span", { class: "carousel-card__name" }, carousel.sellerName || "Closet Seller"),
+          // the handle is what buyers search by, so it leads here.
+          // Older drops were saved before usernames existed — those
+          // still fall back to the display name.
+          el(
+            "span",
+            { class: "carousel-card__name" },
+            carousel.sellerUsername ? `@${carousel.sellerUsername}` : carousel.sellerName || "Closet Seller"
+          ),
           el("span", { class: "carousel-card__time" }, timeAgo(toFirestoreDate(carousel.createdAt))),
         ]),
       ]
@@ -123,7 +131,7 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
     slide.append(
       el("img", {
         class: "carousel-card__img",
-        src: item.imageURL,
+        src: sized(item.imageURL, 840),
         alt: `${item.category || "Item"} — size ${item.size || "?"}`,
         loading: "lazy",
       }),

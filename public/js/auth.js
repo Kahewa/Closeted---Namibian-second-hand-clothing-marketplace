@@ -278,7 +278,7 @@ export function renderNavAuth(user) {
       <div class="nav-user__menu" data-nav-user-menu>
         <a href="profile.html?uid=${user.uid}"><i class="ico ico--user"></i> My profile</a>
         ${adminLink}
-        <a href="search.html"><i class="ico ico--search"></i> Find people</a>
+        <a href="shop.html"><i class="ico ico--search"></i> View sellers</a>
         <button type="button" data-logout><i class="ico ico--close"></i> Log out</button>
       </div>
     </div>

@@ -35,6 +35,28 @@ const MAX_EDGE = 1600;
 const JPEG_QUALITY = 0.82;
 
 /**
+ * Rewrites a Cloudinary URL to ask for a sized, modern-format copy.
+ *
+ * Uploads are stored at up to 1600px, but a grid thumbnail is ~300 CSS px.
+ * Serving the original meant shipping several hundred KB to paint a
+ * postage stamp. Cloudinary does the resizing on delivery, so this is a
+ * URL rewrite — no re-upload, and it applies to every image already
+ * stored. `f_auto` picks WebP/AVIF where the browser supports it and
+ * `q_auto` sets quality from the image content.
+ *
+ * @param {string} url    a secure_url from an upload
+ * @param {number} width  the widest it will ever be drawn, in device pixels
+ * @param {{square?: boolean}} [opts] square crops to a face-aware fill
+ */
+export function sized(url, width, opts = {}) {
+  if (typeof url !== "string" || !url.includes("/image/upload/")) return url;
+  const crop = opts.square
+    ? `w_${width},h_${width},c_fill,g_face`
+    : `w_${width},c_limit`;
+  return url.replace("/image/upload/", `/image/upload/f_auto,q_auto,${crop}/`);
+}
+
+/**
  * Uploads one image and returns the hosted URL plus the id needed to
  * delete it later.
  *

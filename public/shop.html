@@ -3,63 +3,52 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Shop all closets — Closet Sales Namibia</title>
+<title>View sellers — Closet Sales Namibia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&amp;family=Jost:wght@400;500;600&amp;family=Sacramento&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Jost:wght@400;500;600&amp;family=Sacramento&amp;display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
-<body data-page="shop">
+<body data-page="sellers">
   <div class="page">
     <main>
       <section class="band band--white">
         <div class="shell shell--wide">
-          <h2 class="section-title">Explore Our Closet</h2>
+          <h2 class="section-title">View Sellers</h2>
           <div class="heart-row" aria-hidden="true"></div>
 
-          <p class="text-center muted" style="font-size:13px;margin-bottom:18px;">
-            Tap any closet to open it and swipe through every piece inside.
+          <p class="text-center muted" style="margin-bottom:26px;">
+            Search by name or username, then open a seller to see everything in their closet.
           </p>
 
-          <p class="text-center muted" data-shop-loading>Loading closets…</p>
+          <form class="seller-search" data-seller-form>
+            <label class="visually-hidden" for="seller-q">Search sellers</label>
+            <input
+              id="seller-q"
+              type="search"
+              data-seller-input
+              placeholder="Search sellers…"
+              autocomplete="off"
+            />
+            <button type="submit" class="btn btn--primary">Search</button>
+          </form>
 
-          <div class="empty-state" data-shop-empty hidden>
-            <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
-            <p class="h3">No closets yet</p>
-            <p class="muted" style="margin-top:6px;">Be the first — your closet could be today's top drop.</p>
-            <a href="sell.html" class="btn btn--primary" style="margin-top:16px;">sell your closet</a>
-          </div>
+          <p class="text-center seller-count" data-seller-count></p>
+          <p class="text-center muted" data-seller-status>Loading sellers…</p>
 
           <div class="frame">
-            <div class="tile-grid" data-shop-grid></div>
-          </div>
-
-          <div class="text-center" style="margin-top:22px;">
-            <button type="button" class="btn btn--chrome" data-shop-more hidden>Load more closets</button>
+            <div class="tile-grid" data-seller-grid></div>
           </div>
         </div>
       </section>
-
-      <div class="checker-bar" aria-hidden="true"></div>
     </main>
-
-    <!-- opened when a tile is tapped -->
-    <div class="modal lightbox" data-shop-modal hidden>
-      <div class="modal__backdrop" data-shop-close></div>
-      <div class="lightbox__panel" role="dialog" aria-modal="true" aria-label="Closet sale">
-        <button type="button" class="modal__x lightbox__x" data-shop-close aria-label="Close">
-          <i class="ico ico--close" aria-hidden="true"></i>
-        </button>
-        <div data-shop-detail></div>
-      </div>
-    </div>
   </div>
 
   <script type="module" src="js/layout.js"></script>
-  <script type="module" src="js/shop.js"></script>
+  <script type="module" src="js/sellers.js"></script>
 </body>
 </html>

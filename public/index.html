@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&amp;family=Jost:wght@400;500;600&amp;family=Sacramento&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Jost:wght@400;500;600&amp;family=Sacramento&amp;display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -16,72 +16,62 @@
 <body data-page="home">
   <div class="page">
     <main>
-      <!-- opens straight on the story -->
-      <section class="band band--white intro">
-        <div class="shell">
-          <p class="eyebrow text-center">Namibia's online closet</p>
-          <h1 class="split__title text-center">About The <span class="script">Closet</span></h1>
-
-          <p>
-            Closet Sales Namibia was created with one idea in mind — that good clothes
-            deserve a second life. Every listing here is somebody's real wardrobe
-            clear-out, photographed piece by piece, priced honestly.
-          </p>
-          <p>
-            Sellers pay one flat fee to post a whole closet, however many pieces it
-            holds. Buyers browse, find something they love, and message the seller
-            directly on WhatsApp. No middlemen, no commission, no fuss.
-          </p>
-
-          <div class="cta-row">
-            <a href="shop.html" class="btn btn--primary">Shop the closets</a>
-            <a href="sell.html" class="btn btn--lime">Sell yours</a>
-          </div>
-        </div>
-      </section>
-
       <!-- the pinboard -->
       <section class="band band--white">
         <div class="shell shell--wide">
           <h2 class="section-title">Explore Our Closet</h2>
           <div class="heart-row" aria-hidden="true"></div>
 
-          <div class="deck">
-            <div class="deck__main">
-              <div class="frame">
-                <div class="empty-state" data-empty-state hidden>
-                  <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
-                  <p class="h3" data-empty-title>No closets dropped yet</p>
-                  <p class="muted" data-empty-body style="margin-top:6px;">Be the first — your closet could be today's top drop.</p>
-                  <a href="sell.html" class="btn btn--primary" style="margin-top:20px;">Sell your closet</a>
-                </div>
-
-                <div id="feed-start" data-feed></div>
-              </div>
-
-              <div class="text-center" style="margin-top:36px;">
-                <button type="button" class="btn btn--chrome" data-load-more>Load more closets</button>
-              </div>
+          <div class="frame">
+            <div class="empty-state" data-empty-state hidden>
+              <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
+              <p class="h3" data-empty-title>No closets dropped yet</p>
+              <p class="muted" data-empty-body style="margin-top:6px;">Be the first — your closet could be today's top drop.</p>
+              <a href="sell.html" class="btn btn--primary" style="margin-top:20px;">Sell your closet</a>
             </div>
 
-            <aside class="deck__side">
-              <div class="note">
-                <p class="note__title">How it works</p>
-                <ul>
-                  <li>Swipe through each closet</li>
-                  <li>Tap the price for the details</li>
-                  <li>Message the seller on WhatsApp</li>
-                  <li>Arrange your own collection</li>
-                </ul>
-              </div>
-            </aside>
+            <div id="feed-start" data-feed></div>
+          </div>
+
+          <div class="text-center" style="margin-top:36px;">
+            <button type="button" class="btn btn--chrome" data-load-more>Load more closets</button>
           </div>
         </div>
       </section>
     </main>
+
+    <!-- greets an arriving visitor; quiet for an hour afterwards -->
+    <div class="modal welcome" data-welcome hidden>
+      <div class="modal__backdrop" data-welcome-close></div>
+      <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+        <button type="button" class="modal__x" data-welcome-close aria-label="Close">
+          <i class="ico ico--close" aria-hidden="true"></i>
+        </button>
+
+        <p class="eyebrow text-center">Namibia's online closet</p>
+        <h2 class="split__title text-center" id="welcome-title">About The <span class="script">Closet</span></h2>
+
+        <p>
+          Closet Sales Namibia was created with one idea in mind — that good clothes
+          deserve a second life. Every listing here is somebody's real wardrobe
+          clear-out, photographed piece by piece, priced honestly.
+        </p>
+        <p>
+          Sellers pay one flat fee to post a whole closet, however many pieces it
+          holds. Buyers browse, find something they love, and message the seller
+          directly on WhatsApp. No middlemen, no commission, no fuss.
+        </p>
+
+        <div class="cta-row">
+          <a href="shop.html" class="btn btn--primary">Explore the closets</a>
+          <a href="sell.html" class="btn btn--lime">Sell your closet</a>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="js/layout.js"></script>
   <script type="module" src="js/feed.js"></script>
+  <script type="module" src="js/welcome.js"></script>
 </body>
 </html>

@@ -12,7 +12,7 @@ import {
   writeBatch,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { requireAdmin, adminDeleteAccount, setBanned } from "./auth.js";
-import { deleteImages } from "./cloudinary.js";
+import { deleteImages, sized } from "./cloudinary.js";
 import { auth } from "./firebase-config.js";
 import { $, $all, el, toast, initials, formatNAD, timeAgo, toFirestoreDate } from "./utils.js";
 
@@ -150,7 +150,7 @@ function reviewRow(carousel, isPending) {
     "div",
     { class: "review__thumbs" },
     items.slice(0, 8).map((it) =>
-      el("img", { class: "review__thumb", src: it.imageURL, alt: it.category || "item", loading: "lazy" })
+      el("img", { class: "review__thumb", src: sized(it.imageURL, 200), alt: it.category || "item", loading: "lazy", decoding: "async" })
     )
   );
 
@@ -312,7 +312,7 @@ function paintUsers() {
 
   rows.forEach((u) => {
     const avatar = u.profilePicURL
-      ? el("img", { class: "avatar-bubble avatar-bubble--sm", src: u.profilePicURL, alt: "" })
+      ? el("img", { class: "avatar-bubble avatar-bubble--sm", src: sized(u.profilePicURL, 72, { square: true }), alt: "", loading: "lazy", decoding: "async" })
       : el("span", { class: "avatar-bubble avatar-bubble--sm" }, initials(u.displayName));
 
     const actions = el("div", { class: "account__actions" }, [

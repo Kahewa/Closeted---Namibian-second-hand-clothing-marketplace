@@ -15,7 +15,19 @@ app.use(express.json());
 // Firestore and Storage are called directly from the browser via the
 // Firebase client SDK, so this server's only real job is the N$150
 // listing-fee flow below (and, eventually, real payment webhooks).
-app.use(express.static(path.join(__dirname, "..", "public")));
+app.use(
+  express.static(path.join(__dirname, "..", "public"), {
+    // The HTML is revalidated every time so a deploy is picked up at once;
+    // CSS/JS/images are fingerprint-free, so a week with revalidation keeps
+    // repeat visits cheap without serving stale code after a change.
+    setHeaders(res, filePath) {
+      res.setHeader(
+        "Cache-Control",
+        filePath.endsWith(".html") ? "no-cache" : "public, max-age=604800, must-revalidate"
+      );
+    },
+  })
+);
 
 app.use("/api/carousel-fee", paymentsRouter);
 app.use("/api/media", mediaRouter);

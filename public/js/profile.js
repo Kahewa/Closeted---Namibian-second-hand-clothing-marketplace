@@ -10,7 +10,7 @@ import {
   orderBy,
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { uploadImage } from "./cloudinary.js";
+import { uploadImage, sized } from "./cloudinary.js";
 import { renderCarouselCard } from "./carousel-card.js";
 import {
   ensureUserDoc,
@@ -123,7 +123,7 @@ function isOwner() {
 
 function paintView() {
   if (profileData.profilePicURL) {
-    avatarImg.src = profileData.profilePicURL;
+    avatarImg.src = sized(profileData.profilePicURL, 240, { square: true });
     avatarImg.hidden = false;
   } else {
     avatarImg.hidden = true;
