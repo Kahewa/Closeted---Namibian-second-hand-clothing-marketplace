@@ -1,6 +1,6 @@
 import { auth } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "./auth.js";
+import { signUpWithEmail, signInWithEmail, signInWithGoogle, inviteProblem } from "./auth.js";
 import { $, $all, toast, isAdminUser } from "./utils.js";
 
 const redirectTarget = new URLSearchParams(location.search).get("redirect") || "index.html";
@@ -25,15 +25,43 @@ onAuthStateChanged(auth, (user) => {
 const tabs = $all("[data-tab]");
 const panels = { signin: $("[data-panel='signin']"), signup: $("[data-panel='signup']") };
 
-tabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
-    tabs.forEach((t) => t.classList.remove("auth-tab--active"));
-    tab.classList.add("auth-tab--active");
-    Object.entries(panels).forEach(([key, panel]) => {
-      panel.hidden = key !== tab.dataset.tab;
-    });
+function showPanel(which) {
+  tabs.forEach((t) => t.classList.toggle("auth-tab--active", t.dataset.tab === which));
+  Object.entries(panels).forEach(([key, panel]) => {
+    panel.hidden = key !== which;
   });
-});
+}
+
+tabs.forEach((tab) => tab.addEventListener("click", () => showPanel(tab.dataset.tab)));
+
+// ---------------------------------------------------------------------
+// Making an account is by invitation only. Without a valid ?invite= code
+// this page is a log-in page and nothing else: no tabs, no sign-up form.
+// The real gate is in the Firestore rules — this just decides what to
+// show somebody, and tells them plainly why they can't sign up.
+// ---------------------------------------------------------------------
+const inviteCode = new URLSearchParams(location.search).get("invite");
+
+async function openInvite() {
+  if (!inviteCode) return;
+
+  const note = $("[data-invite-note]");
+  const problem = await inviteProblem(inviteCode);
+
+  if (problem) {
+    note.textContent = problem;
+    note.classList.add("invite-note--bad");
+    note.hidden = false;
+    return;
+  }
+
+  note.textContent = "You've been invited to sell on Closet Sales Namibia. Set up your account below.";
+  note.hidden = false;
+  $("[data-auth-tabs]").hidden = false;
+  showPanel("signup");
+}
+
+openInvite();
 
 $("[data-signin-form]").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -66,7 +94,8 @@ $("[data-signup-form]").addEventListener("submit", async (e) => {
       form.name.value.trim(),
       form.email.value.trim(),
       form.password.value,
-      form.username.value
+      form.username.value,
+      inviteCode
     );
     busy = false;
     goHome(user);
@@ -90,7 +119,8 @@ $all("[data-google-btn]").forEach((btn) =>
 
 function friendlyAuthError(err) {
   const code = err?.code || "";
-  if (code.includes("email-already-in-use")) return "That email already has a closet — try logging in instead.";
+  if (code.includes("email-already-in-use")) return "That email already has a closet. Try logging in instead.";
+  if (code.includes("operation-not-allowed")) return "Sign-ups are closed. You need an invite link to join.";
   if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found"))
     return "Email or password didn't match. Try again.";
   if (code.includes("weak-password")) return "Password needs to be at least 6 characters.";

@@ -81,7 +81,7 @@ export async function claimUsername(uid, name, previous = "") {
   const existing = await getDoc(doc(db, "usernames", clean));
   if (existing.exists()) {
     if (existing.data().uid === uid) return clean;
-    throw new Error(`@${clean} is already taken — try another.`);
+    throw new Error(`@${clean} is already taken. Try another one.`);
   }
 
   const batch = writeBatch(db);
@@ -94,7 +94,7 @@ export async function claimUsername(uid, name, previous = "") {
   } catch (err) {
     // Someone claimed it in the split second since the check above.
     if (err?.code === "permission-denied") {
-      throw new Error(`@${clean} was just taken — try another.`);
+      throw new Error(`@${clean} was just taken. Try another one.`);
     }
     throw err;
   }
@@ -108,35 +108,117 @@ export async function uidForUsername(name) {
 }
 
 // ---------------------------------------------------------------------
+// Invites
+// ---------------------------------------------------------------------
+// The platform is invite-only: accounts exist because Grace sent someone
+// a link, not because they found the site. A code is readable by anyone
+// holding the link, so the sign-up page can check it before showing the
+// form, but only the admin can list or issue them.
+
+/** The full sign-up link for a code, ready to paste into a message. */
+export function inviteLink(code) {
+  const base = location.origin + location.pathname.replace(/[^/]*$/, "");
+  return `${base}login.html?invite=${encodeURIComponent(code)}`;
+}
+
+/** Reads one invite, or null if the code doesn't exist. */
+export async function readInvite(code) {
+  const clean = String(code || "").trim().toLowerCase();
+  if (!clean) return null;
+  const snap = await getDoc(doc(db, "invites", clean));
+  return snap.exists() ? { code: clean, ...snap.data() } : null;
+}
+
+/** null if the code can still be used, otherwise the reason it can't. */
+export async function inviteProblem(code) {
+  const invite = await readInvite(code);
+  if (!invite) return "That invite link isn't valid. Ask Closet Sales Namibia for a new one.";
+  if (invite.revoked) return "That invite has been cancelled. Ask for a new one.";
+  if (invite.usedBy) return "That invite has already been used to make an account.";
+  return null;
+}
+
+// ---------------------------------------------------------------------
 // Sign in / up / out
 // ---------------------------------------------------------------------
 
-export async function signUpWithEmail(name, email, password, username) {
+export async function signUpWithEmail(name, email, password, username, inviteCode) {
   const clean = normalizeUsername(username);
   const problem = usernameError(clean);
   if (problem) throw new Error(problem);
-  if (!(await isUsernameFree(clean))) throw new Error(`@${clean} is already taken — try another.`);
+
+  const inviteIssue = await inviteProblem(inviteCode);
+  if (inviteIssue) throw new Error(inviteIssue);
+  const code = String(inviteCode).trim().toLowerCase();
+
+  if (!(await isUsernameFree(clean))) throw new Error(`@${clean} is already taken. Try another one.`);
 
   const cred = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(cred.user, { displayName: name });
-  await ensureUserDoc(cred.user, { displayName: name });
-  await claimUsername(cred.user.uid, clean);
+
+  // Profile, username claim and invite go in one batch. The rules read the
+  // invite as it will be *after* the batch commits, so a profile can only
+  // exist next to an invite stamped with that same uid. That's what makes
+  // invite-only true at the database, rather than just hidden in the UI.
+  const batch = writeBatch(db);
+  batch.set(doc(db, "users", cred.user.uid), {
+    uid: cred.user.uid,
+    displayName: name || "Closet Seller",
+    email: cred.user.email || "",
+    username: clean,
+    inviteCode: code,
+    bio: "",
+    profilePicURL: "",
+    socialLinks: { instagram: "", tiktok: "", facebook: "", whatsapp: "" },
+    banned: false,
+    createdAt: serverTimestamp(),
+  });
+  batch.set(doc(db, "usernames", clean), { uid: cred.user.uid });
+  batch.update(doc(db, "invites", code), { usedBy: cred.user.uid, usedAt: serverTimestamp() });
+
+  try {
+    await batch.commit();
+  } catch (err) {
+    if (err?.code === "permission-denied") {
+      throw new Error(`@${clean} was just taken, or that invite was used a moment ago.`);
+    }
+    throw err;
+  }
   return cred.user;
 }
 
 export async function signInWithEmail(email, password) {
   const cred = await signInWithEmailAndPassword(auth, email, password);
-  // Repairs accounts whose users/{uid} doc never landed — e.g. someone
-  // signed up before the Firestore rules were deployed.
-  await ensureUserDoc(cred.user);
+  // A profile is what makes someone a member, and only an invite creates
+  // one. Somebody who has an auth login but no profile was never invited
+  // (or was removed), so they're signed straight back out rather than
+  // left in a half-working state.
+  await requireMembership(cred.user);
   return cred.user;
 }
 
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   const cred = await signInWithPopup(auth, provider);
-  await ensureUserDoc(cred.user);
+  // Google will happily mint an account for anyone who clicks the button,
+  // so the same membership check applies here.
+  await requireMembership(cred.user);
   return cred.user;
+}
+
+/** Signs the user back out unless they already have a profile. */
+async function requireMembership(user) {
+  if (isAdminUser(user)) {
+    await ensureUserDoc(user);
+    return;
+  }
+  const profile = await loadProfile(user.uid);
+  if (!profile) {
+    await signOut(auth);
+    throw new Error(
+      "There's no Closet Sales Namibia account for that login. You need an invite link to join."
+    );
+  }
 }
 
 export async function signOutUser() {

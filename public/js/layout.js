@@ -38,8 +38,8 @@ const FOOTER_COLS = [
   {
     title: "account",
     links: [
-      { href: "login.html", label: "sign in" },
-      { href: "login.html", label: "join now" },
+      { href: "login.html", label: "log in" },
+      { href: "how.html", label: "sell with us" },
       { href: "profile.html", label: "my profile" },
     ],
   },

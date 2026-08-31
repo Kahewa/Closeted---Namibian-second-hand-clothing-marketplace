@@ -45,8 +45,8 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
         "span",
         {},
         pending
-          ? " — we're checking your N$150 payment. Your carousel goes live on the feed as soon as it clears."
-          : " — this carousel wasn't approved. Message us on WhatsApp if you think that's a mistake."
+          ? ". We're checking your N$150 payment. Your closet goes live as soon as it clears."
+          : ". This closet wasn't approved. Message us on WhatsApp if you think that's a mistake."
       ),
     ]);
 
@@ -132,7 +132,7 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
       el("img", {
         class: "carousel-card__img",
         src: sized(item.imageURL, 840),
-        alt: `${item.category || "Item"} — size ${item.size || "?"}`,
+        alt: `${item.category || "Item"}, size ${item.size || "not given"}`,
         loading: "lazy",
       }),
       el("div", { class: "price-tag" }, [
@@ -196,7 +196,7 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
     dots.forEach((d, i) => d.classList.toggle("carousel-card__dot--active", i === index));
     const sizeEl = metaBar.querySelector("[data-meta-size]");
     const notesEl = metaBar.querySelector("[data-meta-notes]");
-    sizeEl.textContent = `Size ${item.size || "—"} · ${item.store || "Unlisted store"}`;
+    sizeEl.textContent = `Size ${item.size || "not given"} · ${item.store || "Unlisted store"}`;
     notesEl.textContent = item.notes || "";
     notesEl.hidden = !item.notes;
     conditionBadge.textContent = item.condition || "";
@@ -252,7 +252,7 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
   // socials live.
   const waLink = whatsappHref(
     carousel.sellerWhatsapp,
-    `Hi${carousel.sellerName ? ` ${carousel.sellerName.split(" ")[0]}` : ""}! I saw your closet drop on Closet Sales Namibia. I'd like to enquire about a few items`
+    `Hi${carousel.sellerName ? ` ${carousel.sellerName.split(" ")[0]}` : ""}! I saw your closet on Closet Sales Namibia and I'd like to ask about a few pieces.`
   );
 
   card.append(

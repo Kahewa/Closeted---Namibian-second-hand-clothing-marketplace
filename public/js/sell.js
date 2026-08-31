@@ -110,7 +110,7 @@ async function loadForEditing() {
     $("[data-page-eyebrow]").textContent = "edit your carousel";
     $("[data-page-title]").textContent = "Edit your carousel";
     $("[data-page-intro]").textContent =
-      "Change anything you like — it's still waiting for approval. Photos you leave alone stay as they are.";
+      "Change anything you like while it's waiting for approval. Photos you leave alone stay as they are.";
     submitBtn.textContent = "Save changes";
     $("[data-post-note]").innerHTML =
       `<i class="ico ico--note" aria-hidden="true"></i> You can keep editing until this carousel is approved. Once it's live, it's locked.`;
@@ -152,7 +152,7 @@ $("[data-copy-ref]")?.addEventListener("click", async () => {
     await navigator.clipboard.writeText(`@${profile.username}`);
     toast("Reference copied");
   } catch {
-    toast("Couldn't copy — write it down instead.", "error");
+    toast("Couldn't copy it. Write it down instead.", "error");
   }
 });
 
@@ -185,7 +185,7 @@ usernameSave?.addEventListener("click", async () => {
 
 function paintPaymentDetails() {
   const d = PAYMENT_DETAILS;
-  const ref = profile.username ? `@${profile.username}` : "—";
+  const ref = profile.username ? `@${profile.username}` : "…";
   const set = (sel, value) => {
     const node = $(sel);
     if (node) node.textContent = value;
@@ -243,7 +243,7 @@ function addRow(existing = null) {
     const file = fileInput.files?.[0];
     if (!file) return;
     if (file.size > MAX_IMAGE_BYTES) {
-      toast("That photo is over 8MB — try a smaller one.", "error");
+      toast("That photo is over 8MB. Try a smaller one.", "error");
       fileInput.value = "";
       return;
     }
@@ -310,7 +310,7 @@ form.addEventListener("submit", async (e) => {
   if (!isAdmin && !profile.username) {
     usernameBlock.hidden = false;
     usernameInput.focus();
-    toast("Pick a username first — it's your payment reference.", "error");
+    toast("Pick a username first. It's the reference you pay with.", "error");
     return;
   }
 

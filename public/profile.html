@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Profile — Closet Sales Namibia</title>
+<title>Profile · Closet Sales Namibia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -28,26 +28,58 @@
       </div>
 
       <div data-profile-content hidden>
-        <!-- the seller, on a rose band -->
-        <section class="band band--pink">
+        <!-- the seller: their picture on a flip-phone screen, details beside it -->
+        <section class="band profile-stage">
           <div class="shell shell--wide">
             <section class="profile-header" data-profile-header id="contact">
               <div class="profile-header__top">
-                <label class="avatar-upload" data-avatar-upload hidden>
-                  <img data-avatar class="avatar-bubble avatar-bubble--lg" alt="Profile picture" hidden />
-                  <span data-avatar-initials class="avatar-bubble avatar-bubble--lg"></span>
-                  <input type="file" accept="image/*" data-avatar-input />
-                </label>
+
+                <div class="phone" aria-hidden="false">
+                  <div class="phone__top">
+                    <span class="phone__speaker"></span>
+                    <label class="avatar-upload phone__screen" data-avatar-upload>
+                      <img data-avatar class="avatar-bubble avatar-bubble--lg" alt="Profile picture" hidden />
+                      <span data-avatar-initials class="avatar-bubble avatar-bubble--lg"></span>
+                      <input type="file" accept="image/*" id="avatar-input" data-avatar-input />
+                    </label>
+                    <span class="phone__brand">closet sales</span>
+                  </div>
+
+                  <span class="phone__hinge"></span>
+
+                  <div class="phone__bottom">
+                    <!-- the home button doubles as the change-photo control;
+                         a plain label[for] drives the file input above -->
+                    <label class="phone__dpad" for="avatar-input" title="Change profile picture">
+                      <i class="ico ico--camera" aria-hidden="true"></i>
+                      <span class="visually-hidden">Change profile picture</span>
+                    </label>
+                    <span class="phone__keys" aria-hidden="true">
+                      <i></i><i></i><i></i>
+                      <i></i><i></i><i></i>
+                      <i></i><i></i><i></i>
+                      <i></i><i></i><i></i>
+                    </span>
+                  </div>
+                </div>
 
                 <div class="profile-header__name-block">
-                  <h1 class="h2" data-display-name>—</h1>
+                  <h1 class="h2" data-display-name>…</h1>
                   <p class="profile-username" data-username-view></p>
-                  <p class="profile-bio" data-bio-view></p>
-                  <div class="profile-socials" data-social-view></div>
+
+                  <div class="panel panel--bio">
+                    <p class="panel__label">About this closet</p>
+                    <p class="profile-bio" data-bio-view></p>
+                  </div>
+
+                  <div class="panel panel--socials">
+                    <p class="panel__label">Find them here</p>
+                    <div class="profile-socials" data-social-view></div>
+                  </div>
 
                   <div class="profile-actions">
                     <button type="button" class="btn btn--chrome btn--sm" data-edit-toggle hidden><i class="ico ico--pencil" aria-hidden="true"></i> Edit profile</button>
-                    <a href="sell.html" class="btn btn--chrome btn--sm" data-sell-cta hidden>Sell more</a>
+                    <a href="sell.html" class="btn btn--primary btn--sm" data-sell-cta hidden>Sell more</a>
                   </div>
                 </div>
               </div>
@@ -106,58 +138,57 @@
 
               <div class="payref">
                 <span class="payref__label">Your reference</span>
-                <strong class="payref__value" data-pinned-ref>—</strong>
+                <strong class="payref__value" data-pinned-ref>…</strong>
               </div>
 
               <div class="pinned-pay__grid">
                 <div class="paybox">
                   <p class="paybox__title"><i class="ico ico--phone" aria-hidden="true"></i> Wallet / Pay2Cell</p>
                   <dl class="paybox__rows">
-                    <div><dt>Send to</dt><dd data-pay-wallet>—</dd></div>
+                    <div><dt>Send to</dt><dd data-pay-wallet>…</dd></div>
                   </dl>
                 </div>
 
                 <div class="paybox">
                   <p class="paybox__title"><i class="ico ico--bank" aria-hidden="true"></i> Bank transfer</p>
                   <dl class="paybox__rows">
-                    <div><dt>Bank</dt><dd data-pay-bank>—</dd></div>
-                    <div><dt>Account holder</dt><dd data-pay-holder>—</dd></div>
-                    <div><dt>Account type</dt><dd data-pay-type>—</dd></div>
-                    <div><dt>Account number</dt><dd data-pay-number>—</dd></div>
-                    <div><dt>Branch code</dt><dd data-pay-branch>—</dd></div>
+                    <div><dt>Bank</dt><dd data-pay-bank>…</dd></div>
+                    <div><dt>Account holder</dt><dd data-pay-holder>…</dd></div>
+                    <div><dt>Account type</dt><dd data-pay-type>…</dd></div>
+                    <div><dt>Account number</dt><dd data-pay-number>…</dd></div>
+                    <div><dt>Branch code</dt><dd data-pay-branch>…</dd></div>
                   </dl>
                 </div>
               </div>
 
               <div class="pinned-pay__foot">
                 <a class="btn btn--lime btn--sm" data-pay-cash href="#" target="_blank" rel="noopener noreferrer">
-                  <i class="ico ico--cash" aria-hidden="true"></i> Paying cash? WhatsApp <span data-pay-cash-number>—</span>
+                  <i class="ico ico--cash" aria-hidden="true"></i> Paying cash? WhatsApp <span data-pay-cash-number>…</span>
                 </a>
                 <span class="pinned-pay__note">
-                  You can still edit a closet until it's approved — after that it's locked.
+                  You can still edit a closet until it's approved. After that it's locked.
                 </span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- their closets, pinned to the board -->
-        <section class="band band--white">
+        <!-- their closets, on the print -->
+        <section class="browse browse--profile">
           <div class="shell shell--wide">
-            <h2 class="listings-divider">The Closet</h2>
-            <div class="heart-row" aria-hidden="true"></div>
-
             <div class="empty-state" data-listings-empty hidden>
               <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
               <p class="h3">Nothing here yet</p>
               <p class="muted" data-listings-empty-body style="margin-top:8px;"></p>
             </div>
 
-            <div class="frame">
-              <div data-listings></div>
-            </div>
+            <div data-listings></div>
+          </div>
+        </section>
 
-            <!-- owner only -->
+        <!-- owner only -->
+        <section class="band band--white">
+          <div class="shell shell--wide">
             <section class="danger-zone" data-danger-zone hidden>
               <p class="danger-zone__title">Delete my account</p>
               <p class="muted" style="font-size:13px;margin-top:6px;">

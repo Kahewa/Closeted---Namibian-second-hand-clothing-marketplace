@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin — Closet Sales Namibia</title>
+<title>Admin · Closet Sales Namibia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -28,6 +28,9 @@
           <button type="button" class="admin-tab" data-tab="accounts">
             accounts <span class="admin-tab__count" data-count-users>0</span>
           </button>
+          <button type="button" class="admin-tab" data-tab="invites">
+            invites <span class="admin-tab__count" data-count-invites>0</span>
+          </button>
         </div>
 
         <!-- carousels saved before the approval system existed -->
@@ -36,8 +39,8 @@
             <span data-legacy-count>0</span> older carousel(s) have no approval status
           </p>
           <p class="legacy-fix__body">
-            These were posted before approvals existed, so they show up nowhere — not on the feed,
-            not in the queue below. Choose what to do with them.
+            These were posted before approvals existed, so they don't show up anywhere. Not on
+            the feed, and not in the queue below. Choose what to do with them.
           </p>
           <div class="legacy-fix__actions">
             <button type="button" class="btn btn--primary btn--sm" data-legacy-approve>
@@ -89,6 +92,33 @@
           </div>
           <p class="text-center muted" data-users-loading>Loading…</p>
           <div data-users-list></div>
+        </section>
+
+        <!-- invites: the only way anyone gets an account -->
+        <section data-panel="invites" hidden>
+          <p class="muted" style="font-size:13px;margin-bottom:14px;">
+            Nobody can make an account on their own. Create an invite, send the link to the
+            person you want selling, and they set up their own username and password from it.
+            Each link works once.
+          </p>
+
+          <div class="invite-new">
+            <div class="field" style="flex:1 1 240px;min-width:0;">
+              <label for="invite-note">Who is this for? (just for your own notes)</label>
+              <input id="invite-note" type="text" data-invite-for placeholder="Tuli from the Thursday market" autocomplete="off" />
+            </div>
+            <button type="button" class="btn btn--primary" data-invite-create>
+              <i class="ico ico--tag" aria-hidden="true"></i> Create invite link
+            </button>
+          </div>
+
+          <p class="text-center muted" data-invites-loading>Loading…</p>
+          <div class="empty-state" data-invites-empty hidden>
+            <div class="empty-state__icon"><i class="ico ico--tag ico--xl" aria-hidden="true"></i></div>
+            <p class="h3">No invites yet</p>
+            <p class="muted" style="margin-top:6px;">Create one above and send the link on WhatsApp.</p>
+          </div>
+          <div data-invites-list></div>
         </section>
       </div>
     </main>

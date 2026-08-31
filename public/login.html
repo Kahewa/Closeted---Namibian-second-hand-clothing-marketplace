@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Log in — Closet Sales Namibia</title>
+<title>Log in · Closet Sales Namibia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -22,12 +22,16 @@
           <span class="logo__closet">closet sales</span><span class="logo__bg">namibia</span>
         </div>
         <p class="muted text-center" style="margin-top:-10px; margin-bottom:18px; font-size:14px;">
-          Buy what's dropped. Sell what's collecting dust.
+          Log in to post and manage your closet.
         </p>
 
-        <div class="auth-tabs">
+        <!-- Only somebody arriving on an invite link sees these; login.js
+             unhides them once it has checked the code. -->
+        <p class="invite-note" data-invite-note hidden></p>
+
+        <div class="auth-tabs" data-auth-tabs hidden>
           <button type="button" class="auth-tab auth-tab--active" data-tab="signin">Log in</button>
-          <button type="button" class="auth-tab" data-tab="signup">Sign up</button>
+          <button type="button" class="auth-tab" data-tab="signup">Set up account</button>
         </div>
 
         <div data-panel="signin">
@@ -66,7 +70,7 @@
               <label for="signup-password">Password</label>
               <input id="signup-password" type="password" name="password" required minlength="6" autocomplete="new-password" />
             </div>
-            <button class="btn btn--primary btn--block" type="submit">Sign up</button>
+            <button class="btn btn--primary btn--block" type="submit">Create my account</button>
           </form>
         </div>
 
@@ -76,7 +80,14 @@
           <span class="google-g">G</span> Continue with Google
         </button>
 
-        <p class="muted text-center" style="margin-top:18px; font-size:13px;">
+        <p class="auth-foot">
+          Selling here is by invitation. If you'd like to post a closet,
+          <a href="https://wa.me/264818093631?text=Hi!%20I%27d%20like%20an%20invite%20to%20sell%20on%20Closet%20Sales%20Namibia."
+             target="_blank" rel="noopener">message us on WhatsApp</a>
+          and we'll send you a link.
+        </p>
+
+        <p class="muted text-center" style="margin-top:14px; font-size:13px;">
           <a href="index.html">← Back to browsing</a>
         </p>
       </div>

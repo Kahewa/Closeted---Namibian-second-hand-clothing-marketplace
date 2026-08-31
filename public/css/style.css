@@ -463,7 +463,9 @@ code {
 .navlinks a:not(.btn):hover { color: var(--plum); }
 
 /* nav auth slot */
-.nav-user { position: relative; }
+/* The nav links below are position:relative and come later in the DOM, so
+   without this they paint over an open dropdown. */
+.nav-user { position: relative; z-index: 40; }
 .nav-avatar-btn { display: block; }
 .avatar-bubble {
   width: 38px; height: 38px;
@@ -486,12 +488,15 @@ code {
   right: 0;
   top: calc(100% + 18px);
   min-width: 220px;
+  /* never wider than the screen it drops onto */
+  max-width: calc(100vw - 28px);
   padding: 8px;
   display: none;
   flex-direction: column;
   background: var(--white);
   border: var(--line);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-lift);
+  z-index: 41;
 }
 .nav-user__menu--open { display: flex; }
 .nav-user__menu a, .nav-user__menu button {
@@ -577,6 +582,10 @@ code {
     var(--cheetah) center / var(--cheetah-size) repeat;
   padding: 64px 0 84px;
 }
+/* the profile's own run of the print — no heading above it, so it starts
+   tighter than the home page's */
+.browse--profile { padding-top: 46px; }
+
 /* the print is busy — the heading gets its own shadow to stay legible */
 .browse__title {
   font-family: var(--font-display);
@@ -591,42 +600,51 @@ code {
 }
 
 /* ---- newest sellers row --------------------------------------------------*/
+/* Three across, and small — these are people, not products, so the card is
+   just a face, a count and a way in. */
 .seller-row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 26px 18px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 620px;
+  margin: 0 auto;
 }
 .seller-card { text-align: center; }
-.seller-card__media {
+.seller-card__avatar {
   display: block;
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
-  background: var(--blush-pale);
-  margin-bottom: 14px;
-}
-.seller-card__img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--t-mid) var(--ease-out); }
-.seller-card:hover .seller-card__img { transform: scale(1.05); }
-.seller-card__initials {
-  display: flex; align-items: center; justify-content: center;
-  width: 100%; height: 100%;
+  width: clamp(64px, 16vw, 104px);
+  height: clamp(64px, 16vw, 104px);
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--white);
+  box-shadow: 0 6px 18px rgba(112, 60, 84, 0.22);
   background: var(--blush);
+}
+.seller-card__initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--rose-dark);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 30px;
+  font-size: clamp(20px, 5vw, 32px);
 }
 .seller-card__name {
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
   color: var(--plum);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.seller-card__meta { font-size: 12px; color: var(--rose-dark); margin: 2px 0 12px; }
-.seller-card .btn { width: 100%; }
+.seller-card__meta { font-size: 11.5px; color: var(--rose-dark); margin: 2px 0 12px; }
+.seller-card .btn { width: 100%; padding-left: 6px; padding-right: 6px; }
 
 @media (min-width: 720px) {
-  .seller-row { grid-template-columns: repeat(5, 1fr); gap: 20px; }
+  .seller-row { gap: 26px; }
 }
 
 /* ---- buttons -------------------------------------------------------------*/
@@ -1135,6 +1153,8 @@ code {
 .payref,
 .pinned-pay,
 .legacy-fix,
+.invite-row,
+.invite-new,
 .username-claim,
 .danger-zone,
 .empty-state,
@@ -1302,7 +1322,12 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 }
 .profile-header[data-win] { padding-top: 0; }
 .profile-header[data-win]::after { content: none; }
-.profile-header__top { display: flex; gap: 30px; align-items: center; flex-direction: column; text-align: center; }
+.profile-header__top {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: clamp(14px, 3.4vw, 40px);
+}
 .avatar-upload { position: relative; display: block; cursor: pointer; flex-shrink: 0; }
 .avatar-upload input[type="file"] { display: none; }
 .avatar-upload::after {
@@ -1326,9 +1351,9 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   -webkit-text-fill-color: currentColor;
 }
 .band--pink .profile-username { color: var(--white); }
-.profile-bio { font-size: 15px; color: var(--plum-soft); margin-top: 18px; max-width: 56ch; margin-inline: auto; }
+.profile-bio { font-size: 15px; color: var(--plum-soft); max-width: 56ch; }
 .band--pink .profile-bio { color: rgba(255, 255, 255, 0.9); }
-.profile-socials { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; justify-content: center; }
+.profile-socials { display: flex; flex-wrap: wrap; gap: 12px; }
 .profile-socials__empty { font-size: 14px; color: var(--plum-faint); }
 .social-btn {
   display: inline-flex; align-items: center; gap: 9px;
@@ -1342,7 +1367,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 .social-btn:hover { background: var(--rose-deep); border-color: var(--rose-deep); color: var(--white); }
-.profile-actions { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; justify-content: center; }
+.profile-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
 
 .profile-edit-form { display: none; margin-top: 30px; text-align: left; background: var(--white); padding: 32px; }
 .profile-header--editing [data-bio-view],
@@ -1355,6 +1380,214 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 
 .danger-zone { border: 1px solid rgba(194, 86, 107, 0.3); padding: 28px; margin: 56px 0 16px; background: var(--white); }
 .danger-zone__title { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--red); }
+
+/* ---- profile: the flip phone ---------------------------------------------*/
+/* Drawn rather than photographed, so the screen is a real element the
+   avatar can fill — a phone PNG would have an opaque screen and the
+   picture would have to be guessed into position behind it. */
+.profile-stage {
+  background: linear-gradient(180deg, var(--blush-pale) 0%, var(--blush) 100%);
+  padding: 72px 0 80px;
+}
+
+.phone {
+  /* one dial for the whole handset: the em sizes below are relative to
+     font-size, which is derived from the width */
+  --pw: clamp(104px, 26vw, 268px);
+  width: var(--pw);
+  flex: 0 0 var(--pw);
+  font-size: calc(var(--pw) / 19);
+  margin: 0;
+  transform: rotate(-4deg);
+  filter: drop-shadow(0 24px 40px rgba(112, 60, 84, 0.28));
+  transition: transform var(--t-mid) var(--ease);
+}
+.phone:hover { transform: rotate(-1.5deg) translateY(-6px); }
+
+.phone__top,
+.phone__bottom {
+  background:
+    linear-gradient(155deg, #ffffff 0%, var(--rose-mid) 34%, var(--rose) 68%, var(--rose-deep) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.75);
+}
+.phone__top {
+  border-radius: 2.1em 2.1em 0.7em 0.7em;
+  padding: 1.4em 1.3em 1.55em;
+  position: relative;
+}
+/* the little earpiece slot */
+.phone__speaker {
+  display: block;
+  width: 3.85em;
+  height: 0.43em;
+  margin: 0 auto 1em;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.75);
+}
+.phone__brand {
+  display: block;
+  margin-top: 0.85em;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.79em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* the screen — this is where the profile picture lives */
+.phone__screen {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 0.86em;
+  overflow: hidden;
+  background: var(--blush-pale);
+  box-shadow: inset 0 0 0 0.21em rgba(255, 255, 255, 0.85), 0 0.28em 1em rgba(112, 60, 84, 0.25);
+}
+/* the avatar drops its bubble shape and fills the screen instead */
+.phone__screen .avatar-bubble {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  object-fit: cover;
+  font-size: 3.3em;
+  background: var(--blush);
+  color: var(--rose-dark);
+}
+/* nothing sits over the picture any more — the control moved to the
+   home button below */
+.phone__screen.avatar-upload::after { display: none; }
+/* a visitor sees the picture but no camera badge */
+.avatar-upload--readonly { cursor: default; }
+.avatar-upload--readonly::after { display: none; }
+
+.phone__hinge {
+  display: block;
+  width: 58%;
+  height: 0.93em;
+  margin: 0.2em auto;
+  border-radius: 0.21em;
+  background: linear-gradient(180deg, var(--rose-deep), var(--rose-dark));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.phone__bottom {
+  border-radius: 0.7em 0.7em 2.4em 2.4em;
+  padding: 1.3em 1.4em 1.85em;
+  text-align: center;
+}
+.phone__dpad {
+  display: block;
+  width: 4.4em;
+  height: 4.4em;
+  margin: 0 auto 1.1em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #ffffff 0%, var(--rose-mid) 52%, var(--rose-deep) 100%);
+  box-shadow: inset 0 0 0 0.43em rgba(255, 255, 255, 0.6), 0 0.21em 0.57em rgba(112, 60, 84, 0.25);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+/* the camera only appears — and the button only responds — on your own
+   profile; for a visitor it stays a decorative home key */
+.phone__dpad .ico { display: none; font-size: 1.5em; color: var(--rose-dark); }
+.phone--editable .phone__dpad { cursor: pointer; }
+.phone--editable .phone__dpad .ico { display: block; }
+.phone--editable .phone__dpad:hover {
+  transform: scale(1.06);
+  box-shadow: inset 0 0 0 0.43em rgba(255, 255, 255, 0.85), 0 0.3em 0.8em rgba(112, 60, 84, 0.35);
+}
+.phone--editable .phone__dpad:active { transform: scale(0.97); }
+/* while an upload is running */
+.avatar-upload--busy ~ * .phone__dpad,
+.phone--editable .avatar-upload--busy + * .phone__dpad { opacity: 0.6; }
+.phone__keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5em; }
+.phone__keys i {
+  height: 1.07em;
+  border-radius: 0.29em;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 0.07em 0.14em rgba(112, 60, 84, 0.2);
+}
+
+/* ---- phone: photo variant ------------------------------------------------*/
+/* Used when assets/phone.png exists (profile.js adds the class after the
+   file loads). The drawn parts step aside and the screen becomes an
+   absolutely-placed window over the artwork.
+   The four values below are the screen rectangle as a share of the image —
+   nudge them if the avatar doesn't sit exactly in the screen. */
+.phone--photo {
+  --screen-x: 28.5%;
+  --screen-y: 13.2%;
+  --screen-w: 43%;
+  --screen-h: 31.5%;
+
+  aspect-ratio: 578 / 1000;
+  background: url("../assets/phone.png") center / contain no-repeat;
+  position: relative;
+  filter: drop-shadow(0 20px 34px rgba(112, 60, 84, 0.3));
+}
+.phone--photo .phone__top,
+.phone--photo .phone__bottom,
+.phone--photo .phone__hinge { display: none; }
+
+.phone--photo .phone__screen {
+  position: absolute;
+  left: var(--screen-x);
+  top: var(--screen-y);
+  width: var(--screen-w);
+  height: var(--screen-h);
+  aspect-ratio: auto;
+  border-radius: 0.4em;
+  box-shadow: none;
+  background: var(--blush-pale);
+}
+.phone--photo .phone__screen .avatar-bubble { font-size: 2.4em; }
+
+/* the drawn body is hidden in this variant, so the home button is placed
+   over the photo's own d-pad instead */
+.phone--photo .phone__bottom { display: block; background: none; border: none; padding: 0; }
+.phone--photo .phone__keys { display: none; }
+.phone--photo .phone__dpad {
+  position: absolute;
+  left: 50%;
+  top: 60.5%;
+  transform: translate(-50%, -50%);
+  width: 13%;
+  height: 7.5%;
+  margin: 0;
+  border-radius: 22%;
+  background: none;
+  box-shadow: none;
+}
+.phone--photo.phone--editable .phone__dpad:hover { transform: translate(-50%, -50%) scale(1.08); box-shadow: none; }
+.phone--photo.phone--editable .phone__dpad:active { transform: translate(-50%, -50%) scale(0.96); }
+.phone--photo .phone__dpad .ico { font-size: 1.1em; color: var(--rose-dark); }
+
+/* ---- profile: the panels beside it ---------------------------------------*/
+.panel {
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  margin-top: 18px;
+}
+.panel__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rose-dark);
+  margin-bottom: 10px;
+}
+.panel--bio .profile-bio { margin-top: 0; }
+.panel--socials .profile-socials { margin-top: 0; }
 
 /* ---- approval ------------------------------------------------------------*/
 .approval-note {
@@ -1428,6 +1661,92 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 .legacy-fix__title { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
 .legacy-fix__body { font-size: 14px; color: var(--plum-soft); margin-top: 8px; }
 .legacy-fix__actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+
+/* ---- invites --------------------------------------------------------------
+   Accounts are handed out, not signed up for. These are the admin's tools
+   for issuing links, plus the note that greets somebody arriving on one. */
+.invite-new {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 22px;
+  margin-bottom: 24px;
+  background: var(--blush-pale);
+}
+.invite-new .field { margin-bottom: 0; }
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 18px 22px;
+  margin-bottom: 14px;
+  transition: box-shadow var(--t-mid) var(--ease);
+}
+.invite-row:hover { box-shadow: var(--shadow-lift); }
+.invite-row--dead { opacity: 0.6; }
+.invite-row__main { flex: 1 1 260px; min-width: 0; }
+.invite-row__code { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.invite-row__code code {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--plum);
+}
+/* the link is long; let it wrap rather than stretch the row */
+.invite-row__link {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--plum-soft);
+  word-break: break-all;
+}
+.invite-row__meta { margin-top: 4px; font-size: 12.5px; color: var(--plum-faint); }
+.invite-row__actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+
+.invite-pill {
+  padding: 3px 10px;
+  background: var(--blush);
+  color: var(--plum);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.invite-pill--used { background: var(--rose-deep); color: var(--white); }
+.invite-pill--dead { background: rgba(64, 38, 48, 0.14); color: var(--plum-soft); }
+
+/* shown on login.html only when somebody arrives on an invite link */
+.invite-note {
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  background: var(--blush-pale);
+  border-left: 3px solid var(--rose-deep);
+  font-size: 13.5px;
+  color: var(--plum);
+}
+.invite-note--bad { border-left-color: var(--plum); }
+
+.auth-foot {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: var(--line-thin);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--plum-soft);
+  text-align: center;
+}
+.auth-foot a { color: var(--rose-dark); font-weight: 700; }
+
+@media (max-width: 560px) {
+  .invite-row { align-items: stretch; }
+  .invite-row__actions { width: 100%; justify-content: stretch; }
+  .invite-row__actions > * { flex: 1 1 auto; text-align: center; }
+  .invite-new { padding: 18px; }
+  .invite-new .btn { width: 100%; }
+}
 
 .review { padding: 26px; margin-bottom: 20px; transition: box-shadow var(--t-mid) var(--ease); }
 .review:hover { box-shadow: var(--shadow-lift); }
@@ -1571,9 +1890,6 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   .item-row__grid { grid-template-columns: 1fr 1fr 1fr; }
   .footer-cols { grid-template-columns: 1.4fr 1fr 1fr; }
   .pinned-pay__grid { grid-template-columns: 1fr 1fr; }
-  .profile-header__top { flex-direction: row; text-align: left; align-items: flex-start; }
-  .profile-bio { margin-inline: 0; }
-  .profile-socials, .profile-actions { justify-content: flex-start; }
 }
 
 @media (min-width: 900px) {
@@ -1600,6 +1916,11 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 }
 
 @media (max-width: 720px) {
+  .panel { padding: 14px 15px; margin-top: 12px; }
+  .panel__label { font-size: 10px; letter-spacing: 0.14em; }
+  .profile-stage { padding: 44px 0 52px; }
+  .social-btn { padding: 9px 13px; font-size: 11px; }
+
   .navbar__inner { padding: 16px 18px; gap: 14px; flex-wrap: wrap; }
   .iconnav { gap: 16px; order: 3; width: 100%; justify-content: space-between; }
   .iconnav__item { font-size: 11px; letter-spacing: 0.16em; }
@@ -1700,6 +2021,54 @@ html.is-leaving main {
 }
 .reveal.is-in { opacity: 1; transform: none; }
 
+
+/* ---- narrow screens ------------------------------------------------------*/
+@media (max-width: 560px) {
+  /* the nav row: four items have to fit without a horizontal scrollbar,
+     so they tighten and wrap onto a second line rather than overflowing */
+  .navbar .iconnav {
+    gap: 8px 16px;
+    padding: 0 14px 14px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  .iconnav__item { font-size: 10.5px; letter-spacing: 0.1em; }
+  .navbar__top { padding: 14px 14px 12px; gap: 10px; }
+  .logo { font-size: 17px; }
+  .navbar__icon { font-size: 17px; }
+  .avatar-bubble { width: 32px; height: 32px; font-size: 12px; }
+
+  .nav-user__menu { min-width: 0; width: max-content; }
+  .nav-user__menu a, .nav-user__menu button { padding: 12px; font-size: 10.5px; }
+
+  /* sections breathe less on a phone */
+  .band { padding: 44px 0; }
+  .browse { padding: 44px 0 56px; }
+  .hero__inner { padding: 64px 18px; }
+  .shell { padding: 0 16px; }
+
+  /* three sellers still fit, just smaller */
+  .seller-row { gap: 10px; }
+  .seller-card__name { font-size: 11px; letter-spacing: 0.04em; }
+  .seller-card__meta { font-size: 10.5px; }
+  .seller-card .btn { font-size: 9.5px; padding: 9px 4px; letter-spacing: 0.06em; }
+
+  /* the sell form's photo tile was squeezing the inputs */
+  .item-row { gap: 12px; padding: 16px; }
+  .item-row__photo { width: 76px; height: 76px; }
+  .item-row__grid { grid-template-columns: 1fr; }
+
+  .review__actions .btn,
+  .account__actions .btn { flex: 1 1 auto; }
+  .account { flex-wrap: wrap; }
+  .account__actions { width: 100%; justify-content: flex-start; }
+
+  .modal { padding: 14px; }
+  .toast-host { bottom: 20px; width: calc(100% - 28px); }
+}
+
+/* nothing should ever push the page sideways */
+html, body { max-width: 100%; overflow-x: hidden; }
 
 /* ---- accessibility -------------------------------------------------------*/
 :focus-visible { outline: none; }

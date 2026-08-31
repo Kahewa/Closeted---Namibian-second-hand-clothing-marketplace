@@ -7,11 +7,13 @@ import {
   limit,
   getDocs,
   doc,
+  setDoc,
   updateDoc,
   deleteDoc,
   writeBatch,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { requireAdmin, adminDeleteAccount, setBanned } from "./auth.js";
+import { requireAdmin, adminDeleteAccount, setBanned, inviteLink } from "./auth.js";
 import { deleteImages, sized } from "./cloudinary.js";
 import { auth } from "./firebase-config.js";
 import { $, $all, el, toast, initials, formatNAD, timeAgo, toFirestoreDate } from "./utils.js";
@@ -34,6 +36,7 @@ requireAdmin(() => {
   loadPending();
   loadLive();
   loadUsers();
+  loadInvites();
   findLegacyCarousels();
 });
 
@@ -224,7 +227,7 @@ function reviewRow(carousel, isPending) {
     ]),
     el("p", { class: "review__ref" }, [
       el("span", { class: "review__ref-label" }, "payment reference"),
-      el("strong", {}, carousel.paymentRef || carousel.sellerUsername || "— none —"),
+      el("strong", {}, carousel.paymentRef || carousel.sellerUsername || "none yet"),
     ]),
     thumbs,
     actions,
@@ -236,7 +239,7 @@ async function setStatus(btn, carousel, status) {
   try {
     await updateDoc(doc(db, "carousels", carousel.id), { status });
     toast(
-      status === "approved" ? "Approved — it's live now" : status === "rejected" ? "Rejected" : "Pulled down"
+      status === "approved" ? "Approved, it's live now" : status === "rejected" ? "Rejected" : "Pulled down"
     );
     refreshLists();
   } catch (err) {
@@ -390,6 +393,169 @@ async function wipeAccount(btn, user) {
   } catch (err) {
     console.error(err);
     toast("Couldn't delete that account.", "error");
+    btn.disabled = false;
+  }
+}
+
+
+// ---------------------------------------------------------------------
+// Invites
+//
+// Accounts only exist because an invite was sent, so this is the front
+// door. A code is a short random string used as the document id: short
+// enough to read out over the phone, random enough that guessing one is
+// hopeless, and unique because Firestore refuses a second create on the
+// same id.
+// ---------------------------------------------------------------------
+const invitesList = $("[data-invites-list]");
+const invitesLoading = $("[data-invites-loading]");
+const invitesEmpty = $("[data-invites-empty]");
+
+// no 0/o/1/l/i — these get read aloud and typed by hand
+const CODE_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
+
+function newCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  return Array.from(bytes, (b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join("");
+}
+
+let allInvites = [];
+
+async function loadInvites() {
+  if (!invitesList) return;
+  try {
+    const snap = await getDocs(query(collection(db, "invites"), limit(300)));
+    allInvites = snap.docs.map((d) => ({ code: d.id, ...d.data() }));
+    // newest first, and anything still waiting to be used above the rest
+    allInvites.sort((a, b) => {
+      const used = Number(Boolean(a.usedBy)) - Number(Boolean(b.usedBy));
+      if (used) return used;
+      return (toFirestoreDate(b.createdAt)?.getTime() || 0) - (toFirestoreDate(a.createdAt)?.getTime() || 0);
+    });
+    invitesLoading.hidden = true;
+    $("[data-count-invites]").textContent = allInvites.filter((i) => !i.usedBy && !i.revoked).length;
+    paintInvites();
+  } catch (err) {
+    console.error(err);
+    invitesLoading.textContent = `Couldn't load invites: ${err.message}`;
+  }
+}
+
+function paintInvites() {
+  invitesList.innerHTML = "";
+  invitesEmpty.hidden = allInvites.length > 0;
+  allInvites.forEach((invite) => invitesList.append(inviteRow(invite)));
+}
+
+function inviteRow(invite) {
+  const used = Boolean(invite.usedBy);
+  const dead = used || invite.revoked;
+  const link = inviteLink(invite.code);
+
+  const state = invite.revoked
+    ? el("span", { class: "invite-pill invite-pill--dead" }, "cancelled")
+    : used
+    ? el("span", { class: "invite-pill invite-pill--used" }, "used")
+    : el("span", { class: "invite-pill" }, "waiting to be used");
+
+  const who = used ? (allUsers.find((u) => u.uid === invite.usedBy) || null) : null;
+
+  const meta = [];
+  if (invite.note) meta.push(invite.note);
+  if (who) meta.push(who.username ? `@${who.username}` : who.displayName || "an account");
+  const created = toFirestoreDate(invite.createdAt);
+  if (created) meta.push(`made ${timeAgo(created)}`);
+
+  const actions = el("div", { class: "invite-row__actions" });
+
+  if (!dead) {
+    const copyBtn = el("button", { class: "btn btn--primary btn--sm", type: "button" }, "Copy link");
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(link);
+        toast("Invite link copied. Paste it into a message.", "success");
+      } catch {
+        toast("Couldn't copy it. Select the link and copy it by hand.", "error");
+      }
+    });
+
+    const waBtn = el("a", {
+      class: "btn btn--outline btn--sm",
+      href: `https://wa.me/?text=${encodeURIComponent(
+        `Hi! Here's your invite to sell on Closet Sales Namibia. Set up your account here: ${link}`
+      )}`,
+      target: "_blank",
+      rel: "noopener",
+    }, "Send on WhatsApp");
+
+    const killBtn = el("button", { class: "btn btn--outline btn--sm", type: "button" }, "Cancel");
+    killBtn.addEventListener("click", () => revokeInvite(killBtn, invite));
+
+    actions.append(copyBtn, waBtn, killBtn);
+  } else {
+    const delBtn = el("button", { class: "btn btn--outline btn--sm", type: "button" }, "Remove");
+    delBtn.addEventListener("click", () => deleteInvite(delBtn, invite));
+    actions.append(delBtn);
+  }
+
+  return el("article", { class: `invite-row${dead ? " invite-row--dead" : ""}` }, [
+    el("div", { class: "invite-row__main" }, [
+      el("p", { class: "invite-row__code" }, [el("code", {}, invite.code), state]),
+      el("p", { class: "invite-row__link" }, dead ? meta.join(" · ") || "no notes" : link),
+      meta.length && !dead ? el("p", { class: "invite-row__meta" }, meta.join(" · ")) : null,
+    ].filter(Boolean)),
+    actions,
+  ]);
+}
+
+$("[data-invite-create]")?.addEventListener("click", async (e) => {
+  const btn = e.currentTarget;
+  const noteField = $("[data-invite-for]");
+  btn.disabled = true;
+  try {
+    const code = newCode();
+    await setDoc(doc(db, "invites", code), {
+      note: (noteField.value || "").trim(),
+      createdAt: serverTimestamp(),
+      createdBy: auth.currentUser?.uid || "",
+      usedBy: null,
+      revoked: false,
+    });
+    noteField.value = "";
+    try {
+      await navigator.clipboard.writeText(inviteLink(code));
+      toast("Invite created and the link is on your clipboard.", "success");
+    } catch {
+      toast("Invite created. Use Copy link below to grab it.", "success");
+    }
+    await loadInvites();
+  } catch (err) {
+    console.error(err);
+    toast(`Couldn't create the invite: ${err.message}`, "error");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+async function revokeInvite(btn, invite) {
+  btn.disabled = true;
+  try {
+    await updateDoc(doc(db, "invites", invite.code), { revoked: true });
+    toast("That link won't work any more.", "success");
+    await loadInvites();
+  } catch (err) {
+    toast(`Couldn't cancel it: ${err.message}`, "error");
+    btn.disabled = false;
+  }
+}
+
+async function deleteInvite(btn, invite) {
+  btn.disabled = true;
+  try {
+    await deleteDoc(doc(db, "invites", invite.code));
+    await loadInvites();
+  } catch (err) {
+    toast(`Couldn't remove it: ${err.message}`, "error");
     btn.disabled = false;
   }
 }
