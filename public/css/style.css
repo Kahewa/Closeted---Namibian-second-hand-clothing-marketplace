@@ -2168,6 +2168,25 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible { box-shadow: 0 0 0 3px rgba(201, 127, 161, 0.45); }
 
+/* `.btn` is nowrap, which is right for a button sized by its own label and
+   wrong for one told to fill its container: "send whatsapp message" in
+   uppercase at 0.16em tracking is wider than a phone, so it spilled out of
+   its own box. A full-width button has room to wrap and should use it. */
+.btn--block {
+  white-space: normal;
+  line-height: 1.35;
+  text-align: center;
+}
+
+@media (max-width: 420px) {
+  .btn { padding-left: 20px; padding-right: 20px; letter-spacing: 0.1em; }
+  .btn--block { padding-left: 14px; padding-right: 14px; }
+  /* the ask panel is nested two boxes deep; at 320px its own padding was
+     most of what was squeezing the button inside it */
+  .ask { padding: 22px 14px; }
+  .auth-page { padding: 40px 14px; }
+}
+
 /* ---- dark ---------------------------------------------------------------
    Only the base tokens are redefined; everything else is aliased off them,
    so the whole sheet follows. Three states, and they have to agree:

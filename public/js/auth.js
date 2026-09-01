@@ -221,43 +221,58 @@ export async function signInWithEmail(email, password) {
   return cred.user;
 }
 
-// Popups are the wrong tool on a phone. iOS Safari only allows one opened
-// straight out of a tap with nothing awaited in between, and in-app browsers
-// — Instagram's and Facebook's especially, which is where most of our
-// sellers come from — either block them outright or open one that can't talk
-// back to the page it came from. On anything handheld we hand off to a
-// full-page redirect and collect the result when the browser comes back.
-function prefersRedirect() {
+// Popup first, redirect only as a rescue.
+//
+// The obvious reading is that popups are for desktops and redirects are for
+// phones. On iOS it's the other way round. signInWithRedirect parks the
+// state for the round trip on the Firebase domain, and Safari partitions
+// storage belonging to any domain other than the one on screen — so the
+// browser comes back from Google having forgotten why it left. A popup
+// hands the answer back over postMessage and never touches that storage,
+// which is why it survives where the redirect doesn't.
+//
+// What popups genuinely can't do is open inside Instagram's and Facebook's
+// in-app browsers, which is where a good share of our sellers arrive from.
+// Those throw, and that's what the redirect is kept around for.
+function canRetryWithRedirect(err) {
+  const code = err?.code || "";
   return (
-    /Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent) ||
-    // iPadOS reports itself as a Mac, so fall back to asking about touch
-    (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)) ||
-    window.matchMedia("(max-width: 820px)").matches
+    code.includes("popup-blocked") ||
+    code.includes("operation-not-supported-in-this-environment") ||
+    code.includes("web-storage-unsupported") ||
+    code.includes("internal-error")
   );
 }
 
 /**
- * Starts Google sign-in. Returns the user on desktop, or null on a phone —
- * where the page is already navigating away and the answer arrives later
- * via googleRedirectUser().
+ * Starts Google sign-in. Returns the user, or null when the browser is on
+ * its way out to Google — in which case the answer arrives on the next page
+ * load via googleRedirectUser().
+ *
+ * `validated` skips re-checking an invite the caller has already checked.
+ * That await matters more than it looks: iOS only allows a popup opened in
+ * the same tick as the tap that asked for it, and anything awaited first
+ * spends the gesture.
  */
-export async function startGoogle(inviteCode = "") {
-  if (inviteCode) {
+export async function startGoogle(inviteCode = "", { validated = false } = {}) {
+  if (inviteCode && !validated) {
     const issue = await inviteProblem(inviteCode);
     if (issue) throw new Error(issue);
   }
 
   const provider = new GoogleAuthProvider();
-  // Skip whatever Google session the browser last used. Phones are shared,
-  // and silently signing in as the wrong account is worse than one more tap.
+  // Phones get shared. Signing in silently as whoever used Google last is
+  // worse than one more tap.
   provider.setCustomParameters({ prompt: "select_account" });
 
-  if (prefersRedirect()) {
+  try {
+    const cred = await signInWithPopup(auth, provider);
+    return cred.user;
+  } catch (err) {
+    if (!canRetryWithRedirect(err)) throw err;
     await signInWithRedirect(auth, provider);
     return null;
   }
-  const cred = await signInWithPopup(auth, provider);
-  return cred.user;
 }
 
 /** The user coming back from a redirect sign-in, or null on a normal load. */

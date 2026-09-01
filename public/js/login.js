@@ -76,6 +76,11 @@ $all("[data-go]").forEach((btn) =>
 const inviteCode = new URLSearchParams(location.search).get("invite");
 const inviteNote = $("[data-invite-note]");
 
+// iOS only permits a popup opened in the same tick as the tap. openInvite()
+// has already vetted this code on page load, so the click handler must not
+// await that check again — the await is what costs us the popup.
+let inviteOk = false;
+
 async function openInvite() {
   if (!inviteCode) return;
 
@@ -87,6 +92,7 @@ async function openInvite() {
     return;
   }
 
+  inviteOk = true;
   inviteNote.textContent = "You've been invited to sell on Closet Sales Namibia.";
   inviteNote.hidden = false;
   showPanel("signup");
@@ -164,54 +170,48 @@ async function handleGoogleUser(user) {
   toast("That Google account hasn't been invited yet. Ask us for a link to join.", "error");
 }
 
-$all("[data-google-btn], [data-google-invite]").forEach((btn) =>
+$all("[data-google-btn], [data-google-invite]").forEach((btn) => {
+  const label = btn.innerHTML;
+
+  function restore(message) {
+    btn.disabled = false;
+    btn.innerHTML = label;
+    busy = false;
+    if (message) toast(message, "error");
+  }
+
   btn.addEventListener("click", async () => {
     btn.disabled = true;
+    btn.textContent = "Taking you to Google…";
     busy = true;
-    try {
-      // null means a phone: the page is on its way to Google, and the
-      // answer comes back through boot() on the next load
-      const user = await startGoogle(btn.hasAttribute("data-google-invite") ? inviteCode : "");
-      if (user) await handleGoogleUser(user);
-      else return;                // navigating away; leave the button alone
-    } catch (err) {
-      busy = false;
-      toast(friendlyAuthError(err), "error");
-    }
-    btn.disabled = false;
-  })
-);
 
-// ---------------------------------------------------------------------
-// Sign up, with an invite in hand
-// ---------------------------------------------------------------------
-$("[data-signup-form]").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const btn = form.querySelector("button[type='submit']");
-  if (form.password.value.length < 6) {
-    toast("Password needs to be at least 6 characters.", "error");
-    return;
-  }
-  btn.disabled = true;
-  btn.textContent = "Setting up your closet…";
-  busy = true;
-  try {
-    const user = await signUpWithEmail(
-      form.name.value.trim(),
-      form.email.value.trim(),
-      form.password.value,
-      form.username.value,
-      inviteCode
-    );
-    busy = false;
-    goHome(user);
-  } catch (err) {
-    busy = false;
-    toast(friendlyAuthError(err), "error");
-    btn.disabled = false;
-    btn.textContent = "Create my account";
-  }
+    try {
+      const forInvite = btn.hasAttribute("data-google-invite");
+      const user = await startGoogle(forInvite ? inviteCode : "", { validated: inviteOk });
+
+      if (user) {
+        await handleGoogleUser(user);
+        restore();
+        return;
+      }
+
+      // null means a phone: signInWithRedirect resolves before the browser
+      // actually leaves, so if we're still here in a moment it never went.
+      // Without this the button just sits there disabled and the whole thing
+      // looks like a dead tap.
+      setTimeout(() => {
+        if (!document.hidden) {
+          restore(
+            "Couldn't reach Google sign-in. Check this address is in " +
+              "Firebase's authorised domains, and that the site isn't behind " +
+              "Vercel's deployment protection. Email and password works either way."
+          );
+        }
+      }, 4000);
+    } catch (err) {
+      restore(friendlyAuthError(err));
+    }
+  });
 });
 
 $("[data-username-form]").addEventListener("submit", async (e) => {
@@ -241,5 +241,14 @@ function friendlyAuthError(err) {
   if (code.includes("weak-password")) return "Password needs to be at least 6 characters.";
   if (code.includes("invalid-email")) return "That email doesn't look right.";
   if (code.includes("popup-closed-by-user")) return "Google sign-in was closed before finishing.";
+  if (code.includes("popup-blocked")) return "Your browser blocked the Google window. Allow pop-ups for this site, or use email and password.";
+  // The three that look identical from the outside — a dead button — but
+  // each need a different thing fixed, so each says which.
+  if (code.includes("unauthorized-domain"))
+    return "This web address isn't on Firebase's authorised domains list, so Google won't sign anyone in from it. Add it in Firebase Console → Authentication → Settings.";
+  if (code.includes("operation-not-allowed"))
+    return "Google sign-in isn't switched on for this project. Enable it in Firebase Console → Authentication → Sign-in method.";
+  if (code.includes("network-request-failed"))
+    return "Couldn't reach Firebase. Check the connection and try again.";
   return err?.message || "Something went wrong. Please try again.";
 }
