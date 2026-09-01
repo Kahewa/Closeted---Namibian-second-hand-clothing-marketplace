@@ -5,12 +5,7 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
-
-    {
-      "//": "Google sign-in on a phone goes out to Google and comes back, and Firebase parks the state for that round trip on closet-bg.firebaseapp.com. Safari and Firefox treat storage on a domain that isn't the one you're looking at as third-party and bin it, so the browser returns from Google having forgotten why it left. Proxying Firebase's auth handler through our own domain makes that storage first-party and the round trip survives. Set authDomain to this site's own host for it to take effect.",
-      "source": "/__/auth/:path*",
-      "destination": "https://closet-bg.firebaseapp.com/__/auth/:path*"
-    },
+    { "source": "/__/auth/:path*", "destination": "https://closet-bg.firebaseapp.com/__/auth/:path*" },
     { "source": "/__/firebase/:path*", "destination": "https://closet-bg.firebaseapp.com/__/firebase/:path*" }
   ]
 }

@@ -7,11 +7,18 @@
 
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBTkVp63KQNOS9lJCit3qhgChEgcPu1oXg",
-  // The site's own host, not closet-bg.firebaseapp.com. Firebase parks the
-  // state for a redirect sign-in on whatever this says, and Safari bins
-  // storage belonging to a domain other than the one on screen — so on a
-  // phone the browser came back from Google having forgotten why it left.
-  // vercel.json proxies /__/auth/* through to Firebase so this can be us.
+  // The site's own host, not closet-bg.firebaseapp.com.
+  //
+  // Firebase parks the state for a redirect sign-in on whatever this says.
+  // Safari and Firefox bin storage belonging to a domain other than the one
+  // on screen, so on a phone the browser came back from Google having
+  // forgotten why it left. Pointing this at our own host makes that storage
+  // first-party; the /__/auth/* and /__/firebase/* rewrites in vercel.json
+  // are what let our host answer for it. Both halves are needed — change
+  // one without the other and Google sign-in breaks on phones again.
+  //
+  // localhost keeps the firebaseapp.com domain: there's no proxy in front
+  // of the dev server, and same-site storage isn't an issue there anyway.
   authDomain: location.hostname === "localhost" ? "closet-bg.firebaseapp.com" : location.host,
   projectId: "closet-bg",
   storageBucket: "closet-bg.firebasestorage.app",
