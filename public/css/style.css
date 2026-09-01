@@ -1806,6 +1806,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   color: var(--plum-soft);
   text-align: center;
 }
+.auth-switch a,
 .auth-switch button {
   padding: 0;
   background: none;
@@ -1818,6 +1819,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   text-underline-offset: 3px;
   cursor: pointer;
 }
+.auth-switch a:hover,
 .auth-switch button:hover { color: var(--plum); }
 
 .field__optional {

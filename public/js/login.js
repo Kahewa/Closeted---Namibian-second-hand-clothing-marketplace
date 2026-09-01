@@ -62,8 +62,18 @@ function showPanel(which) {
   $("[data-auth-lead]").textContent = LEADS[which];
 }
 
-$all("[data-go]").forEach((btn) =>
-  btn.addEventListener("click", () => showPanel(btn.dataset.go))
+// Real links, intercepted — not buttons.
+//
+// Switching panels in place is nicer, but if this listener ever fails to
+// attach (a module that didn't load, an error earlier in the file) a button
+// leaves the sign-in form with no way to reach it at all. As links they
+// still navigate, and ?mode= below opens the right panel on arrival, so the
+// worst case is a page reload rather than a locked door.
+$all("[data-go]").forEach((el) =>
+  el.addEventListener("click", (e) => {
+    e.preventDefault();
+    showPanel(el.dataset.go);
+  })
 );
 
 // ---------------------------------------------------------------------
@@ -117,7 +127,13 @@ async function openInvite() {
     goHome(auth.currentUser);
     return;
   }
+
   await openInvite();
+
+  // An invite decides the panel on its own; otherwise honour ?mode=.
+  if (!inviteOk && new URLSearchParams(location.search).get("mode") === "signin") {
+    showPanel("signin");
+  }
 })();
 
 // ---------------------------------------------------------------------
