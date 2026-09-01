@@ -45,8 +45,8 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
         "span",
         {},
         pending
-          ? ". We're checking your N$150 payment. Your closet goes live as soon as it clears."
-          : ". This closet wasn't approved. Message us on WhatsApp if you think that's a mistake."
+          ? " — we're checking your N$150 payment. Your carousel goes live on the feed as soon as it clears."
+          : " — this carousel wasn't approved. Message us on WhatsApp if you think that's a mistake."
       ),
     ]);
 
@@ -106,16 +106,11 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
           [el("i", { class: "ico ico--trash", "aria-hidden": "true" }), " Delete listing"]
         ),
       ]);
-      trigger.addEventListener("pointerdown", (e) => e.stopPropagation());
       trigger.addEventListener("click", (e) => {
         e.stopPropagation();
         dropdown.classList.toggle("carousel-card__owner-dropdown--open");
       });
-      // pointerdown for the same reason as the nav menu: iOS never
-      // delivers an outside tap here as a click
-      document.addEventListener("pointerdown", () =>
-        dropdown.classList.remove("carousel-card__owner-dropdown--open")
-      );
+      document.addEventListener("click", () => dropdown.classList.remove("carousel-card__owner-dropdown--open"));
       menuWrap.append(trigger, dropdown);
       titlebar.append(menuWrap);
     }
@@ -137,7 +132,7 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
       el("img", {
         class: "carousel-card__img",
         src: sized(item.imageURL, 840),
-        alt: `${item.category || "Item"}, size ${item.size || "not given"}`,
+        alt: `${item.category || "Item"} — size ${item.size || "?"}`,
         loading: "lazy",
       }),
       el("div", { class: "price-tag" }, [
@@ -201,7 +196,7 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
     dots.forEach((d, i) => d.classList.toggle("carousel-card__dot--active", i === index));
     const sizeEl = metaBar.querySelector("[data-meta-size]");
     const notesEl = metaBar.querySelector("[data-meta-notes]");
-    sizeEl.textContent = `Size ${item.size || "not given"} · ${item.store || "Unlisted store"}`;
+    sizeEl.textContent = `Size ${item.size || "—"} · ${item.store || "Unlisted store"}`;
     notesEl.textContent = item.notes || "";
     notesEl.hidden = !item.notes;
     conditionBadge.textContent = item.condition || "";
@@ -257,7 +252,7 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
   // socials live.
   const waLink = whatsappHref(
     carousel.sellerWhatsapp,
-    `Hi${carousel.sellerName ? ` ${carousel.sellerName.split(" ")[0]}` : ""}! I saw your closet on Closet Sales Namibia and I'd like to ask about a few pieces.`
+    `Hi${carousel.sellerName ? ` ${carousel.sellerName.split(" ")[0]}` : ""}! I saw your closet drop on Closet Sales Namibia. I'd like to enquire about a few items`
   );
 
   card.append(

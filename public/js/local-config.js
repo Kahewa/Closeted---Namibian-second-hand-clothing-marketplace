@@ -7,20 +7,6 @@
 
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBTkVp63KQNOS9lJCit3qhgChEgcPu1oXg",
-  // Left on the Firebase domain deliberately.
-  //
-  // Safari and Firefox bin storage belonging to a domain other than the one
-  // on screen, which is why redirect sign-in can come back from Google
-  // having forgotten why it left. The documented fix is to point this at our
-  // own host and let the /__/auth/* rewrite in vercel.json proxy through to
-  // Firebase — but that only works if our host actually answers those paths,
-  // and while Vercel Deployment Protection is on it answers them with an SSO
-  // redirect instead. Pointing this at our host before that's confirmed would
-  // break Google sign-in outright rather than only on Safari.
-  //
-  // To switch it on: confirm https://<the site>/__/auth/handler returns
-  // Firebase's page and not a redirect, then change this to
-  //   location.hostname === "localhost" ? "closet-bg.firebaseapp.com" : location.host
   authDomain: "closet-bg.firebaseapp.com",
   projectId: "closet-bg",
   storageBucket: "closet-bg.firebasestorage.app",

@@ -4,8 +4,6 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   onAuthStateChanged,
   signOut,
   updateProfile,
@@ -40,14 +38,11 @@ export async function ensureUserDoc(user, extra = {}) {
   if (!snap.exists()) {
     await setDoc(ref, {
       uid: user.uid,
-      // Deliberately not user.displayName / user.photoURL: signing in with
-      // Google shouldn't quietly publish the name and picture off somebody's
-      // Google account. They fill those in themselves.
-      displayName: extra.displayName || "",
+      displayName: user.displayName || extra.displayName || "Closet Seller",
       email: user.email || "",
       username: "",
       bio: "",
-      profilePicURL: "",
+      profilePicURL: user.photoURL || "",
       socialLinks: { instagram: "", tiktok: "", facebook: "", whatsapp: "" },
       banned: false,
       createdAt: serverTimestamp(),
@@ -86,7 +81,7 @@ export async function claimUsername(uid, name, previous = "") {
   const existing = await getDoc(doc(db, "usernames", clean));
   if (existing.exists()) {
     if (existing.data().uid === uid) return clean;
-    throw new Error(`@${clean} is already taken. Try another one.`);
+    throw new Error(`@${clean} is already taken — try another.`);
   }
 
   const batch = writeBatch(db);
@@ -99,7 +94,7 @@ export async function claimUsername(uid, name, previous = "") {
   } catch (err) {
     // Someone claimed it in the split second since the check above.
     if (err?.code === "permission-denied") {
-      throw new Error(`@${clean} was just taken. Try another one.`);
+      throw new Error(`@${clean} was just taken — try another.`);
     }
     throw err;
   }
@@ -113,192 +108,35 @@ export async function uidForUsername(name) {
 }
 
 // ---------------------------------------------------------------------
-// Invites
-// ---------------------------------------------------------------------
-// The platform is invite-only: accounts exist because Grace sent someone
-// a link, not because they found the site. A code is readable by anyone
-// holding the link, so the sign-up page can check it before showing the
-// form, but only the admin can list or issue them.
-
-/** The full sign-up link for a code, ready to paste into a message. */
-export function inviteLink(code) {
-  const base = location.origin + location.pathname.replace(/[^/]*$/, "");
-  return `${base}login.html?invite=${encodeURIComponent(code)}`;
-}
-
-/** Reads one invite, or null if the code doesn't exist. */
-export async function readInvite(code) {
-  const clean = String(code || "").trim().toLowerCase();
-  if (!clean) return null;
-  const snap = await getDoc(doc(db, "invites", clean));
-  return snap.exists() ? { code: clean, ...snap.data() } : null;
-}
-
-/** null if the code can still be used, otherwise the reason it can't. */
-export async function inviteProblem(code) {
-  const invite = await readInvite(code);
-  if (!invite) return "That invite link isn't valid. Ask Closet Sales Namibia for a new one.";
-  if (invite.revoked) return "That invite has been cancelled. Ask for a new one.";
-  if (invite.usedBy) return "That invite has already been used to make an account.";
-  return null;
-}
-
-// ---------------------------------------------------------------------
 // Sign in / up / out
 // ---------------------------------------------------------------------
 
-/**
- * Turns an invite into a real member: writes the profile, claims the
- * username, and burns the invite.
- *
- * All three go in one batch. The rules read the invite as it will be
- * *after* the batch commits, so a profile can only exist next to an
- * invite stamped with that same uid — that's what makes invite-only true
- * at the database rather than just hidden in the UI. It's also what makes
- * a link single-use: the second person to open it finds usedBy already
- * set, and the rules refuse to let them overwrite it.
- */
-export async function claimInvite(user, name, username, inviteCode) {
+export async function signUpWithEmail(name, email, password, username) {
   const clean = normalizeUsername(username);
   const problem = usernameError(clean);
   if (problem) throw new Error(problem);
-
-  const inviteIssue = await inviteProblem(inviteCode);
-  if (inviteIssue) throw new Error(inviteIssue);
-  const code = String(inviteCode).trim().toLowerCase();
-
-  if (!(await isUsernameFree(clean))) throw new Error(`@${clean} is already taken. Try another one.`);
-
-  const batch = writeBatch(db);
-  batch.set(doc(db, "users", user.uid), {
-    uid: user.uid,
-    displayName: (name || "").trim(),   // optional; the site falls back to the username
-    email: user.email || "",
-    username: clean,
-    inviteCode: code,
-    bio: "",
-    profilePicURL: "",
-    socialLinks: { instagram: "", tiktok: "", facebook: "", whatsapp: "" },
-    banned: false,
-    createdAt: serverTimestamp(),
-  });
-  batch.set(doc(db, "usernames", clean), { uid: user.uid });
-  batch.update(doc(db, "invites", code), { usedBy: user.uid, usedAt: serverTimestamp() });
-
-  try {
-    await batch.commit();
-  } catch (err) {
-    if (err?.code === "permission-denied") {
-      throw new Error(`@${clean} was just taken, or that link was used a moment ago.`);
-    }
-    throw err;
-  }
-}
-
-export async function signUpWithEmail(name, email, password, username, inviteCode) {
-  const clean = normalizeUsername(username);
-  const problem = usernameError(clean);
-  if (problem) throw new Error(problem);
-
-  const inviteIssue = await inviteProblem(inviteCode);
-  if (inviteIssue) throw new Error(inviteIssue);
-
-  if (!(await isUsernameFree(clean))) throw new Error(`@${clean} is already taken. Try another one.`);
+  if (!(await isUsernameFree(clean))) throw new Error(`@${clean} is already taken — try another.`);
 
   const cred = await createUserWithEmailAndPassword(auth, email, password);
-  if (name) await updateProfile(cred.user, { displayName: name });
-  await claimInvite(cred.user, name, clean, inviteCode);
+  await updateProfile(cred.user, { displayName: name });
+  await ensureUserDoc(cred.user, { displayName: name });
+  await claimUsername(cred.user.uid, clean);
   return cred.user;
 }
 
 export async function signInWithEmail(email, password) {
   const cred = await signInWithEmailAndPassword(auth, email, password);
-  // A profile is what makes someone a member, and only an invite creates
-  // one. Somebody who has an auth login but no profile was never invited
-  // (or was removed), so they're signed straight back out rather than
-  // left in a half-working state.
-  await requireMembership(cred.user);
+  // Repairs accounts whose users/{uid} doc never landed — e.g. someone
+  // signed up before the Firestore rules were deployed.
+  await ensureUserDoc(cred.user);
   return cred.user;
 }
 
-// Popup first, redirect only as a rescue.
-//
-// The obvious reading is that popups are for desktops and redirects are for
-// phones. On iOS it's the other way round. signInWithRedirect parks the
-// state for the round trip on the Firebase domain, and Safari partitions
-// storage belonging to any domain other than the one on screen — so the
-// browser comes back from Google having forgotten why it left. A popup
-// hands the answer back over postMessage and never touches that storage,
-// which is why it survives where the redirect doesn't.
-//
-// What popups genuinely can't do is open inside Instagram's and Facebook's
-// in-app browsers, which is where a good share of our sellers arrive from.
-// Those throw, and that's what the redirect is kept around for.
-function canRetryWithRedirect(err) {
-  const code = err?.code || "";
-  return (
-    code.includes("popup-blocked") ||
-    code.includes("operation-not-supported-in-this-environment") ||
-    code.includes("web-storage-unsupported") ||
-    code.includes("internal-error")
-  );
-}
-
-/**
- * Starts Google sign-in. Returns the user, or null when the browser is on
- * its way out to Google — in which case the answer arrives on the next page
- * load via googleRedirectUser().
- *
- * `validated` skips re-checking an invite the caller has already checked.
- * That await matters more than it looks: iOS only allows a popup opened in
- * the same tick as the tap that asked for it, and anything awaited first
- * spends the gesture.
- */
-export async function startGoogle(inviteCode = "", { validated = false } = {}) {
-  if (inviteCode && !validated) {
-    const issue = await inviteProblem(inviteCode);
-    if (issue) throw new Error(issue);
-  }
-
+export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
-  // Phones get shared. Signing in silently as whoever used Google last is
-  // worse than one more tap.
-  provider.setCustomParameters({ prompt: "select_account" });
-
-  try {
-    const cred = await signInWithPopup(auth, provider);
-    return cred.user;
-  } catch (err) {
-    if (!canRetryWithRedirect(err)) throw err;
-    await signInWithRedirect(auth, provider);
-    return null;
-  }
-}
-
-/** The user coming back from a redirect sign-in, or null on a normal load. */
-export async function googleRedirectUser() {
-  try {
-    const result = await getRedirectResult(auth);
-    return result?.user || null;
-  } catch (err) {
-    // A failed redirect shouldn't take the whole page down with it
-    console.error("Google redirect sign-in failed:", err);
-    throw err;
-  }
-}
-
-/**
- * What to do with somebody Google just handed us. A profile is what makes
- * a member, and only an invite creates one, so no profile means they were
- * never invited — unless they're holding a live invite right now.
- */
-export async function afterGoogle(user) {
-  if (isAdminUser(user)) {
-    await ensureUserDoc(user);
-    return { member: true };
-  }
-  const profile = await loadProfile(user.uid);
-  return { member: Boolean(profile) };
+  const cred = await signInWithPopup(auth, provider);
+  await ensureUserDoc(cred.user);
+  return cred.user;
 }
 
 export async function signOutUser() {
@@ -455,15 +293,12 @@ export function renderNavAuth(user) {
     menu.classList.remove("nav-user__menu--open");
     trigger.setAttribute("aria-expanded", "false");
   };
-  trigger.addEventListener("pointerdown", (e) => e.stopPropagation());
   trigger.addEventListener("click", (e) => {
     e.stopPropagation();
     const open = menu.classList.toggle("nav-user__menu--open");
     trigger.setAttribute("aria-expanded", String(open));
   });
-  // pointerdown, not click: a tap on plain page furniture never reaches
-  // document as a click in iOS Safari, so the menu would stay stuck open.
-  document.addEventListener("pointerdown", closeMenu);
+  document.addEventListener("click", closeMenu);
 
   authArea.querySelector("[data-logout]").addEventListener("click", async () => {
     await signOutUser();

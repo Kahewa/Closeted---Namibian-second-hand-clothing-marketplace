@@ -33,16 +33,6 @@
 
   --board: #dda6c0;         /* pinboard fabric */
 
-  /* the footer and the pink CTA bands: always white text, so the band
-     itself has to stay dark enough to carry it in either theme */
-  --band: var(--rose);
-  --on-band: #ffffff;
-
-  /* Split so a dark theme can send them opposite ways: edges lighten
-     against a dark surface, shadows only ever get heavier. */
-  --edge-rgb: 64, 38, 48;
-  --shade-rgb: 64, 38, 48;
-
   /* legacy aliases — nothing references a dead var */
   --surface: var(--white);
   --surface-2: var(--blush-pale);
@@ -112,20 +102,20 @@
   --glass-strong: var(--white);
   --glass-2: var(--white);
   --glass-3: var(--white);
-  --glass-line: rgba(var(--edge-rgb), 0.1);
+  --glass-line: rgba(64, 38, 48, 0.1);
   --glass-line-2: var(--rose);
   --blur: blur(10px);
   --blur-lg: blur(16px);
   --bg-deep: var(--white);
   --titlebar: transparent;
-  --clay-sm: 0 2px 10px rgba(var(--shade-rgb), 0.07);
-  --clay: 0 6px 24px rgba(var(--shade-rgb), 0.1);
-  --clay-lg: 0 14px 40px rgba(var(--shade-rgb), 0.16);
+  --clay-sm: 0 2px 10px rgba(64, 38, 48, 0.07);
+  --clay: 0 6px 24px rgba(64, 38, 48, 0.1);
+  --clay-lg: 0 14px 40px rgba(64, 38, 48, 0.16);
   --clay-in: none;
   --clay-in-deep: none;
   --clay-puff: none;
-  --clay-dark: rgba(var(--edge-rgb), 0.12);
-  --clay-dark-soft: rgba(var(--edge-rgb), 0.07);
+  --clay-dark: rgba(64, 38, 48, 0.12);
+  --clay-dark-soft: rgba(64, 38, 48, 0.07);
   --clay-light: rgba(255, 255, 255, 0.9);
   --grad-pink: linear-gradient(160deg, var(--rose) 0%, var(--rose-deep) 100%);
   --grad-pink-deep: var(--grad-pink);
@@ -137,9 +127,9 @@
   --grad-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
 
   /* shadows — restrained, editorial */
-  --shadow-sm: 0 2px 10px rgba(var(--shade-rgb), 0.07);
-  --shadow-card: 0 6px 24px rgba(var(--shade-rgb), 0.1);
-  --shadow-lift: 0 16px 40px rgba(var(--shade-rgb), 0.18);
+  --shadow-sm: 0 2px 10px rgba(64, 38, 48, 0.07);
+  --shadow-card: 0 6px 24px rgba(64, 38, 48, 0.1);
+  --shadow-lift: 0 16px 40px rgba(64, 38, 48, 0.18);
   --shadow-glow: 0 8px 24px rgba(201, 127, 161, 0.35);
   --shadow-hard-sm: var(--shadow-sm);
   --shadow-hard: var(--shadow-card);
@@ -147,7 +137,7 @@
   --shadow-btn: var(--shadow-sm);
   --shadow-soft: var(--shadow-card);
   /* a pinned polaroid casts a shadow that leans with its tilt */
-  --shadow-pin: 0 10px 26px rgba(var(--shade-rgb), 0.22);
+  --shadow-pin: 0 10px 26px rgba(64, 38, 48, 0.22);
 
   --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
   --font-heading: var(--font-display);
@@ -162,8 +152,8 @@
   --radius-xl: 4px;
   --radius-full: 999px;
 
-  --line: 1px solid rgba(var(--edge-rgb), 0.12);
-  --line-thin: 1px solid rgba(var(--edge-rgb), 0.08);
+  --line: 1px solid rgba(64, 38, 48, 0.12);
+  --line-thin: 1px solid rgba(64, 38, 48, 0.08);
   --hairline: var(--line);
 
   --ease: cubic-bezier(0.22, 0.9, 0.28, 1);
@@ -187,7 +177,7 @@
   /* woven fabric for the pinboard */
   --board-weave:
     repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.07) 0 2px, transparent 2px 4px),
-    repeating-linear-gradient(-45deg, rgba(var(--shade-rgb), 0.05) 0 2px, transparent 2px 4px);
+    repeating-linear-gradient(-45deg, rgba(64, 38, 48, 0.05) 0 2px, transparent 2px 4px);
 }
 
 /* ---- reset --------------------------------------------------------------*/
@@ -196,7 +186,6 @@ html, body { margin: 0; padding: 0; }
 
 body {
   min-height: 100vh;
-  min-height: 100dvh;
   position: relative;
   overflow-x: hidden;
   background: var(--white);
@@ -270,12 +259,10 @@ h1, h2, h3, h4, p { margin: 0; }
 .ico--arrow { --ico: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h14M13 6l6 6-6 6'/></svg>"); }
 .ico--grid { --ico: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='7' height='7' rx='1'/><rect x='14' y='3' width='7' height='7' rx='1'/><rect x='3' y='14' width='7' height='7' rx='1'/><rect x='14' y='14' width='7' height='7' rx='1'/></svg>"); }
 .ico--shirt { --ico: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 3 3 6l2 4 2-1v12h10V9l2 1 2-4-6-3a3 3 0 0 1-6 0z'/></svg>"); }
-.ico--sun { --ico: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='4.2'/><path d='M12 2v2.4M12 19.6V22M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2 12h2.4M19.6 12H22M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7'/></svg>"); }
-.ico--moon { --ico: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1z'/></svg>"); }
 .ico--hourglass { --ico: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 2h12M6 22h12'/><path d='M6 2c0 5 6 6 6 10s-6 5-6 10'/><path d='M18 2c0 5-6 6-6 10s6 5 6 10'/></svg>"); }
 
 /* ---- layout ---------------------------------------------------------- */
-.page { position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+.page { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
 .shell { width: 100%; max-width: var(--shell-narrow); margin: 0 auto; padding: 0 24px; }
 .shell--wide { max-width: var(--shell-width); }
 main { flex: 1; }
@@ -283,14 +270,14 @@ main { flex: 1; }
 /* the stacked colour bands that give the page its rhythm */
 .band { padding: 84px 0; }
 .band--white { background: var(--white); }
-.band--pink { background: var(--band); color: var(--on-band); }
+.band--pink { background: var(--rose); color: var(--white); }
 .band--lav { background: var(--blush); }
 
 .band--pink .muted,
 .band--pink .section-title,
 .band--pink .h1,
 .band--pink .h2,
-.band--pink .h3 { color: var(--on-band); }
+.band--pink .h3 { color: var(--white); }
 
 
 /* ---- typography -------------------------------------------------------- */
@@ -476,9 +463,7 @@ code {
 .navlinks a:not(.btn):hover { color: var(--plum); }
 
 /* nav auth slot */
-/* The nav links below are position:relative and come later in the DOM, so
-   without this they paint over an open dropdown. */
-.nav-user { position: relative; z-index: 40; }
+.nav-user { position: relative; }
 .nav-avatar-btn { display: block; }
 .avatar-bubble {
   width: 38px; height: 38px;
@@ -501,15 +486,12 @@ code {
   right: 0;
   top: calc(100% + 18px);
   min-width: 220px;
-  /* never wider than the screen it drops onto */
-  max-width: calc(100vw - 28px);
   padding: 8px;
   display: none;
   flex-direction: column;
   background: var(--white);
   border: var(--line);
-  box-shadow: var(--shadow-lift);
-  z-index: 41;
+  box-shadow: var(--shadow-card);
 }
 .nav-user__menu--open { display: flex; }
 .nav-user__menu a, .nav-user__menu button {
@@ -546,7 +528,7 @@ code {
   transition: color var(--t-fast) var(--ease);
 }
 .navbar__icon:hover { color: var(--rose-deep); }
-.navbar__icon--end { justify-self: end; gap: 6px; }
+.navbar__icon--end { justify-self: end; }
 .navbar__icon--end .avatar-bubble { width: 34px; height: 34px; }
 
 /* the links sit on their own centred row underneath */
@@ -595,10 +577,6 @@ code {
     var(--cheetah) center / var(--cheetah-size) repeat;
   padding: 64px 0 84px;
 }
-/* the profile's own run of the print — no heading above it, so it starts
-   tighter than the home page's */
-.browse--profile { padding-top: 46px; }
-
 /* the print is busy — the heading gets its own shadow to stay legible */
 .browse__title {
   font-family: var(--font-display);
@@ -613,51 +591,42 @@ code {
 }
 
 /* ---- newest sellers row --------------------------------------------------*/
-/* Three across, and small — these are people, not products, so the card is
-   just a face, a count and a way in. */
 .seller-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  max-width: 620px;
-  margin: 0 auto;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 26px 18px;
 }
 .seller-card { text-align: center; }
-.seller-card__avatar {
+.seller-card__media {
   display: block;
-  width: clamp(64px, 16vw, 104px);
-  height: clamp(64px, 16vw, 104px);
-  margin: 0 auto 12px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--white);
-  box-shadow: 0 6px 18px rgba(112, 60, 84, 0.22);
-  background: var(--blush);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--blush-pale);
+  margin-bottom: 14px;
 }
+.seller-card__img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--t-mid) var(--ease-out); }
+.seller-card:hover .seller-card__img { transform: scale(1.05); }
 .seller-card__initials {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  background: var(--blush);
   color: var(--rose-dark);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(20px, 5vw, 32px);
+  font-size: 30px;
 }
 .seller-card__name {
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: lowercase;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--plum);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
-.seller-card__meta { font-size: 11.5px; color: var(--rose-dark); margin: 2px 0 12px; }
-.seller-card .btn { width: 100%; padding-left: 6px; padding-right: 6px; }
+.seller-card__meta { font-size: 12px; color: var(--rose-dark); margin: 2px 0 12px; }
+.seller-card .btn { width: 100%; }
 
 @media (min-width: 720px) {
-  .seller-row { gap: 26px; }
+  .seller-row { grid-template-columns: repeat(5, 1fr); gap: 20px; }
 }
 
 /* ---- buttons -------------------------------------------------------------*/
@@ -698,7 +667,7 @@ code {
 .band--pink .btn--outline:hover { background: var(--white); color: var(--rose-dark); }
 .btn--chrome { background: var(--white); border-color: var(--rose-mid); color: var(--rose-dark); }
 .btn--chrome:hover { background: var(--blush-pale); border-color: var(--rose-deep); }
-.btn--google { background: var(--white); border-color: rgba(var(--edge-rgb), 0.18); color: var(--plum); }
+.btn--google { background: var(--white); border-color: rgba(64, 38, 48, 0.18); color: var(--plum); }
 .btn--google:hover { background: var(--blush-pale); border-color: var(--plum); }
 .btn--sm { padding: 12px 24px; font-size: 12px; }
 .btn--block { width: 100%; }
@@ -752,7 +721,7 @@ code {
   background-image: var(--board-weave);
   border: none;
   border-radius: 0;
-  box-shadow: inset 0 2px 18px rgba(var(--shade-rgb), 0.16);
+  box-shadow: inset 0 2px 18px rgba(64, 38, 48, 0.16);
   padding: 44px 26px 36px;
 }
 
@@ -771,7 +740,7 @@ code {
 [data-feed] .carousel-card:hover,
 [data-listings] .carousel-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 20px 44px rgba(var(--shade-rgb), 0.3);
+  box-shadow: 0 20px 44px rgba(64, 38, 48, 0.3);
   z-index: 2;
 }
 
@@ -787,7 +756,7 @@ code {
   border-radius: 50%;
   background:
     radial-gradient(circle at 34% 30%, #ffffff 0%, var(--gold) 46%, var(--gold-dark) 100%);
-  box-shadow: 0 3px 7px rgba(var(--shade-rgb), 0.4);
+  box-shadow: 0 3px 7px rgba(64, 38, 48, 0.4);
   z-index: 3;
 }
 
@@ -882,7 +851,7 @@ code {
   letter-spacing: 0.4em;
   text-indent: 0.4em;
   white-space: nowrap;
-  box-shadow: 0 6px 20px rgba(var(--shade-rgb), 0.35);
+  box-shadow: 0 6px 20px rgba(64, 38, 48, 0.35);
 }
 .carousel-card__sold-toggle {
   position: absolute;
@@ -1028,10 +997,10 @@ code {
   width: 16px; height: 16px;
   border-radius: 50%;
   background: radial-gradient(circle at 34% 30%, #ffffff 0%, var(--gold) 46%, var(--gold-dark) 100%);
-  box-shadow: 0 2px 6px rgba(var(--shade-rgb), 0.4);
+  box-shadow: 0 2px 6px rgba(64, 38, 48, 0.4);
   z-index: 3;
 }
-.tile:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(var(--shade-rgb), 0.3); z-index: 2; }
+.tile:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(64, 38, 48, 0.3); z-index: 2; }
 .tile:hover .tile__img { transform: scale(1.05); }
 
 .tile__media { position: relative; display: block; aspect-ratio: 1; overflow: hidden; background: var(--blush-pale); }
@@ -1053,7 +1022,7 @@ code {
   position: absolute;
   inset: auto 0 0 0;
   padding: 6px 0;
-  background: rgba(var(--shade-rgb), 0.82);
+  background: rgba(64, 38, 48, 0.82);
   color: var(--white);
   font-size: 11px;
   letter-spacing: 0.2em;
@@ -1166,8 +1135,7 @@ code {
 .payref,
 .pinned-pay,
 .legacy-fix,
-.invite-row,
-.invite-new,
+.username-claim,
 .danger-zone,
 .empty-state,
 .modal__panel,
@@ -1217,7 +1185,7 @@ input[type="tel"], input[type="url"], select, textarea {
   font-size: 15px;
   color: var(--plum);
   background: var(--white);
-  border: 1px solid rgba(var(--edge-rgb), 0.16);
+  border: 1px solid rgba(64, 38, 48, 0.16);
   border-radius: 0;
   transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
 }
@@ -1235,10 +1203,23 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 .joinbox__row { display: flex; gap: 12px; margin-top: 22px; }
 
 /* ---- auth ----------------------------------------------------------------*/
-.auth-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; min-height: 100dvh; padding: 60px 24px; background: var(--blush-pale); }
+.auth-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 60px 24px; background: var(--blush-pale); }
 .auth-card { width: 100%; max-width: 460px; }
-/* the login page has no masthead to hang the theme switch off */
-.auth-page .theme-toggle { position: absolute; top: 18px; right: 18px; z-index: 2; }
+.auth-tabs { display: flex; margin-bottom: 32px; border-bottom: 1px solid rgba(64, 38, 48, 0.14); }
+.auth-tab {
+  flex: 1;
+  padding: 14px 0;
+  background: none;
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--plum-faint);
+  transition: color var(--t-mid) var(--ease), border-color var(--t-mid) var(--ease);
+}
+.auth-tab + .auth-tab { border-left: none; }
+.auth-tab--active { color: var(--plum); border-bottom-color: var(--rose-deep); background: none; box-shadow: none; }
 .divider-or {
   display: flex; align-items: center; gap: 18px;
   margin: 28px 0;
@@ -1247,7 +1228,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   text-transform: uppercase;
   color: var(--plum-faint);
 }
-.divider-or::before, .divider-or::after { content: ""; flex: 1; height: 1px; background: rgba(var(--edge-rgb), 0.14); border: none; }
+.divider-or::before, .divider-or::after { content: ""; flex: 1; height: 1px; background: rgba(64, 38, 48, 0.14); border: none; }
 
 /* ---- sell ----------------------------------------------------------------*/
 .fee-explainer { text-align: center; }
@@ -1278,7 +1259,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 .item-row__photo {
   flex-shrink: 0;
   width: 104px; height: 104px;
-  border: 1px solid rgba(var(--edge-rgb), 0.16);
+  border: 1px solid rgba(64, 38, 48, 0.16);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   overflow: hidden;
@@ -1304,6 +1285,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 }
 .item-row__remove:hover { background: var(--rose-dark); }
 
+.username-claim { padding: 26px; margin: 26px 0; text-align: left; background: var(--blush-pale); }
 .intro-list { display: flex; flex-direction: column; gap: 14px; margin: 24px 0 0; font-size: 14.5px; color: var(--plum-soft); }
 .intro-list li { padding-left: 28px; position: relative; }
 .intro-list li::before { content: ""; position: absolute; left: 0; top: 13px; width: 16px; height: 1px; background: var(--rose-deep); }
@@ -1320,12 +1302,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 }
 .profile-header[data-win] { padding-top: 0; }
 .profile-header[data-win]::after { content: none; }
-.profile-header__top {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: clamp(14px, 3.4vw, 40px);
-}
+.profile-header__top { display: flex; gap: 30px; align-items: center; flex-direction: column; text-align: center; }
 .avatar-upload { position: relative; display: block; cursor: pointer; flex-shrink: 0; }
 .avatar-upload input[type="file"] { display: none; }
 .avatar-upload::after {
@@ -1349,9 +1326,9 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   -webkit-text-fill-color: currentColor;
 }
 .band--pink .profile-username { color: var(--white); }
-.profile-bio { font-size: 15px; color: var(--plum-soft); max-width: 56ch; }
+.profile-bio { font-size: 15px; color: var(--plum-soft); margin-top: 18px; max-width: 56ch; margin-inline: auto; }
 .band--pink .profile-bio { color: rgba(255, 255, 255, 0.9); }
-.profile-socials { display: flex; flex-wrap: wrap; gap: 12px; }
+.profile-socials { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; justify-content: center; }
 .profile-socials__empty { font-size: 14px; color: var(--plum-faint); }
 .social-btn {
   display: inline-flex; align-items: center; gap: 9px;
@@ -1365,7 +1342,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 .social-btn:hover { background: var(--rose-deep); border-color: var(--rose-deep); color: var(--white); }
-.profile-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+.profile-actions { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; justify-content: center; }
 
 .profile-edit-form { display: none; margin-top: 30px; text-align: left; background: var(--white); padding: 32px; }
 .profile-header--editing [data-bio-view],
@@ -1378,214 +1355,6 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 
 .danger-zone { border: 1px solid rgba(194, 86, 107, 0.3); padding: 28px; margin: 56px 0 16px; background: var(--white); }
 .danger-zone__title { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--red); }
-
-/* ---- profile: the flip phone ---------------------------------------------*/
-/* Drawn rather than photographed, so the screen is a real element the
-   avatar can fill — a phone PNG would have an opaque screen and the
-   picture would have to be guessed into position behind it. */
-.profile-stage {
-  background: linear-gradient(180deg, var(--blush-pale) 0%, var(--blush) 100%);
-  padding: 72px 0 80px;
-}
-
-.phone {
-  /* one dial for the whole handset: the em sizes below are relative to
-     font-size, which is derived from the width */
-  --pw: clamp(104px, 26vw, 268px);
-  width: var(--pw);
-  flex: 0 0 var(--pw);
-  font-size: calc(var(--pw) / 19);
-  margin: 0;
-  transform: rotate(-4deg);
-  filter: drop-shadow(0 24px 40px rgba(112, 60, 84, 0.28));
-  transition: transform var(--t-mid) var(--ease);
-}
-.phone:hover { transform: rotate(-1.5deg) translateY(-6px); }
-
-.phone__top,
-.phone__bottom {
-  background:
-    linear-gradient(155deg, #ffffff 0%, var(--rose-mid) 34%, var(--rose) 68%, var(--rose-deep) 100%);
-  border: 2px solid rgba(255, 255, 255, 0.75);
-}
-.phone__top {
-  border-radius: 2.1em 2.1em 0.7em 0.7em;
-  padding: 1.4em 1.3em 1.55em;
-  position: relative;
-}
-/* the little earpiece slot */
-.phone__speaker {
-  display: block;
-  width: 3.85em;
-  height: 0.43em;
-  margin: 0 auto 1em;
-  border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.75);
-}
-.phone__brand {
-  display: block;
-  margin-top: 0.85em;
-  text-align: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.79em;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* the screen — this is where the profile picture lives */
-.phone__screen {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  border-radius: 0.86em;
-  overflow: hidden;
-  background: var(--blush-pale);
-  box-shadow: inset 0 0 0 0.21em rgba(255, 255, 255, 0.85), 0 0.28em 1em rgba(112, 60, 84, 0.25);
-}
-/* the avatar drops its bubble shape and fills the screen instead */
-.phone__screen .avatar-bubble {
-  width: 100%;
-  height: 100%;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  object-fit: cover;
-  font-size: 3.3em;
-  background: var(--blush);
-  color: var(--rose-dark);
-}
-/* nothing sits over the picture any more — the control moved to the
-   home button below */
-.phone__screen.avatar-upload::after { display: none; }
-/* a visitor sees the picture but no camera badge */
-.avatar-upload--readonly { cursor: default; }
-.avatar-upload--readonly::after { display: none; }
-
-.phone__hinge {
-  display: block;
-  width: 58%;
-  height: 0.93em;
-  margin: 0.2em auto;
-  border-radius: 0.21em;
-  background: linear-gradient(180deg, var(--rose-deep), var(--rose-dark));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-.phone__bottom {
-  border-radius: 0.7em 0.7em 2.4em 2.4em;
-  padding: 1.3em 1.4em 1.85em;
-  text-align: center;
-}
-.phone__dpad {
-  display: block;
-  width: 4.4em;
-  height: 4.4em;
-  margin: 0 auto 1.1em;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #ffffff 0%, var(--rose-mid) 52%, var(--rose-deep) 100%);
-  box-shadow: inset 0 0 0 0.43em rgba(255, 255, 255, 0.6), 0 0.21em 0.57em rgba(112, 60, 84, 0.25);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
-  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
-}
-/* the camera only appears — and the button only responds — on your own
-   profile; for a visitor it stays a decorative home key */
-.phone__dpad .ico { display: none; font-size: 1.5em; color: var(--rose-dark); }
-.phone--editable .phone__dpad { cursor: pointer; }
-.phone--editable .phone__dpad .ico { display: block; }
-.phone--editable .phone__dpad:hover {
-  transform: scale(1.06);
-  box-shadow: inset 0 0 0 0.43em rgba(255, 255, 255, 0.85), 0 0.3em 0.8em rgba(112, 60, 84, 0.35);
-}
-.phone--editable .phone__dpad:active { transform: scale(0.97); }
-/* while an upload is running */
-.avatar-upload--busy ~ * .phone__dpad,
-.phone--editable .avatar-upload--busy + * .phone__dpad { opacity: 0.6; }
-.phone__keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5em; }
-.phone__keys i {
-  height: 1.07em;
-  border-radius: 0.29em;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 0.07em 0.14em rgba(112, 60, 84, 0.2);
-}
-
-/* ---- phone: photo variant ------------------------------------------------*/
-/* Used when assets/phone.png exists (profile.js adds the class after the
-   file loads). The drawn parts step aside and the screen becomes an
-   absolutely-placed window over the artwork.
-   The four values below are the screen rectangle as a share of the image —
-   nudge them if the avatar doesn't sit exactly in the screen. */
-.phone--photo {
-  --screen-x: 28.5%;
-  --screen-y: 13.2%;
-  --screen-w: 43%;
-  --screen-h: 31.5%;
-
-  aspect-ratio: 578 / 1000;
-  background: url("../assets/phone.png") center / contain no-repeat;
-  position: relative;
-  filter: drop-shadow(0 20px 34px rgba(112, 60, 84, 0.3));
-}
-.phone--photo .phone__top,
-.phone--photo .phone__bottom,
-.phone--photo .phone__hinge { display: none; }
-
-.phone--photo .phone__screen {
-  position: absolute;
-  left: var(--screen-x);
-  top: var(--screen-y);
-  width: var(--screen-w);
-  height: var(--screen-h);
-  aspect-ratio: auto;
-  border-radius: 0.4em;
-  box-shadow: none;
-  background: var(--blush-pale);
-}
-.phone--photo .phone__screen .avatar-bubble { font-size: 2.4em; }
-
-/* the drawn body is hidden in this variant, so the home button is placed
-   over the photo's own d-pad instead */
-.phone--photo .phone__bottom { display: block; background: none; border: none; padding: 0; }
-.phone--photo .phone__keys { display: none; }
-.phone--photo .phone__dpad {
-  position: absolute;
-  left: 50%;
-  top: 60.5%;
-  transform: translate(-50%, -50%);
-  width: 13%;
-  height: 7.5%;
-  margin: 0;
-  border-radius: 22%;
-  background: none;
-  box-shadow: none;
-}
-.phone--photo.phone--editable .phone__dpad:hover { transform: translate(-50%, -50%) scale(1.08); box-shadow: none; }
-.phone--photo.phone--editable .phone__dpad:active { transform: translate(-50%, -50%) scale(0.96); }
-.phone--photo .phone__dpad .ico { font-size: 1.1em; color: var(--rose-dark); }
-
-/* ---- profile: the panels beside it ---------------------------------------*/
-.panel {
-  background: rgba(255, 255, 255, 0.72);
-  border-radius: var(--radius-md);
-  padding: 20px 22px;
-  margin-top: 18px;
-}
-.panel__label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--rose-dark);
-  margin-bottom: 10px;
-}
-.panel--bio .profile-bio { margin-top: 0; }
-.panel--socials .profile-socials { margin-top: 0; }
 
 /* ---- approval ------------------------------------------------------------*/
 .approval-note {
@@ -1628,7 +1397,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 .status-pill--rejected { border-color: var(--red); color: var(--red); }
 
 /* ---- admin ---------------------------------------------------------------*/
-.admin-tabs { display: flex; gap: 34px; flex-wrap: wrap; margin: 34px 0 36px; padding: 0 0 0; border-bottom: 1px solid rgba(var(--edge-rgb), 0.14); width: 100%; background: none; }
+.admin-tabs { display: flex; gap: 34px; flex-wrap: wrap; margin: 34px 0 36px; padding: 0 0 0; border-bottom: 1px solid rgba(64, 38, 48, 0.14); width: 100%; background: none; }
 .admin-tab {
   padding: 0 0 14px;
   margin-bottom: -1px;
@@ -1655,189 +1424,10 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 }
 .admin-tab--active .admin-tab__count { background: var(--rose-dark); }
 
-/* ---- "why can't I post yet" ----------------------------------------------
-   One block per outstanding requirement, each carrying its own reason. The
-   input sits inside the explanation so the answer never means going and
-   finding a form somewhere else. */
-.setup-need {
-  padding: 18px 20px;
-  margin-top: 18px;
-  background: var(--blush-pale);
-  border-left: 3px solid var(--rose-deep);
-}
-.setup-need__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--plum);
-}
-.setup-need__why {
-  margin: 6px 0 14px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--plum-soft);
-}
-.setup-need .field label { font-size: 11px; }
-.setup-need input { background: var(--white); }
-
 .legacy-fix { padding: 26px; margin-bottom: 30px; background: var(--blush-pale); }
 .legacy-fix__title { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
 .legacy-fix__body { font-size: 14px; color: var(--plum-soft); margin-top: 8px; }
 .legacy-fix__actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
-
-/* ---- invites --------------------------------------------------------------
-   Accounts are handed out, not signed up for. These are the admin's tools
-   for issuing links, plus the note that greets somebody arriving on one. */
-.invite-new {
-  padding: 24px;
-  margin-bottom: 24px;
-  background: var(--blush-pale);
-  text-align: center;
-}
-.invite-new__btn { padding: 16px 34px; font-size: 13px; }
-.invite-new__btn .ico { margin-right: 8px; vertical-align: -2px; }
-.invite-new__hint {
-  max-width: 440px;
-  margin: 12px auto 0;
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: var(--plum-soft);
-}
-.invite-new__note { max-width: 380px; margin: 18px auto 0; text-align: left; }
-.invite-new__note .field { margin-bottom: 0; }
-/* the freshly-made link, so it can be selected by hand if the clipboard
-   call was blocked */
-.invite-new__latest {
-  margin-top: 16px;
-  padding: 10px 14px;
-  background: var(--white);
-  border: var(--line-thin);
-  font-size: 12.5px;
-  color: var(--plum);
-  word-break: break-all;
-  user-select: all;
-}
-
-.invite-row {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
-  padding: 18px 22px;
-  margin-bottom: 14px;
-  transition: box-shadow var(--t-mid) var(--ease);
-}
-.invite-row:hover { box-shadow: var(--shadow-lift); }
-.invite-row--dead { opacity: 0.6; }
-.invite-row__main { flex: 1 1 260px; min-width: 0; }
-.invite-row__code { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.invite-row__code code {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--plum);
-}
-/* the link is long; let it wrap rather than stretch the row */
-.invite-row__link {
-  margin-top: 6px;
-  font-size: 12.5px;
-  color: var(--plum-soft);
-  word-break: break-all;
-}
-.invite-row__meta { margin-top: 4px; font-size: 12.5px; color: var(--plum-faint); }
-.invite-row__actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-
-.invite-pill {
-  padding: 3px 10px;
-  background: var(--blush);
-  color: var(--plum);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-.invite-pill--used { background: var(--rose-deep); color: var(--white); }
-.invite-pill--dead { background: rgba(var(--edge-rgb), 0.14); color: var(--plum-soft); }
-
-/* shown on login.html only when somebody arrives on an invite link */
-.invite-note {
-  padding: 14px 16px;
-  margin-bottom: 18px;
-  background: var(--blush-pale);
-  border-left: 3px solid var(--rose-deep);
-  font-size: 13.5px;
-  color: var(--plum);
-}
-.invite-note--bad { border-left-color: var(--plum); }
-
-.auth-lead {
-  margin-top: -10px;
-  margin-bottom: 22px;
-  font-size: 14px;
-}
-
-/* The front door for anyone who isn't already a seller. Deliberately the
-   biggest thing on the card: asking for a link is the action almost every
-   new arrival wants, and logging in is one toggle away. */
-.ask {
-  padding: 26px 22px;
-  background: var(--blush-pale);
-  border-left: 3px solid var(--rose-deep);
-  text-align: center;
-}
-.ask__lead {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.6;
-  color: var(--plum);
-}
-.ask__btn {
-  margin-top: 20px;
-  padding-top: 17px;
-  padding-bottom: 17px;
-  font-size: 14px;
-}
-.ask__btn .ico { margin-right: 8px; vertical-align: -2px; }
-
-.auth-switch {
-  margin-top: 22px;
-  font-size: 13.5px;
-  color: var(--plum-soft);
-  text-align: center;
-}
-.auth-switch a,
-.auth-switch button {
-  padding: 0;
-  background: none;
-  border: none;
-  box-shadow: none;
-  font: inherit;
-  font-weight: 700;
-  color: var(--rose-dark);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.auth-switch a:hover,
-.auth-switch button:hover { color: var(--plum); }
-
-.field__optional {
-  margin-left: 6px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--plum-faint);
-}
-
-@media (max-width: 560px) {
-  .invite-row { align-items: stretch; }
-  .invite-row__actions { width: 100%; justify-content: stretch; }
-  .invite-row__actions > * { flex: 1 1 auto; text-align: center; }
-  .invite-new { padding: 18px; }
-  .invite-new .btn { width: 100%; }
-}
 
 .review { padding: 26px; margin-bottom: 20px; transition: box-shadow var(--t-mid) var(--ease); }
 .review:hover { box-shadow: var(--shadow-lift); }
@@ -1853,7 +1443,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 }
 .review__ref-label { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--plum-faint); }
 .review__thumbs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
-.review__thumb { width: 68px; height: 84px; object-fit: cover; border: 1px solid rgba(var(--edge-rgb), 0.1); flex-shrink: 0; }
+.review__thumb { width: 68px; height: 84px; object-fit: cover; border: 1px solid rgba(64, 38, 48, 0.1); flex-shrink: 0; }
 .review__actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
 
 .account { display: flex; align-items: center; gap: 18px; padding: 18px 22px; margin-bottom: 14px; transition: box-shadow var(--t-mid) var(--ease); }
@@ -1867,18 +1457,17 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 /* ---- modal ---------------------------------------------------------------*/
 .modal { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 24px; }
 .modal[hidden] { display: none; }
-.modal__backdrop { position: absolute; inset: 0; background: rgba(var(--shade-rgb), 0.55); animation: fade-in var(--t-mid) var(--ease) both; }
+.modal__backdrop { position: absolute; inset: 0; background: rgba(64, 38, 48, 0.55); animation: fade-in var(--t-mid) var(--ease) both; }
 .modal__panel {
   position: relative;
   width: 100%;
   max-width: 500px;
   max-height: 88vh;
-  max-height: 88dvh;
   overflow-y: auto;
   padding: 44px 38px 38px;
   background: var(--white);
   border: none;
-  box-shadow: 0 30px 70px rgba(var(--shade-rgb), 0.4);
+  box-shadow: 0 30px 70px rgba(64, 38, 48, 0.4);
 }
 .modal__panel[data-win] { padding-top: 62px; }
 .modal__panel::before { content: none; }
@@ -1907,7 +1496,7 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 .paybox__rows dt { color: var(--plum-faint); font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; }
 .paybox__rows dd { margin: 0; text-align: right; word-break: break-word; }
 
-.lightbox__panel { position: relative; width: 100%; max-width: 440px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; padding: 8px; }
+.lightbox__panel { position: relative; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; padding: 8px; }
 .lightbox__panel .carousel-card { margin-bottom: 0; transform: none; }
 .lightbox__panel .carousel-card::before { content: none; }
 .lightbox__x { position: absolute; top: 16px; right: 16px; z-index: 3; background: var(--white); }
@@ -1931,18 +1520,18 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 .toast--error { background: var(--red); }
 
 /* ---- empty states --------------------------------------------------------*/
-.empty-state { text-align: center; padding: 64px 30px; margin: 20px 0; border: 1px solid rgba(var(--edge-rgb), 0.12); background: var(--white); }
+.empty-state { text-align: center; padding: 64px 30px; margin: 20px 0; border: 1px solid rgba(64, 38, 48, 0.12); background: var(--white); }
 .empty-state__icon { font-size: 30px; margin-bottom: 18px; color: var(--rose-mid); }
 
 /* ---- footer --------------------------------------------------------------*/
-.site-footer { margin-top: 0; padding: 64px 24px 48px; background: var(--band); color: var(--on-band); border: none; }
+.site-footer { margin-top: 0; padding: 64px 24px 48px; background: var(--rose); color: var(--white); border: none; }
 .footer-cols { max-width: var(--shell-width); margin: 0 auto; display: grid; gap: 40px; grid-template-columns: 1fr; }
-.footer-brand__name { font-family: var(--font-display); font-weight: 700; font-size: 26px; line-height: 1.2; color: var(--on-band); background: none; -webkit-text-fill-color: currentColor; }
+.footer-brand__name { font-family: var(--font-display); font-weight: 700; font-size: 26px; line-height: 1.2; color: var(--white); background: none; -webkit-text-fill-color: currentColor; }
 .footer-brand__sub { font-size: 13.5px; color: rgba(255, 255, 255, 0.82); margin-top: 14px; }
-.footer-col__title { font-size: 11.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--on-band); margin-bottom: 18px; }
+.footer-col__title { font-size: 11.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white); margin-bottom: 18px; }
 .footer-col a { display: block; font-size: 14px; color: rgba(255, 255, 255, 0.82); padding: 6px 0; transition: color var(--t-fast) var(--ease); }
-.footer-col a:hover { color: var(--on-band); }
-.footer-socials { display: flex; gap: 16px; margin-top: 20px; font-size: 17px; color: var(--on-band); }
+.footer-col a:hover { color: var(--white); }
+.footer-socials { display: flex; gap: 16px; margin-top: 20px; font-size: 17px; color: var(--white); }
 .footer-bottom {
   max-width: var(--shell-width);
   margin: 44px auto 0;
@@ -1982,6 +1571,9 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
   .item-row__grid { grid-template-columns: 1fr 1fr 1fr; }
   .footer-cols { grid-template-columns: 1.4fr 1fr 1fr; }
   .pinned-pay__grid { grid-template-columns: 1fr 1fr; }
+  .profile-header__top { flex-direction: row; text-align: left; align-items: flex-start; }
+  .profile-bio { margin-inline: 0; }
+  .profile-socials, .profile-actions { justify-content: flex-start; }
 }
 
 @media (min-width: 900px) {
@@ -2008,11 +1600,6 @@ input::placeholder, textarea::placeholder { color: var(--plum-faint); font-weigh
 }
 
 @media (max-width: 720px) {
-  .panel { padding: 14px 15px; margin-top: 12px; }
-  .panel__label { font-size: 10px; letter-spacing: 0.14em; }
-  .profile-stage { padding: 44px 0 52px; }
-  .social-btn { padding: 9px 13px; font-size: 11px; }
-
   .navbar__inner { padding: 16px 18px; gap: 14px; flex-wrap: wrap; }
   .iconnav { gap: 16px; order: 3; width: 100%; justify-content: space-between; }
   .iconnav__item { font-size: 11px; letter-spacing: 0.16em; }
@@ -2114,54 +1701,6 @@ html.is-leaving main {
 .reveal.is-in { opacity: 1; transform: none; }
 
 
-/* ---- narrow screens ------------------------------------------------------*/
-@media (max-width: 560px) {
-  /* the nav row: four items have to fit without a horizontal scrollbar,
-     so they tighten and wrap onto a second line rather than overflowing */
-  .navbar .iconnav {
-    gap: 8px 16px;
-    padding: 0 14px 14px;
-    flex-wrap: wrap;
-    row-gap: 8px;
-  }
-  .iconnav__item { font-size: 10.5px; letter-spacing: 0.1em; }
-  .navbar__top { padding: 14px 14px 12px; gap: 10px; }
-  .logo { font-size: 17px; }
-  .navbar__icon { font-size: 17px; }
-  .avatar-bubble { width: 32px; height: 32px; font-size: 12px; }
-
-  .nav-user__menu { min-width: 0; width: max-content; }
-  .nav-user__menu a, .nav-user__menu button { padding: 12px; font-size: 10.5px; }
-
-  /* sections breathe less on a phone */
-  .band { padding: 44px 0; }
-  .browse { padding: 44px 0 56px; }
-  .hero__inner { padding: 64px 18px; }
-  .shell { padding: 0 16px; }
-
-  /* three sellers still fit, just smaller */
-  .seller-row { gap: 10px; }
-  .seller-card__name { font-size: 11px; letter-spacing: 0.04em; }
-  .seller-card__meta { font-size: 10.5px; }
-  .seller-card .btn { font-size: 9.5px; padding: 9px 4px; letter-spacing: 0.06em; }
-
-  /* the sell form's photo tile was squeezing the inputs */
-  .item-row { gap: 12px; padding: 16px; }
-  .item-row__photo { width: 76px; height: 76px; }
-  .item-row__grid { grid-template-columns: 1fr; }
-
-  .review__actions .btn,
-  .account__actions .btn { flex: 1 1 auto; }
-  .account { flex-wrap: wrap; }
-  .account__actions { width: 100%; justify-content: flex-start; }
-
-  .modal { padding: 14px; }
-  .toast-host { bottom: 20px; width: calc(100% - 28px); }
-}
-
-/* nothing should ever push the page sideways */
-html, body { max-width: 100%; overflow-x: hidden; }
-
 /* ---- accessibility -------------------------------------------------------*/
 :focus-visible { outline: none; }
 a:focus-visible,
@@ -2169,181 +1708,6 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible { box-shadow: 0 0 0 3px rgba(201, 127, 161, 0.45); }
-
-/* `.btn` is nowrap, which is right for a button sized by its own label and
-   wrong for one told to fill its container: "send whatsapp message" in
-   uppercase at 0.16em tracking is wider than a phone, so it spilled out of
-   its own box. A full-width button has room to wrap and should use it. */
-.btn--block {
-  white-space: normal;
-  line-height: 1.35;
-  text-align: center;
-}
-
-@media (max-width: 420px) {
-  .btn { padding-left: 20px; padding-right: 20px; letter-spacing: 0.1em; }
-  .btn--block { padding-left: 14px; padding-right: 14px; }
-  /* the ask panel is nested two boxes deep; at 320px its own padding was
-     most of what was squeezing the button inside it */
-  .ask { padding: 22px 14px; }
-  .auth-page { padding: 40px 14px; }
-}
-
-/* ---- dark ---------------------------------------------------------------
-   Only the base tokens are redefined; everything else is aliased off them,
-   so the whole sheet follows. Three states, and they have to agree:
-   an explicit choice stamps data-theme on <html>, and "system" stamps
-   nothing at all — leaving prefers-color-scheme as the only signal. The
-   :not([data-theme="light"]) guard is what stops a system-dark phone from
-   overriding somebody who deliberately asked for light.
-
-   The roses stay. Turning the brand grey after dark would be a different
-   shop; they're only lifted enough to hold their own against a dark ground. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --band: #7a4460;
-    --rose: #e2a8c2;
-    --rose-deep: #d992b0;
-    --rose-dark: #eab5cb;      /* "dark" means emphasis, so on dark it lightens */
-    --rose-mid: #b87a99;
-    --blush: #4a333f;
-    --blush-pale: #2e2029;
-
-    --white: #241922;          /* the surface everything sits on */
-    --off-white: #2b1f27;
-
-    --plum: #f7edf1;           /* ink, inverted */
-    --plum-soft: #c8b0bb;
-    --plum-faint: #98828d;
-
-    --gold: #d8bf90;
-    --gold-dark: #b89a68;
-    --board: #3d2a35;
-
-    --edge-rgb: 247, 237, 241;
-    --shade-rgb: 0, 0, 0;
-
-    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
-    --shadow-card: 0 6px 24px rgba(0, 0, 0, 0.45);
-    --shadow-lift: 0 16px 40px rgba(0, 0, 0, 0.6);
-    --shadow-pin: 0 10px 26px rgba(0, 0, 0, 0.6);
-
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme="dark"] {
-  --band: #7a4460;
-  --rose: #e2a8c2;
-  --rose-deep: #d992b0;
-  --rose-dark: #eab5cb;
-  --rose-mid: #b87a99;
-  --blush: #4a333f;
-  --blush-pale: #2e2029;
-
-  --white: #241922;
-  --off-white: #2b1f27;
-
-  --plum: #f7edf1;
-  --plum-soft: #c8b0bb;
-  --plum-faint: #98828d;
-
-  --gold: #d8bf90;
-  --gold-dark: #b89a68;
-  --board: #3d2a35;
-
-  --edge-rgb: 247, 237, 241;
-  --shade-rgb: 0, 0, 0;
-
-  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
-  --shadow-card: 0 6px 24px rgba(0, 0, 0, 0.45);
-  --shadow-lift: 0 16px 40px rgba(0, 0, 0, 0.6);
-  --shadow-pin: 0 10px 26px rgba(0, 0, 0, 0.6);
-
-  color-scheme: dark;
-}
-
-/* A few places named a light colour outright rather than a token. */
-:root[data-theme="dark"] .approval-note--rejected,
-:root:not([data-theme="light"]) .approval-note--rejected {
-  background: #4a2b31;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .condition-pill--new { color: #9ad3a8; }
-  :root:not([data-theme="light"]) .condition-pill--good { color: #b6a6d8; }
-  :root:not([data-theme="light"]) .condition-pill--fair { color: #e0a97c; }
-}
-:root[data-theme="dark"] .condition-pill--new { color: #9ad3a8; }
-:root[data-theme="dark"] .condition-pill--good { color: #b6a6d8; }
-:root[data-theme="dark"] .condition-pill--fair { color: #e0a97c; }
-
-/* the theme switch, in the masthead next to the account icon */
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  background: none;
-  border: none;
-  box-shadow: none;
-  color: var(--plum);
-  cursor: pointer;
-  transition: color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
-}
-.theme-toggle:hover { color: var(--rose-deep); }
-.theme-toggle:active { transform: scale(0.92); }
-.theme-toggle .ico { width: 21px; height: 21px; }
-/* one icon per state, so no layout shift when they swap */
-.theme-toggle__moon { display: none; }
-:root[data-theme="dark"] .theme-toggle__sun { display: none; }
-:root[data-theme="dark"] .theme-toggle__moon { display: inline-block; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .theme-toggle__sun { display: none; }
-  :root:not([data-theme="light"]) .theme-toggle__moon { display: inline-block; }
-}
-
-/* ---- phones ---------------------------------------------------------------
-   Collected fixes for things that only go wrong on a touch screen. */
-
-/* iOS Safari zooms the whole page in when you focus a field smaller than
-   16px, and never zooms back out — so every form on a phone left the layout
-   scrolled sideways. Only the ones you can actually type into need this. */
-@media (max-width: 820px) {
-  input[type="text"], input[type="email"], input[type="password"],
-  input[type="number"], input[type="tel"], input[type="url"],
-  select, textarea,
-  .item-row__grid input, .item-row__grid select, .item-row textarea {
-    font-size: 16px;
-  }
-}
-
-@media (hover: none) {
-  /* grey flash on every tap, on a site built out of pink */
-  a, button, [role="button"], label, summary { -webkit-tap-highlight-color: transparent; }
-
-  /* Hover styling sticks after a tap on touch devices: the card stays lifted
-     until you tap something else. Only apply lift where hovering is real. */
-  .review:hover, .account:hover, .invite-row:hover { box-shadow: var(--shadow-card); }
-
-  /* thumb-sized targets */
-  .btn--sm { min-height: 40px; }
-  .modal__x { width: 42px; height: 42px; }
-}
-
-@media (max-width: 560px) {
-  /* A modal with the keyboard up has almost no room left, so give it the
-     screen rather than a polite margin. */
-  .modal { padding: 12px; align-items: flex-start; padding-top: 5vh; }
-  .modal__panel { padding: 34px 20px 26px; max-height: 90dvh; }
-  .modal__panel[data-win] { padding-top: 54px; }
-
-  /* long unbroken strings — invite links, emails, handles — were pushing
-     the page sideways */
-  .invite-row__link, .account__meta, .invite-new__latest { word-break: break-word; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

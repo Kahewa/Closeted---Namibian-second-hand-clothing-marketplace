@@ -17,8 +17,8 @@ import {
 import { sized } from "./cloudinary.js";
 import { $, el, initials } from "./utils.js";
 
-const HOW_MANY = 3;
-// enough recent drops to find three different sellers even if one person
+const HOW_MANY = 5;
+// enough recent drops to find five different sellers even if one person
 // posted several in a row
 const SCAN = 40;
 
@@ -62,27 +62,9 @@ async function load() {
     );
     users.forEach((d) => profiles.set(d.id, d.data()));
 
-    // how many closets each of them has. A single-field equality query
-    // needs no composite index; the status filter happens in memory, so
-    // pending and rejected drops aren't counted as live closets.
-    const counts = await Promise.all(
-      ids.map(async (uid) => {
-        try {
-          const mine = await getDocs(
-            query(collection(db, "carousels"), where("sellerId", "==", uid), limit(100))
-          );
-          return mine.docs.filter((d) => d.data().status === "approved").length;
-        } catch {
-          return null;
-        }
-      })
-    );
-
     status.hidden = true;
     row.innerHTML = "";
-    picks.forEach((carousel, i) =>
-      row.append(card(carousel, profiles.get(carousel.sellerId), counts[i]))
-    );
+    picks.forEach((carousel) => row.append(card(carousel, profiles.get(carousel.sellerId))));
   } catch (err) {
     console.error("Couldn't load the newest sellers:", err);
     status.textContent = /index/i.test(err.message)
@@ -91,30 +73,26 @@ async function load() {
   }
 }
 
-/** A seller: their picture, how many closets they have, and a way in. */
-function card(carousel, profile, closets) {
+/** A seller, shown through the cover of the closet they just posted. */
+function card(carousel, profile) {
+  const cover = (carousel.items || []).find((i) => !i.sold) || (carousel.items || [])[0];
   const handle = carousel.sellerUsername || profile?.username;
-  const pic = profile?.profilePicURL || carousel.sellerPhotoURL;
+  const count = (carousel.items || []).length;
 
-  const avatar = pic
+  const media = cover?.imageURL
     ? el("img", {
-        class: "seller-card__avatar",
-        src: sized(pic, 260, { square: true }),
+        class: "seller-card__img",
+        src: sized(cover.imageURL, 520),
         alt: "",
         loading: "lazy",
         decoding: "async",
       })
-    : el("span", { class: "seller-card__avatar seller-card__initials" }, initials(carousel.sellerName));
-
-  const label =
-    closets === null || closets === undefined
-      ? ""
-      : `${closets} closet${closets === 1 ? "" : "s"}`;
+    : el("span", { class: "seller-card__initials" }, initials(carousel.sellerName));
 
   return el("article", { class: "seller-card" }, [
-    avatar,
+    el("span", { class: "seller-card__media" }, [media]),
     el("p", { class: "seller-card__name" }, handle ? `@${handle}` : carousel.sellerName || "Closet Seller"),
-    el("p", { class: "seller-card__meta" }, label),
+    el("p", { class: "seller-card__meta" }, `${count} piece${count === 1 ? "" : "s"}`),
     el("a", { class: "btn btn--chrome btn--sm", href: `profile.html?uid=${carousel.sellerId}` }, "View account"),
   ]);
 }

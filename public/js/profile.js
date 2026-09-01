@@ -94,9 +94,10 @@ async function loadProfile() {
   try {
     let snap = await getDoc(doc(db, "users", targetUid));
 
-    // The admin can arrive here without a profile doc, since they never
-    // came through an invite. Everyone else is guaranteed one by sign-in.
-    if (!snap.exists() && currentUser && currentUser.uid === targetUid && isAdminUser(currentUser)) {
+    // Viewing your own profile with no users/{uid} doc means the one that
+    // should have been written at sign-up never landed — create it now
+    // rather than dead-ending on "this closet doesn't exist".
+    if (!snap.exists() && currentUser && currentUser.uid === targetUid) {
       await ensureUserDoc(currentUser);
       snap = await getDoc(doc(db, "users", targetUid));
     }
@@ -130,13 +131,12 @@ function paintView() {
   avatarImg.parentElement.querySelector("[data-avatar-initials]").textContent = initials(profileData.displayName);
   avatarImg.parentElement.querySelector("[data-avatar-initials]").hidden = !!profileData.profilePicURL;
 
-  nameEl.textContent =
-    profileData.displayName || (profileData.username ? `@${profileData.username}` : "Closet Seller");
+  nameEl.textContent = profileData.displayName || "Closet Seller";
 
   usernameView.textContent = profileData.username
     ? `@${profileData.username}`
     : isOwner()
-      ? "no username yet, add one so people can find you"
+      ? "no username yet — add one so people can find you"
       : "";
   usernameEdit.value = profileData.username || "";
 
@@ -164,15 +164,9 @@ function paintView() {
 
   const owner = isOwner();
   editToggleBtn.hidden = !owner;
+  avatarUploadLabel.hidden = !owner;
   sellCta.hidden = !owner;
   dangerZone.hidden = !owner;
-
-  // everyone sees the picture; only the owner gets the camera badge and
-  // the file input behind it
-  avatarUploadLabel.hidden = false;
-  avatarUploadLabel.classList.toggle("avatar-upload--readonly", !owner);
-  // the home button only acts as the upload control on your own profile
-  document.querySelector(".phone")?.classList.toggle("phone--editable", owner);
 }
 
 editToggleBtn?.addEventListener("click", () => {
@@ -220,7 +214,7 @@ avatarInput?.addEventListener("change", async () => {
   const file = avatarInput.files?.[0];
   if (!file || !isOwner()) return;
   if (file.size > 5 * 1024 * 1024) {
-    toast("That photo is over 5MB. Try a smaller one.", "error");
+    toast("That photo is over 5MB — try a smaller one.", "error");
     return;
   }
   try {
@@ -271,7 +265,7 @@ function paintPinnedPayment(waitingCount) {
   }
 
   const d = PAYMENT_DETAILS;
-  const ref = profileData.username ? `@${profileData.username}` : "set a username first";
+  const ref = profileData.username ? `@${profileData.username}` : "— set a username —";
   const set = (sel, value) => {
     const node = pinnedPay.querySelector(sel);
     if (node) node.textContent = value;
@@ -323,8 +317,8 @@ async function loadListings() {
     if (!carousels.length) {
       listingsEmpty.hidden = false;
       listingsEmpty.querySelector("[data-listings-empty-body]").textContent = isOwner()
-        ? "You haven't posted a closet yet. Yours is waiting."
-        : "Nothing listed yet. Check back soon.";
+        ? "You haven't dropped a carousel yet — your closet is waiting."
+        : "Nothing listed yet — check back soon.";
       return;
     }
     listingsEmpty.hidden = true;
@@ -337,20 +331,7 @@ async function loadListings() {
     listingsEmpty.querySelector("[data-listings-empty-body]").innerHTML =
       `Couldn't load listings.<br><small>${err.message}</small>` +
       (err.message?.includes("index")
-        ? "<br><small>Firestore needs a one-time composite index for this query. Open your browser console and click the link Firebase printed there, or deploy <code>firebase/firestore.indexes.json</code>.</small>"
+        ? "<br><small>Firestore needs a one-time composite index for this query — open your browser console and click the link Firebase printed there, or deploy <code>firebase/firestore.indexes.json</code>.</small>"
         : "");
   }
-}
-
-// ---------------------------------------------------------------------
-// Phone artwork
-// ---------------------------------------------------------------------
-// The handset is drawn in CSS by default. If a photo has been dropped at
-// assets/phone.png, swap to it — probed by loading the image rather than
-// guessed, so a missing file quietly leaves the drawn one in place.
-const phoneEl = $(".phone");
-if (phoneEl) {
-  const probe = new Image();
-  probe.addEventListener("load", () => phoneEl.classList.add("phone--photo"));
-  probe.src = "assets/phone.png";
 }

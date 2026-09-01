@@ -19,6 +19,8 @@ service cloud.firestore {
       return isSignedIn() && request.auth.token.email == 'bygreys.na@gmail.com';
     }
 
+    // A banned user keeps their login but can't write anything new.
+    // Costs one extra read, so it's only checked on carousel creation.
     // `.get(field, default)` rather than `.field`: reading a key that isn't
     // on the document raises an error and fails the whole rule, which would
     // lock out every account created before `banned` was added.
@@ -30,43 +32,12 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------
-    // invites/{code} — the platform is invite-only.
-    //
-    // Anyone can read a single invite by its code, because the sign-up
-    // page has to check the link it was given. Nobody but the admin can
-    // list them, so codes can't be harvested by guessing at the
-    // collection. A signed-in user may stamp exactly one unused invite
-    // with their own uid, and nothing else.
-    // ---------------------------------------------------------------
-    match /invites/{code} {
-      allow get: if true;
-      allow list: if isAdmin();
-      allow create, delete: if isAdmin();
-
-      allow update: if isAdmin()
-        || (isSignedIn()
-            && resource.data.get('usedBy', null) == null
-            && resource.data.get('revoked', false) != true
-            && request.resource.data.usedBy == request.auth.uid
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedBy', 'usedAt']));
-    }
-
-    // ---------------------------------------------------------------
     // users/{uid} — public profile: username, pic, bio, social links.
-    //
-    // Creating a profile is what actually makes someone a member, so this
-    // is where the invite is enforced. `getAfter` reads the invite as it
-    // will be once the batch commits, so the profile and the claim on the
-    // invite have to land together or not at all.
+    // Admin can update (to ban) and delete (to remove an account).
     // ---------------------------------------------------------------
-    function claimedAnInvite(uid) {
-      return request.resource.data.get('inviteCode', '') != ''
-        && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.get('usedBy', '') == uid;
-    }
-
     match /users/{uid} {
       allow read: if true;                 // profiles + username search are public
-      allow create: if isOwner(uid) && (isAdmin() || claimedAnInvite(uid));
+      allow create: if isOwner(uid);
       allow update: if isOwner(uid) || isAdmin();
       allow delete: if isOwner(uid) || isAdmin();
     }
@@ -84,30 +55,6 @@ service cloud.firestore {
       allow update: if false;              // release and re-claim instead
     }
 
-    // A WhatsApp number is how buyers make contact, not evidence of who
-    // anyone is, so posting a closet needs somewhere buyers can actually
-    // look the seller up. Defaulted reads throughout: a profile written
-    // before socialLinks existed must fail this check, not error on it.
-    function socialLinks() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid))
-        .data.get('socialLinks', {});
-    }
-
-    // `is string` before trim(): an old profile could hold a null here, and
-    // calling trim() on it would raise rather than simply fail the check.
-    function filledIn(links, key) {
-      return links.get(key, '') is string && links.get(key, '').trim() != '';
-    }
-
-    function hasSocialProof() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && (
-          filledIn(socialLinks(), 'instagram')
-          || filledIn(socialLinks(), 'tiktok')
-          || filledIn(socialLinks(), 'facebook')
-        );
-    }
-
     // ---------------------------------------------------------------
     // carousels/{carouselId} — a seller's closet drop.
     // The N$150 fee is paid manually (bank transfer / wallet), so a new
@@ -120,7 +67,6 @@ service cloud.firestore {
 
       allow create: if isSignedIn()
         && notBanned()
-        && (isAdmin() || hasSocialProof())
         && request.resource.data.sellerId == request.auth.uid
         && request.resource.data.keys().hasAll(['sellerId', 'items', 'createdAt', 'status'])
         // admin posts go live immediately; everyone else waits for approval

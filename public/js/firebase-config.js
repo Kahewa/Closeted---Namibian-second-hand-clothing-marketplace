@@ -39,7 +39,7 @@ export const isFirebaseConfigured = !Object.values(firebaseConfig).some(
 
 if (!isFirebaseConfigured) {
   console.warn(
-    "%cCloset Sales Namibia: Firebase isn't set up yet.",
+    "%cCloset Sales Namibia — Firebase isn't configured yet.",
     "font-weight:bold",
     "\nCopy public/js/local-config.example.js to local-config.js and fill it in."
   );

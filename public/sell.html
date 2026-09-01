@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sell your closet · Closet Sales Namibia</title>
+<title>Sell your closet — Closet Sales Namibia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -11,9 +11,7 @@
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-<link rel="stylesheet" href="css/style.css?v=2026-09-01a" />
-<script src="js/errors.js?v=2026-09-01a"></script>
-<script src="js/theme.js?v=2026-09-01a"></script>
+<link rel="stylesheet" href="css/style.css" />
 </head>
 <body data-page="sell">
   <div class="page">
@@ -23,12 +21,12 @@
         <h1 class="h1" style="margin-top:6px;" data-page-title>Build Your Closet</h1>
         <p class="muted" style="margin-top:8px;" data-page-intro>
           Each photo you add becomes one item for sale, with its own size, store, condition and price.
-          Add as many as you like. It's one N$150 fee for the whole closet.
+          Add as many as you like — it's one N$150 fee for the whole carousel.
         </p>
 
         <!-- admin only: no fee, no approval -->
         <section class="chrome-card" data-win="admin" data-admin-note hidden style="margin-top:22px;">
-          <p class="h3"><i class="ico ico--tools" aria-hidden="true"></i> Admin, no fee</p>
+          <p class="h3"><i class="ico ico--tools" aria-hidden="true"></i> Admin — no fee</p>
           <p class="muted" style="font-size:13px;margin-top:6px;">
             You're signed in as the admin, so carousels post immediately and go live without approval.
           </p>
@@ -36,6 +34,18 @@
 
         <section data-step="items" style="margin-top:22px;">
           <span class="item-count-badge" data-item-count>0 items in this carousel</span>
+
+          <!-- shown only if this account hasn't picked a username yet -->
+          <div class="username-claim" data-username-block hidden>
+            <p class="h3">Pick your username first</p>
+            <p class="muted" style="font-size:13px;margin:6px 0 10px;">
+              It's your payment reference, and how buyers find you.
+            </p>
+            <div class="joinbox__row">
+              <input type="text" data-username-input placeholder="e.g. grace.closet" autocomplete="off" maxlength="20" />
+              <button type="button" class="btn btn--lime" data-username-save>save</button>
+            </div>
+          </div>
 
           <form data-carousel-form novalidate>
             <div class="chrome-card" data-win="contact details" style="margin-bottom:18px;">
@@ -70,60 +80,6 @@
     </main>
 
     <!-- shown on arrival: what a carousel costs and how it works -->
-    <!-- Nobody gets told "you can't post" without being told why, and
-         without the fix being right there in front of them. -->
-    <div class="modal" data-setup-modal hidden>
-      <div class="modal__backdrop" data-setup-close></div>
-      <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="setup-title" data-win="before you can sell">
-        <button type="button" class="modal__x" data-setup-close aria-label="Close"><i class="ico ico--close" aria-hidden="true"></i></button>
-
-        <p class="eyebrow">almost there</p>
-        <h2 class="h2" id="setup-title" style="margin-top:6px;">Your closet isn't ready to post yet</h2>
-        <p class="muted" style="font-size:13.5px;margin-top:8px;" data-setup-lead></p>
-
-        <div class="setup-need" data-need="username" hidden>
-          <p class="setup-need__title">Pick a username</p>
-          <p class="setup-need__why">
-            It's how buyers find you, and it's the reference you'll pay the N$150 with,
-            so we can match your payment to your closet.
-          </p>
-          <div class="field" style="margin-bottom:0;">
-            <label for="setup-username">Username</label>
-            <input id="setup-username" type="text" data-username-input placeholder="e.g. grace.closet" autocomplete="off" maxlength="20" />
-            <p class="muted" style="font-size:11px;">3–20 characters: lowercase letters, numbers, dots or underscores.</p>
-          </div>
-        </div>
-
-        <div class="setup-need" data-need="socials" hidden>
-          <p class="setup-need__title">Add one social link</p>
-          <p class="setup-need__why">
-            Buyers are sending money to a stranger, so they want to see who they're
-            buying from first. Any one of these does it. Your WhatsApp number doesn't
-            count, since that's how they reach you rather than proof of who you are.
-          </p>
-          <div class="field">
-            <label for="setup-instagram"><i class="ico ico--instagram" aria-hidden="true"></i> Instagram</label>
-            <input id="setup-instagram" type="text" data-social="instagram" placeholder="yourhandle" autocomplete="off" />
-          </div>
-          <div class="field">
-            <label for="setup-tiktok"><i class="ico ico--tiktok" aria-hidden="true"></i> TikTok</label>
-            <input id="setup-tiktok" type="text" data-social="tiktok" placeholder="yourhandle" autocomplete="off" />
-          </div>
-          <div class="field" style="margin-bottom:0;">
-            <label for="setup-facebook"><i class="ico ico--facebook" aria-hidden="true"></i> Facebook</label>
-            <input id="setup-facebook" type="text" data-social="facebook" placeholder="your profile or page" autocomplete="off" />
-          </div>
-        </div>
-
-        <button type="button" class="btn btn--primary btn--block" data-setup-save style="margin-top:20px;">
-          Save and carry on
-        </button>
-        <p class="muted text-center" style="font-size:12px;margin-top:10px;">
-          You can build your closet first and fill these in before you post.
-        </p>
-      </div>
-    </div>
-
     <div class="modal" data-intro-modal hidden>
       <div class="modal__backdrop" data-intro-close></div>
       <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="intro-title" data-win="before you start">
@@ -133,14 +89,14 @@
         <p class="price-display" data-fee-amount style="margin:10px 0 2px;">N$150</p>
 
         <ul class="intro-list">
-          <li><strong>One flat fee</strong> for the whole closet. Post as many items in it as you like.</li>
-          <li><strong>Build it now, pay after.</strong> Add your pieces first. The banking details come up when you hit post.</li>
-          <li><strong>It goes live once your payment clears.</strong> Until then it sits on your profile, marked as waiting for approval.</li>
-          <li><strong>You can edit it right up until approval.</strong> After that it's locked.</li>
+          <li><strong>One flat fee</strong> for the whole carousel — post as many items in it as you like.</li>
+          <li><strong>Build it now, pay after.</strong> Add your pieces first; the banking details come up when you hit post.</li>
+          <li><strong>It goes live once your payment clears.</strong> Until then it sits on your profile marked "waiting for approval".</li>
+          <li><strong>You can edit it right up until approval</strong> — after that it's locked.</li>
         </ul>
 
         <button type="button" class="btn btn--primary btn--block" data-intro-go style="margin-top:16px;">
-          got it, let's build it
+          got it — let's build it →
         </button>
       </div>
     </div>
@@ -151,7 +107,7 @@
       <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="pay-title" data-win="pay N$150">
         <button type="button" class="modal__x" data-pay-close aria-label="Close"><i class="ico ico--close" aria-hidden="true"></i></button>
 
-        <h2 class="h2" id="pay-title">Your closet is saved. Now pay N$150</h2>
+        <h2 class="h2" id="pay-title">Carousel saved — now pay N$150</h2>
         <p class="muted" style="font-size:13px;margin-top:4px;">
           Your carousel is safe on your profile. Send the fee using either option below and it goes
           live as soon as the payment is checked. These details stay pinned to your profile until then.
@@ -159,7 +115,7 @@
 
         <div class="payref">
           <span class="payref__label">Use this reference</span>
-          <strong class="payref__value" data-pay-reference>…</strong>
+          <strong class="payref__value" data-pay-reference>—</strong>
           <button type="button" class="btn btn--chrome btn--sm" data-copy-ref>copy</button>
         </div>
         <p class="muted" style="font-size:12px;">
@@ -169,18 +125,18 @@
         <div class="paybox">
           <p class="paybox__title"><i class="ico ico--phone" aria-hidden="true"></i> Wallet / Pay2Cell</p>
           <dl class="paybox__rows">
-            <div><dt>Send to</dt><dd data-pay-wallet>…</dd></div>
+            <div><dt>Send to</dt><dd data-pay-wallet>—</dd></div>
           </dl>
         </div>
 
         <div class="paybox">
           <p class="paybox__title"><i class="ico ico--bank" aria-hidden="true"></i> Bank transfer</p>
           <dl class="paybox__rows">
-            <div><dt>Bank</dt><dd data-pay-bank>…</dd></div>
-            <div><dt>Account holder</dt><dd data-pay-holder>…</dd></div>
-            <div><dt>Account type</dt><dd data-pay-type>…</dd></div>
-            <div><dt>Account number</dt><dd data-pay-number>…</dd></div>
-            <div><dt>Branch code</dt><dd data-pay-branch>…</dd></div>
+            <div><dt>Bank</dt><dd data-pay-bank>—</dd></div>
+            <div><dt>Account holder</dt><dd data-pay-holder>—</dd></div>
+            <div><dt>Account type</dt><dd data-pay-type>—</dd></div>
+            <div><dt>Account number</dt><dd data-pay-number>—</dd></div>
+            <div><dt>Branch code</dt><dd data-pay-branch>—</dd></div>
           </dl>
         </div>
 
@@ -190,12 +146,12 @@
             Message us on WhatsApp and we'll arrange collection.
           </p>
           <a class="btn btn--lime btn--sm" data-pay-cash href="#" target="_blank" rel="noopener noreferrer">
-            <i class="ico ico--chat" aria-hidden="true"></i> WhatsApp <span data-pay-cash-number>…</span>
+            <i class="ico ico--chat" aria-hidden="true"></i> WhatsApp <span data-pay-cash-number>—</span>
           </a>
         </div>
 
         <button type="button" class="btn btn--primary btn--block" data-pay-done style="margin-top:16px;">
-          done, take me to my profile
+          done — take me to my profile →
         </button>
         <p class="muted text-center" style="font-size:11px;margin-top:8px;">
           <i class="ico ico--note" aria-hidden="true"></i> You can still edit this carousel until it's approved.
@@ -204,7 +160,7 @@
     </div>
   </div>
 
-  <script type="module" src="js/layout.js?v=2026-09-01a"></script>
-  <script type="module" src="js/sell.js?v=2026-09-01a"></script>
+  <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/sell.js"></script>
 </body>
 </html>

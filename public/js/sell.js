@@ -11,7 +11,6 @@ import { uploadImage, sized } from "./cloudinary.js";
 import { requireAuth, claimUsername, isAdminUser } from "./auth.js";
 import {
   $,
-  $all,
   el,
   toast,
   formatNAD,
@@ -25,10 +24,6 @@ import {
   CAROUSEL_FEE,
   PAYMENT_DETAILS,
 } from "./utils.js";
-
-// WhatsApp is how buyers make contact, so it doesn't count as proof of
-// anyone. A seller needs at least one of these before they can post.
-const SOCIALS = ["instagram", "tiktok", "facebook"];
 
 const MAX_ITEMS = 30;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -45,10 +40,10 @@ const submitBtn = $("[data-submit-carousel]");
 const itemCountEl = $("[data-item-count]");
 const whatsappInput = $("[data-whatsapp]");
 
+const usernameBlock = $("[data-username-block]");
 const usernameInput = $("[data-username-input]");
+const usernameSave = $("[data-username-save]");
 
-const setupModal = $("[data-setup-modal]");
-const setupLead = $("[data-setup-lead]");
 const introModal = $("[data-intro-modal]");
 const payModal = $("[data-pay-modal]");
 
@@ -60,115 +55,13 @@ let isAdmin = false;
 let rowIndex = 0;
 let editing = null; // the carousel doc being edited, if any
 
-/** True once the seller has somewhere buyers can look them up. */
-function hasSocialLink() {
-  return SOCIALS.some((key) => (profile.socialLinks?.[key] || "").trim());
-}
-
-// ---------------------------------------------------------------------
-// "Why can't I post yet?"
-//
-// A username and one social link are both required. Both used to fail as
-// a block that appeared without explanation, or a toast that vanished
-// before it was read. This says what's missing, why it's asked for, and
-// takes the answer on the spot.
-// ---------------------------------------------------------------------
-function missingBits() {
-  if (isAdmin) return [];
-  const missing = [];
-  if (!profile.username) missing.push("username");
-  if (!hasSocialLink()) missing.push("socials");
-  return missing;
-}
-
-const SETUP_LEADS = {
-  username: "You need a username before you can post.",
-  socials: "You need one social link before you can post.",
-  both: "There are two things we need before your closet can go up.",
-};
-
-/** Opens the explainer if anything's outstanding. Returns whether it did. */
-function openSetupIfNeeded() {
-  const missing = missingBits();
-  if (!missing.length) return false;
-
-  setupLead.textContent = missing.length === 2 ? SETUP_LEADS.both : SETUP_LEADS[missing[0]];
-  $all("[data-need]").forEach((section) => {
-    section.hidden = !missing.includes(section.dataset.need);
-  });
-
-  openModal(setupModal);
-  return true;
-}
-
-$all("[data-setup-close]").forEach((btn) =>
-  btn.addEventListener("click", () => closeModal(setupModal))
-);
-
-$("[data-setup-save]")?.addEventListener("click", async (e) => {
-  const btn = e.currentTarget;
-  const missing = missingBits();
-
-  const wanted = normalizeUsername(usernameInput.value);
-  if (missing.includes("username")) {
-    const problem = usernameError(wanted);
-    if (problem) {
-      toast(problem, "error");
-      usernameInput.focus();
-      return;
-    }
-  }
-
-  const entered = {};
-  SOCIALS.forEach((key) => {
-    entered[key] = ($(`[data-social="${key}"]`)?.value || "").trim();
-  });
-  if (missing.includes("socials") && !SOCIALS.some((key) => entered[key])) {
-    toast("Add at least one of Instagram, TikTok or Facebook.", "error");
-    return;
-  }
-
-  btn.disabled = true;
-  btn.classList.add("btn--loading");
-  try {
-    if (missing.includes("socials")) {
-      await setDoc(
-        doc(db, "users", currentUser.uid),
-        { socialLinks: { ...(profile.socialLinks || {}), ...entered } },
-        { merge: true }
-      );
-      profile.socialLinks = { ...(profile.socialLinks || {}), ...entered };
-    }
-    // Username last: it's the one that can still lose a race with somebody
-    // else claiming the same handle, and failing after the links saved is
-    // easier to recover from than the other way round.
-    if (missing.includes("username")) {
-      await claimUsername(currentUser.uid, wanted, profile.username);
-      profile = { ...profile, username: wanted };
-      paintPaymentDetails();
-    }
-
-    closeModal(setupModal);
-    toast("You're all set. Build your closet.", "success");
-  } catch (err) {
-    toast(err.message || "Couldn't save that.", "error");
-  } finally {
-    btn.disabled = false;
-    btn.classList.remove("btn--loading");
-  }
-});
-
 requireAuth(async (user, loaded) => {
   currentUser = user;
   profile = loaded || {};
   isAdmin = isAdminUser(user);
 
   adminNote.hidden = !isAdmin;
-
-  SOCIALS.forEach((key) => {
-    const input = $(`[data-social="${key}"]`);
-    if (input) input.value = profile.socialLinks?.[key] || "";
-  });
+  usernameBlock.hidden = isAdmin || !!profile.username;
 
   if (profile.socialLinks?.whatsapp && !whatsappInput.value) {
     whatsappInput.value = profile.socialLinks.whatsapp;
@@ -178,9 +71,8 @@ requireAuth(async (user, loaded) => {
   if (editId) {
     await loadForEditing();
   } else {
-    // Whatever's missing gets explained first; the fee explainer is no use
-    // to somebody who can't post yet either way.
-    if (!isAdmin && !openSetupIfNeeded()) openModal(introModal);
+    // The fee explainer greets everyone arriving to build a new carousel.
+    if (!isAdmin) openModal(introModal);
     if (!rowsHost.children.length) {
       addRow();
       addRow();
@@ -218,7 +110,7 @@ async function loadForEditing() {
     $("[data-page-eyebrow]").textContent = "edit your carousel";
     $("[data-page-title]").textContent = "Edit your carousel";
     $("[data-page-intro]").textContent =
-      "Change anything you like while it's waiting for approval. Photos you leave alone stay as they are.";
+      "Change anything you like — it's still waiting for approval. Photos you leave alone stay as they are.";
     submitBtn.textContent = "Save changes";
     $("[data-post-note]").innerHTML =
       `<i class="ico ico--note" aria-hidden="true"></i> You can keep editing until this carousel is approved. Once it's live, it's locked.`;
@@ -260,13 +152,40 @@ $("[data-copy-ref]")?.addEventListener("click", async () => {
     await navigator.clipboard.writeText(`@${profile.username}`);
     toast("Reference copied");
   } catch {
-    toast("Couldn't copy it. Write it down instead.", "error");
+    toast("Couldn't copy — write it down instead.", "error");
+  }
+});
+
+// ---------------------------------------------------------------------
+// Username — it doubles as the payment reference
+// ---------------------------------------------------------------------
+usernameSave?.addEventListener("click", async () => {
+  const wanted = normalizeUsername(usernameInput.value);
+  const problem = usernameError(wanted);
+  if (problem) {
+    toast(problem, "error");
+    return;
+  }
+
+  usernameSave.disabled = true;
+  usernameSave.classList.add("btn--loading");
+  try {
+    await claimUsername(currentUser.uid, wanted, profile.username);
+    profile = { ...profile, username: wanted };
+    usernameBlock.hidden = true;
+    paintPaymentDetails();
+    toast(`You're @${wanted}`);
+  } catch (err) {
+    toast(err.message || "Couldn't save that username.", "error");
+  } finally {
+    usernameSave.disabled = false;
+    usernameSave.classList.remove("btn--loading");
   }
 });
 
 function paintPaymentDetails() {
   const d = PAYMENT_DETAILS;
-  const ref = profile.username ? `@${profile.username}` : "…";
+  const ref = profile.username ? `@${profile.username}` : "—";
   const set = (sel, value) => {
     const node = $(sel);
     if (node) node.textContent = value;
@@ -324,7 +243,7 @@ function addRow(existing = null) {
     const file = fileInput.files?.[0];
     if (!file) return;
     if (file.size > MAX_IMAGE_BYTES) {
-      toast("That photo is over 8MB. Try a smaller one.", "error");
+      toast("That photo is over 8MB — try a smaller one.", "error");
       fileInput.value = "";
       return;
     }
@@ -388,7 +307,12 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!currentUser) return;
 
-  if (openSetupIfNeeded()) return;
+  if (!isAdmin && !profile.username) {
+    usernameBlock.hidden = false;
+    usernameInput.focus();
+    toast("Pick a username first — it's your payment reference.", "error");
+    return;
+  }
 
   const rows = Array.from(rowsHost.children);
   if (!rows.length) {
@@ -472,9 +396,7 @@ form.addEventListener("submit", async (e) => {
     } else {
       await setDoc(carouselRef, {
         sellerId: currentUser.uid,
-        // not currentUser.displayName: for a Google login that's their Google
-        // account name, which they never chose to publish here
-        sellerName: latest.displayName || (latest.username ? `@${latest.username}` : "Closet Seller"),
+        sellerName: latest.displayName || currentUser.displayName || "Closet Seller",
         sellerUsername: latest.username || "",
         sellerPhotoURL: latest.profilePicURL || "",
         sellerWhatsapp: whatsapp,

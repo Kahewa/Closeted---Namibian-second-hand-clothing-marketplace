@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Log in · Closet Sales Namibia</title>
+<title>Log in — Closet Sales Namibia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -11,51 +11,26 @@
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-<link rel="stylesheet" href="css/style.css?v=2026-09-01a" />
-<script src="js/errors.js?v=2026-09-01a"></script>
-<script src="js/theme.js?v=2026-09-01a"></script>
+<link rel="stylesheet" href="css/style.css" />
 </head>
 <body data-page="login">
   <div class="page auth-page">
-    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch between light and dark">
-      <i class="ico ico--sun theme-toggle__sun" aria-hidden="true"></i>
-      <i class="ico ico--moon theme-toggle__moon" aria-hidden="true"></i>
-    </button>
 
     <div class="shell">
       <div class="auth-card glass-card">
         <div class="logo logo--center">
           <span class="logo__closet">closet sales</span><span class="logo__bg">namibia</span>
         </div>
-        <p class="muted text-center auth-lead" data-auth-lead>
-          Namibia's invite-only closet sale.
+        <p class="muted text-center" style="margin-top:-10px; margin-bottom:18px; font-size:14px;">
+          Buy what's dropped. Sell what's collecting dust.
         </p>
 
-        <!-- filled in by login.js once it has checked an invite code -->
-        <p class="invite-note" data-invite-note hidden></p>
-
-        <!-- What most people landing here need: a way to ask for a link.
-             The log-in form is a toggle away rather than the front door,
-             since sellers who already have an account arrive far less
-             often than people wondering how to get one. -->
-        <div data-panel="ask">
-          <div class="ask">
-            <p class="ask__lead">
-              Selling here is by invitation. Message us and we'll send you a
-              link to set up your account.
-            </p>
-            <a class="btn btn--primary btn--block ask__btn"
-               href="https://wa.me/264818093631?text=Hi!%20I%27d%20like%20an%20invite%20to%20sell%20on%20Closet%20Sales%20Namibia."
-               target="_blank" rel="noopener">
-              <i class="ico ico--chat" aria-hidden="true"></i> Send WhatsApp message
-            </a>
-          </div>
-          <p class="auth-switch">
-            Have an account? <a href="login.html?mode=signin" data-go="signin">Log in</a>
-          </p>
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab auth-tab--active" data-tab="signin">Log in</button>
+          <button type="button" class="auth-tab" data-tab="signup">Sign up</button>
         </div>
 
-        <div data-panel="signin" hidden>
+        <div data-panel="signin">
           <form data-signin-form novalidate>
             <div class="field">
               <label for="signin-email">Email</label>
@@ -67,21 +42,14 @@
             </div>
             <button class="btn btn--primary btn--block" type="submit">Log in</button>
           </form>
-
-          <div class="divider-or">or</div>
-
-          <button type="button" class="btn btn--google btn--block" data-google-btn>
-            <span class="google-g">G</span> Continue with Google
-          </button>
-
-          <p class="auth-switch">
-            No account yet? <a href="login.html" data-go="ask">Ask for an invite</a>
-          </p>
         </div>
 
-        <!-- reached only from a valid invite link -->
         <div data-panel="signup" hidden>
           <form data-signup-form novalidate>
+            <div class="field">
+              <label for="signup-name">Your name</label>
+              <input id="signup-name" type="text" name="name" required autocomplete="name" />
+            </div>
             <div class="field">
               <label for="signup-username">Username</label>
               <input id="signup-username" type="text" name="username" required maxlength="20" placeholder="grace.closet" autocomplete="off" />
@@ -91,10 +59,6 @@
               </p>
             </div>
             <div class="field">
-              <label for="signup-name">Your name <span class="field__optional">optional</span></label>
-              <input id="signup-name" type="text" name="name" autocomplete="name" placeholder="leave it blank to go by your username" />
-            </div>
-            <div class="field">
               <label for="signup-email">Email</label>
               <input id="signup-email" type="email" name="email" required autocomplete="email" />
             </div>
@@ -102,44 +66,24 @@
               <label for="signup-password">Password</label>
               <input id="signup-password" type="password" name="password" required minlength="6" autocomplete="new-password" />
             </div>
-            <button class="btn btn--primary btn--block" type="submit">Create my account</button>
-          </form>
-
-          <div class="divider-or">or</div>
-
-          <button type="button" class="btn btn--google btn--block" data-google-invite>
-            <span class="google-g">G</span> Continue with Google
-          </button>
-        </div>
-
-        <!-- Google gets us an email and nothing else, so the username still
-             has to be asked for before the account exists. -->
-        <div data-panel="username" hidden>
-          <form data-username-form novalidate>
-            <div class="field">
-              <label for="pick-username">Pick your username</label>
-              <input id="pick-username" type="text" name="username" required maxlength="20" placeholder="grace.closet" autocomplete="off" />
-              <p class="muted" style="font-size:11px;">
-                3–20 characters: lowercase letters, numbers, dots or underscores. People search
-                for you by this, and it's your payment reference.
-              </p>
-            </div>
-            <div class="field">
-              <label for="pick-name">Your name <span class="field__optional">optional</span></label>
-              <input id="pick-name" type="text" name="name" autocomplete="name" placeholder="leave it blank to go by your username" />
-            </div>
-            <button class="btn btn--primary btn--block" type="submit">Finish setting up</button>
+            <button class="btn btn--primary btn--block" type="submit">Sign up</button>
           </form>
         </div>
 
-        <p class="muted text-center" style="margin-top:22px; font-size:13px;">
+        <div class="divider-or">or</div>
+
+        <button type="button" class="btn btn--google btn--block" data-google-btn>
+          <span class="google-g">G</span> Continue with Google
+        </button>
+
+        <p class="muted text-center" style="margin-top:18px; font-size:13px;">
           <a href="index.html">← Back to browsing</a>
         </p>
       </div>
     </div>
   </div>
 
-  <script type="module" src="js/layout.js?v=2026-09-01a"></script>
-  <script type="module" src="js/login.js?v=2026-09-01a"></script>
+  <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/login.js"></script>
 </body>
 </html>

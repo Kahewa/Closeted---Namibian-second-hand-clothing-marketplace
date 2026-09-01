@@ -67,7 +67,7 @@ export function sized(url, width, opts = {}) {
 export async function uploadImage(file, folder) {
   if (!isCloudinaryConfigured) {
     throw new Error(
-      "Image uploads aren't set up yet. Copy public/js/local-config.example.js to local-config.js and add your Cloudinary cloud name and unsigned preset."
+      "Image uploads aren't configured yet — copy public/js/local-config.example.js to local-config.js and add your Cloudinary cloud name and unsigned preset."
     );
   }
 
