@@ -106,11 +106,16 @@ export function renderCarouselCard(carousel, currentUser, options = {}) {
           [el("i", { class: "ico ico--trash", "aria-hidden": "true" }), " Delete listing"]
         ),
       ]);
+      trigger.addEventListener("pointerdown", (e) => e.stopPropagation());
       trigger.addEventListener("click", (e) => {
         e.stopPropagation();
         dropdown.classList.toggle("carousel-card__owner-dropdown--open");
       });
-      document.addEventListener("click", () => dropdown.classList.remove("carousel-card__owner-dropdown--open"));
+      // pointerdown for the same reason as the nav menu: iOS never
+      // delivers an outside tap here as a click
+      document.addEventListener("pointerdown", () =>
+        dropdown.classList.remove("carousel-card__owner-dropdown--open")
+      );
       menuWrap.append(trigger, dropdown);
       titlebar.append(menuWrap);
     }

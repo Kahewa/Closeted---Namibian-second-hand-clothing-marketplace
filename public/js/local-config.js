@@ -7,7 +7,12 @@
 
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBTkVp63KQNOS9lJCit3qhgChEgcPu1oXg",
-  authDomain: "closet-bg.firebaseapp.com",
+  // The site's own host, not closet-bg.firebaseapp.com. Firebase parks the
+  // state for a redirect sign-in on whatever this says, and Safari bins
+  // storage belonging to a domain other than the one on screen — so on a
+  // phone the browser came back from Google having forgotten why it left.
+  // vercel.json proxies /__/auth/* through to Firebase so this can be us.
+  authDomain: location.hostname === "localhost" ? "closet-bg.firebaseapp.com" : location.host,
   projectId: "closet-bg",
   storageBucket: "closet-bg.firebasestorage.app",
   messagingSenderId: "611455741225",

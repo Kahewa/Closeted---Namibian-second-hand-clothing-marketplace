@@ -12,6 +12,7 @@
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
 <link rel="stylesheet" href="css/style.css" />
+<script src="js/theme.js"></script>
 </head>
 <body data-page="sell">
   <div class="page">
@@ -34,41 +35,6 @@
 
         <section data-step="items" style="margin-top:22px;">
           <span class="item-count-badge" data-item-count>0 items in this carousel</span>
-
-          <!-- shown until this account has a social link that isn't WhatsApp.
-               Buyers use it to check a seller is real before they send money. -->
-          <div class="username-claim" data-socials-block hidden>
-            <p class="h3">Add a social link first</p>
-            <p class="muted" style="font-size:13px;margin:6px 0 12px;">
-              Buyers want to see who they're buying from. Add at least one of these
-              (your WhatsApp number doesn't count) and you're set.
-            </p>
-            <div class="field">
-              <label for="sell-instagram"><i class="ico ico--instagram" aria-hidden="true"></i> Instagram</label>
-              <input id="sell-instagram" type="text" data-social="instagram" placeholder="yourhandle" autocomplete="off" />
-            </div>
-            <div class="field">
-              <label for="sell-tiktok"><i class="ico ico--tiktok" aria-hidden="true"></i> TikTok</label>
-              <input id="sell-tiktok" type="text" data-social="tiktok" placeholder="yourhandle" autocomplete="off" />
-            </div>
-            <div class="field">
-              <label for="sell-facebook"><i class="ico ico--facebook" aria-hidden="true"></i> Facebook</label>
-              <input id="sell-facebook" type="text" data-social="facebook" placeholder="your profile or page" autocomplete="off" />
-            </div>
-            <button type="button" class="btn btn--lime" data-socials-save>save my links</button>
-          </div>
-
-          <!-- shown only if this account hasn't picked a username yet -->
-          <div class="username-claim" data-username-block hidden>
-            <p class="h3">Pick your username first</p>
-            <p class="muted" style="font-size:13px;margin:6px 0 10px;">
-              It's your payment reference, and how buyers find you.
-            </p>
-            <div class="joinbox__row">
-              <input type="text" data-username-input placeholder="e.g. grace.closet" autocomplete="off" maxlength="20" />
-              <button type="button" class="btn btn--lime" data-username-save>save</button>
-            </div>
-          </div>
 
           <form data-carousel-form novalidate>
             <div class="chrome-card" data-win="contact details" style="margin-bottom:18px;">
@@ -103,6 +69,60 @@
     </main>
 
     <!-- shown on arrival: what a carousel costs and how it works -->
+    <!-- Nobody gets told "you can't post" without being told why, and
+         without the fix being right there in front of them. -->
+    <div class="modal" data-setup-modal hidden>
+      <div class="modal__backdrop" data-setup-close></div>
+      <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="setup-title" data-win="before you can sell">
+        <button type="button" class="modal__x" data-setup-close aria-label="Close"><i class="ico ico--close" aria-hidden="true"></i></button>
+
+        <p class="eyebrow">almost there</p>
+        <h2 class="h2" id="setup-title" style="margin-top:6px;">Your closet isn't ready to post yet</h2>
+        <p class="muted" style="font-size:13.5px;margin-top:8px;" data-setup-lead></p>
+
+        <div class="setup-need" data-need="username" hidden>
+          <p class="setup-need__title">Pick a username</p>
+          <p class="setup-need__why">
+            It's how buyers find you, and it's the reference you'll pay the N$150 with,
+            so we can match your payment to your closet.
+          </p>
+          <div class="field" style="margin-bottom:0;">
+            <label for="setup-username">Username</label>
+            <input id="setup-username" type="text" data-username-input placeholder="e.g. grace.closet" autocomplete="off" maxlength="20" />
+            <p class="muted" style="font-size:11px;">3–20 characters: lowercase letters, numbers, dots or underscores.</p>
+          </div>
+        </div>
+
+        <div class="setup-need" data-need="socials" hidden>
+          <p class="setup-need__title">Add one social link</p>
+          <p class="setup-need__why">
+            Buyers are sending money to a stranger, so they want to see who they're
+            buying from first. Any one of these does it. Your WhatsApp number doesn't
+            count, since that's how they reach you rather than proof of who you are.
+          </p>
+          <div class="field">
+            <label for="setup-instagram"><i class="ico ico--instagram" aria-hidden="true"></i> Instagram</label>
+            <input id="setup-instagram" type="text" data-social="instagram" placeholder="yourhandle" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="setup-tiktok"><i class="ico ico--tiktok" aria-hidden="true"></i> TikTok</label>
+            <input id="setup-tiktok" type="text" data-social="tiktok" placeholder="yourhandle" autocomplete="off" />
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label for="setup-facebook"><i class="ico ico--facebook" aria-hidden="true"></i> Facebook</label>
+            <input id="setup-facebook" type="text" data-social="facebook" placeholder="your profile or page" autocomplete="off" />
+          </div>
+        </div>
+
+        <button type="button" class="btn btn--primary btn--block" data-setup-save style="margin-top:20px;">
+          Save and carry on
+        </button>
+        <p class="muted text-center" style="font-size:12px;margin-top:10px;">
+          You can build your closet first and fill these in before you post.
+        </p>
+      </div>
+    </div>
+
     <div class="modal" data-intro-modal hidden>
       <div class="modal__backdrop" data-intro-close></div>
       <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="intro-title" data-win="before you start">

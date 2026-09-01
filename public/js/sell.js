@@ -11,6 +11,7 @@ import { uploadImage, sized } from "./cloudinary.js";
 import { requireAuth, claimUsername, isAdminUser } from "./auth.js";
 import {
   $,
+  $all,
   el,
   toast,
   formatNAD,
@@ -44,10 +45,10 @@ const submitBtn = $("[data-submit-carousel]");
 const itemCountEl = $("[data-item-count]");
 const whatsappInput = $("[data-whatsapp]");
 
-const usernameBlock = $("[data-username-block]");
 const usernameInput = $("[data-username-input]");
-const usernameSave = $("[data-username-save]");
 
+const setupModal = $("[data-setup-modal]");
+const setupLead = $("[data-setup-lead]");
 const introModal = $("[data-intro-modal]");
 const payModal = $("[data-pay-modal]");
 
@@ -59,39 +60,101 @@ let isAdmin = false;
 let rowIndex = 0;
 let editing = null; // the carousel doc being edited, if any
 
-const socialsBlock = $("[data-socials-block]");
-
 /** True once the seller has somewhere buyers can look them up. */
 function hasSocialLink() {
   return SOCIALS.some((key) => (profile.socialLinks?.[key] || "").trim());
 }
 
-$("[data-socials-save]")?.addEventListener("click", async (e) => {
+// ---------------------------------------------------------------------
+// "Why can't I post yet?"
+//
+// A username and one social link are both required. Both used to fail as
+// a block that appeared without explanation, or a toast that vanished
+// before it was read. This says what's missing, why it's asked for, and
+// takes the answer on the spot.
+// ---------------------------------------------------------------------
+function missingBits() {
+  if (isAdmin) return [];
+  const missing = [];
+  if (!profile.username) missing.push("username");
+  if (!hasSocialLink()) missing.push("socials");
+  return missing;
+}
+
+const SETUP_LEADS = {
+  username: "You need a username before you can post.",
+  socials: "You need one social link before you can post.",
+  both: "There are two things we need before your closet can go up.",
+};
+
+/** Opens the explainer if anything's outstanding. Returns whether it did. */
+function openSetupIfNeeded() {
+  const missing = missingBits();
+  if (!missing.length) return false;
+
+  setupLead.textContent = missing.length === 2 ? SETUP_LEADS.both : SETUP_LEADS[missing[0]];
+  $all("[data-need]").forEach((section) => {
+    section.hidden = !missing.includes(section.dataset.need);
+  });
+
+  openModal(setupModal);
+  return true;
+}
+
+$all("[data-setup-close]").forEach((btn) =>
+  btn.addEventListener("click", () => closeModal(setupModal))
+);
+
+$("[data-setup-save]")?.addEventListener("click", async (e) => {
   const btn = e.currentTarget;
+  const missing = missingBits();
+
+  const wanted = normalizeUsername(usernameInput.value);
+  if (missing.includes("username")) {
+    const problem = usernameError(wanted);
+    if (problem) {
+      toast(problem, "error");
+      usernameInput.focus();
+      return;
+    }
+  }
+
   const entered = {};
   SOCIALS.forEach((key) => {
     entered[key] = ($(`[data-social="${key}"]`)?.value || "").trim();
   });
-
-  if (!SOCIALS.some((key) => entered[key])) {
+  if (missing.includes("socials") && !SOCIALS.some((key) => entered[key])) {
     toast("Add at least one of Instagram, TikTok or Facebook.", "error");
     return;
   }
 
   btn.disabled = true;
+  btn.classList.add("btn--loading");
   try {
-    await setDoc(
-      doc(db, "users", currentUser.uid),
-      { socialLinks: { ...(profile.socialLinks || {}), ...entered } },
-      { merge: true }
-    );
-    profile.socialLinks = { ...(profile.socialLinks || {}), ...entered };
-    socialsBlock.hidden = true;
-    toast("Saved. Buyers can find you now.", "success");
+    if (missing.includes("socials")) {
+      await setDoc(
+        doc(db, "users", currentUser.uid),
+        { socialLinks: { ...(profile.socialLinks || {}), ...entered } },
+        { merge: true }
+      );
+      profile.socialLinks = { ...(profile.socialLinks || {}), ...entered };
+    }
+    // Username last: it's the one that can still lose a race with somebody
+    // else claiming the same handle, and failing after the links saved is
+    // easier to recover from than the other way round.
+    if (missing.includes("username")) {
+      await claimUsername(currentUser.uid, wanted, profile.username);
+      profile = { ...profile, username: wanted };
+      paintPaymentDetails();
+    }
+
+    closeModal(setupModal);
+    toast("You're all set. Build your closet.", "success");
   } catch (err) {
-    toast(`Couldn't save those: ${err.message}`, "error");
+    toast(err.message || "Couldn't save that.", "error");
   } finally {
     btn.disabled = false;
+    btn.classList.remove("btn--loading");
   }
 });
 
@@ -101,13 +164,11 @@ requireAuth(async (user, loaded) => {
   isAdmin = isAdminUser(user);
 
   adminNote.hidden = !isAdmin;
-  usernameBlock.hidden = isAdmin || !!profile.username;
 
   SOCIALS.forEach((key) => {
     const input = $(`[data-social="${key}"]`);
     if (input) input.value = profile.socialLinks?.[key] || "";
   });
-  socialsBlock.hidden = isAdmin || hasSocialLink();
 
   if (profile.socialLinks?.whatsapp && !whatsappInput.value) {
     whatsappInput.value = profile.socialLinks.whatsapp;
@@ -117,8 +178,9 @@ requireAuth(async (user, loaded) => {
   if (editId) {
     await loadForEditing();
   } else {
-    // The fee explainer greets everyone arriving to build a new carousel.
-    if (!isAdmin) openModal(introModal);
+    // Whatever's missing gets explained first; the fee explainer is no use
+    // to somebody who can't post yet either way.
+    if (!isAdmin && !openSetupIfNeeded()) openModal(introModal);
     if (!rowsHost.children.length) {
       addRow();
       addRow();
@@ -199,33 +261,6 @@ $("[data-copy-ref]")?.addEventListener("click", async () => {
     toast("Reference copied");
   } catch {
     toast("Couldn't copy it. Write it down instead.", "error");
-  }
-});
-
-// ---------------------------------------------------------------------
-// Username — it doubles as the payment reference
-// ---------------------------------------------------------------------
-usernameSave?.addEventListener("click", async () => {
-  const wanted = normalizeUsername(usernameInput.value);
-  const problem = usernameError(wanted);
-  if (problem) {
-    toast(problem, "error");
-    return;
-  }
-
-  usernameSave.disabled = true;
-  usernameSave.classList.add("btn--loading");
-  try {
-    await claimUsername(currentUser.uid, wanted, profile.username);
-    profile = { ...profile, username: wanted };
-    usernameBlock.hidden = true;
-    paintPaymentDetails();
-    toast(`You're @${wanted}`);
-  } catch (err) {
-    toast(err.message || "Couldn't save that username.", "error");
-  } finally {
-    usernameSave.disabled = false;
-    usernameSave.classList.remove("btn--loading");
   }
 });
 
@@ -353,19 +388,7 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!currentUser) return;
 
-  if (!isAdmin && !profile.username) {
-    usernameBlock.hidden = false;
-    usernameInput.focus();
-    toast("Pick a username first. It's the reference you pay with.", "error");
-    return;
-  }
-
-  if (!isAdmin && !hasSocialLink()) {
-    socialsBlock.hidden = false;
-    socialsBlock.scrollIntoView({ behavior: "smooth", block: "center" });
-    toast("Add one social link before posting. WhatsApp on its own isn't enough.", "error");
-    return;
-  }
+  if (openSetupIfNeeded()) return;
 
   const rows = Array.from(rowsHost.children);
   if (!rows.length) {

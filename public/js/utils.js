@@ -173,11 +173,33 @@ export function isValidUrl(value = "") {
 // Opening was animated by CSS, but closing just flipped `hidden` and the
 // panel vanished mid-frame. These play the exit first, then hide.
 
+// iOS ignores `overflow: hidden` on body — the page behind a modal scrolls
+// anyway, and worse, the modal scrolls with it. Pinning the body in place is
+// the only thing that holds, but it throws away the scroll position, so we
+// keep it and put it back on close.
+let lockedScroll = 0;
+
+function lockScroll() {
+  lockedScroll = window.scrollY;
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${lockedScroll}px`;
+  document.body.style.width = "100%";
+  document.body.style.overflow = "hidden";
+}
+
+function unlockScroll() {
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.width = "";
+  document.body.style.overflow = "";
+  window.scrollTo(0, lockedScroll);
+}
+
 export function openModal(node) {
   if (!node) return;
   node.classList.remove("modal--closing");
   node.hidden = false;
-  document.body.style.overflow = "hidden";
+  lockScroll();
 }
 
 export function closeModal(node) {
@@ -186,7 +208,7 @@ export function closeModal(node) {
   const finish = () => {
     node.hidden = true;
     node.classList.remove("modal--closing");
-    document.body.style.overflow = "";
+    unlockScroll();
   };
 
   const panel = node.querySelector(".modal__panel, .lightbox__panel");

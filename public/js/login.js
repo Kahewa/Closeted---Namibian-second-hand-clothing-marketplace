@@ -3,10 +3,12 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/f
 import {
   signUpWithEmail,
   signInWithEmail,
-  signInWithGoogle,
-  googleForInvite,
+  startGoogle,
+  googleRedirectUser,
+  afterGoogle,
   claimInvite,
   inviteProblem,
+  signOutUser,
 } from "./auth.js";
 import { $, $all, toast, isAdminUser } from "./utils.js";
 
@@ -15,9 +17,12 @@ const redirectTarget = new URLSearchParams(location.search).get("redirect") || "
 // Signing up signs you in immediately, so the auth listener below fires
 // while the profile doc and username claim are still being written — and
 // mid-way through the Google flow, before we've even asked for a username.
-// Navigating then would leave an account with no profile. `busy` holds the
-// redirect; the handlers navigate themselves once they're finished.
-let busy = false;
+// Navigating then would leave an account with no profile.
+//
+// It starts held, not open: on a phone Google sends the browser away and
+// back, so a page load can already be carrying a signed-in user who still
+// owes us a username. Nothing redirects until boot() has looked.
+let busy = true;
 
 function goHome(user) {
   // The admin lands on the dashboard rather than the shopper's feed.
@@ -87,7 +92,27 @@ async function openInvite() {
   showPanel("signup");
 }
 
-openInvite();
+// Nothing on this page is trustworthy until we know whether the browser is
+// coming back from Google. Do that first, then let the page behave normally.
+(async function boot() {
+  try {
+    const user = await googleRedirectUser();
+    if (user) {
+      await openInvite();
+      await handleGoogleUser(user);
+      return;
+    }
+  } catch (err) {
+    toast(friendlyAuthError(err), "error");
+  }
+
+  busy = false;
+  if (auth.currentUser) {
+    goHome(auth.currentUser);
+    return;
+  }
+  await openInvite();
+})();
 
 // ---------------------------------------------------------------------
 // Log in
@@ -99,7 +124,12 @@ $("[data-signin-form]").addEventListener("submit", async (e) => {
   btn.disabled = true;
   btn.textContent = "Logging in…";
   try {
-    await signInWithEmail(form.email.value.trim(), form.password.value);
+    // Navigate here rather than leaning on the auth listener: it's held
+    // shut while boot() settles the Google redirect, and a login that
+    // landed in that window would otherwise just sit there.
+    const user = await signInWithEmail(form.email.value.trim(), form.password.value);
+    busy = false;
+    goHome(user);
   } catch (err) {
     toast(friendlyAuthError(err), "error");
     btn.disabled = false;
@@ -107,13 +137,48 @@ $("[data-signin-form]").addEventListener("submit", async (e) => {
   }
 });
 
-$all("[data-google-btn]").forEach((btn) =>
+// Whoever Google gives us, however they got here: already a member, or an
+// invite in hand and one username short, or not welcome yet.
+let googleUser = null;
+
+async function handleGoogleUser(user) {
+  const { member } = await afterGoogle(user);
+
+  if (member) {
+    busy = false;
+    goHome(user);
+    return;
+  }
+
+  if (inviteCode && !(await inviteProblem(inviteCode))) {
+    googleUser = user;
+    inviteNote.hidden = true;
+    showPanel("username");
+    $("#pick-username").focus();
+    return;                       // busy stays held; they aren't done
+  }
+
+  await signOutUser();
+  busy = false;
+  showPanel("ask");
+  toast("That Google account hasn't been invited yet. Ask us for a link to join.", "error");
+}
+
+$all("[data-google-btn], [data-google-invite]").forEach((btn) =>
   btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    busy = true;
     try {
-      await signInWithGoogle();
+      // null means a phone: the page is on its way to Google, and the
+      // answer comes back through boot() on the next load
+      const user = await startGoogle(btn.hasAttribute("data-google-invite") ? inviteCode : "");
+      if (user) await handleGoogleUser(user);
+      else return;                // navigating away; leave the button alone
     } catch (err) {
+      busy = false;
       toast(friendlyAuthError(err), "error");
     }
+    btn.disabled = false;
   })
 );
 
@@ -146,34 +211,6 @@ $("[data-signup-form]").addEventListener("submit", async (e) => {
     toast(friendlyAuthError(err), "error");
     btn.disabled = false;
     btn.textContent = "Create my account";
-  }
-});
-
-// Google on an invite page. The popup only tells us an email address, so
-// the username still has to be asked for before there's an account.
-let googleUser = null;
-
-$("[data-google-invite]").addEventListener("click", async (e) => {
-  const btn = e.currentTarget;
-  btn.disabled = true;
-  busy = true;
-  try {
-    const { user, needsUsername } = await googleForInvite(inviteCode);
-    if (!needsUsername) {
-      // already a member — this link isn't for them, but they're in
-      busy = false;
-      goHome(user);
-      return;
-    }
-    googleUser = user;
-    inviteNote.hidden = true;
-    showPanel("username");
-    $("#pick-username").focus();
-  } catch (err) {
-    busy = false;
-    toast(friendlyAuthError(err), "error");
-  } finally {
-    btn.disabled = false;
   }
 });
 

@@ -122,7 +122,13 @@ function navbar(cfg) {
     <div class="navbar__top">
       <a class="navbar__icon" href="shop.html" aria-label="Search sellers">${ico("search")}</a>
       ${logo}
-      <span class="navbar__icon navbar__icon--end" data-nav-auth></span>
+      <span class="navbar__icon navbar__icon--end">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch between light and dark">
+          <i class="ico ico--sun theme-toggle__sun" aria-hidden="true"></i>
+          <i class="ico ico--moon theme-toggle__moon" aria-hidden="true"></i>
+        </button>
+        <span data-nav-auth></span>
+      </span>
     </div>
     ${iconnav}
   </header>`;
@@ -202,6 +208,12 @@ if (clock) {
 // Chromium and Safari cross-fade documents natively through the view
 // transition declared in the stylesheet. Firefox doesn't, and there the
 // jump between pages is abrupt — so fade the current page out first and
+// The button is drawn here but the theme itself is decided in theme.js,
+// which runs before paint. This only flips it.
+document.querySelector("[data-theme-toggle]")?.addEventListener("click", () => {
+  window.ClosetTheme?.toggle();
+});
+
 // navigate on the way down. Same idea, done by hand.
 const hasViewTransitions = "startViewTransition" in document;
 const wantsMotion = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;

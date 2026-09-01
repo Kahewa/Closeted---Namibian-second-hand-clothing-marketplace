@@ -4,6 +4,8 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   signOut,
   updateProfile,
@@ -209,21 +211,6 @@ export async function signUpWithEmail(name, email, password, username, inviteCod
   return cred.user;
 }
 
-/**
- * Google, on a page that's holding an invite. The popup gets us a signed-in
- * user but not a member: we still need a username off them, so this reports
- * whether one is outstanding rather than finishing the job itself.
- */
-export async function googleForInvite(inviteCode) {
-  const inviteIssue = await inviteProblem(inviteCode);
-  if (inviteIssue) throw new Error(inviteIssue);
-
-  const provider = new GoogleAuthProvider();
-  const cred = await signInWithPopup(auth, provider);
-  const profile = await loadProfile(cred.user.uid);
-  return { user: cred.user, needsUsername: !profile };
-}
-
 export async function signInWithEmail(email, password) {
   const cred = await signInWithEmailAndPassword(auth, email, password);
   // A profile is what makes someone a member, and only an invite creates
@@ -234,28 +221,69 @@ export async function signInWithEmail(email, password) {
   return cred.user;
 }
 
-export async function signInWithGoogle() {
+// Popups are the wrong tool on a phone. iOS Safari only allows one opened
+// straight out of a tap with nothing awaited in between, and in-app browsers
+// — Instagram's and Facebook's especially, which is where most of our
+// sellers come from — either block them outright or open one that can't talk
+// back to the page it came from. On anything handheld we hand off to a
+// full-page redirect and collect the result when the browser comes back.
+function prefersRedirect() {
+  return (
+    /Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent) ||
+    // iPadOS reports itself as a Mac, so fall back to asking about touch
+    (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)) ||
+    window.matchMedia("(max-width: 820px)").matches
+  );
+}
+
+/**
+ * Starts Google sign-in. Returns the user on desktop, or null on a phone —
+ * where the page is already navigating away and the answer arrives later
+ * via googleRedirectUser().
+ */
+export async function startGoogle(inviteCode = "") {
+  if (inviteCode) {
+    const issue = await inviteProblem(inviteCode);
+    if (issue) throw new Error(issue);
+  }
+
   const provider = new GoogleAuthProvider();
+  // Skip whatever Google session the browser last used. Phones are shared,
+  // and silently signing in as the wrong account is worse than one more tap.
+  provider.setCustomParameters({ prompt: "select_account" });
+
+  if (prefersRedirect()) {
+    await signInWithRedirect(auth, provider);
+    return null;
+  }
   const cred = await signInWithPopup(auth, provider);
-  // Google will happily mint an account for anyone who clicks the button,
-  // so the same membership check applies here.
-  await requireMembership(cred.user);
   return cred.user;
 }
 
-/** Signs the user back out unless they already have a profile. */
-async function requireMembership(user) {
+/** The user coming back from a redirect sign-in, or null on a normal load. */
+export async function googleRedirectUser() {
+  try {
+    const result = await getRedirectResult(auth);
+    return result?.user || null;
+  } catch (err) {
+    // A failed redirect shouldn't take the whole page down with it
+    console.error("Google redirect sign-in failed:", err);
+    throw err;
+  }
+}
+
+/**
+ * What to do with somebody Google just handed us. A profile is what makes
+ * a member, and only an invite creates one, so no profile means they were
+ * never invited — unless they're holding a live invite right now.
+ */
+export async function afterGoogle(user) {
   if (isAdminUser(user)) {
     await ensureUserDoc(user);
-    return;
+    return { member: true };
   }
   const profile = await loadProfile(user.uid);
-  if (!profile) {
-    await signOut(auth);
-    throw new Error(
-      "There's no Closet Sales Namibia account for that login. You need an invite link to join."
-    );
-  }
+  return { member: Boolean(profile) };
 }
 
 export async function signOutUser() {
@@ -412,12 +440,15 @@ export function renderNavAuth(user) {
     menu.classList.remove("nav-user__menu--open");
     trigger.setAttribute("aria-expanded", "false");
   };
+  trigger.addEventListener("pointerdown", (e) => e.stopPropagation());
   trigger.addEventListener("click", (e) => {
     e.stopPropagation();
     const open = menu.classList.toggle("nav-user__menu--open");
     trigger.setAttribute("aria-expanded", String(open));
   });
-  document.addEventListener("click", closeMenu);
+  // pointerdown, not click: a tap on plain page furniture never reaches
+  // document as a click in iOS Safari, so the menu would stay stuck open.
+  document.addEventListener("pointerdown", closeMenu);
 
   authArea.querySelector("[data-logout]").addEventListener("click", async () => {
     await signOutUser();
