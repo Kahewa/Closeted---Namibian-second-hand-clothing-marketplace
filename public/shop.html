@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>View sellers — Closet Sales Namibia</title>
+<title>Seller Directory — Closet Sales Namibia</title>
+<meta name="description" content="Search and browse verified Namibian closet sellers. Discover unique pre-loved pieces and direct WhatsApp shopping links." />
+<meta property="og:title" content="Seller Directory — Closet Sales Namibia" />
+<meta property="og:description" content="Search and browse verified Namibian closet sellers. Discover unique pre-loved pieces and direct WhatsApp shopping links." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Jost:wght@500;600;700&amp;family=Sacramento&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Righteous&family=Sacramento&family=Syne:wght@700;800&family=Space+Grotesk:wght@600;700&display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -18,11 +21,11 @@
     <main>
       <section class="band band--white">
         <div class="shell shell--wide">
-          <h2 class="section-title">View Sellers</h2>
+          <h2 class="section-title">Seller Directory</h2>
           <div class="heart-row" aria-hidden="true"></div>
 
-          <p class="text-center muted" style="margin-bottom:26px;">
-            Search by name or username, then open a seller to see everything in their closet.
+          <p class="text-center muted" style="margin-bottom: 28px; max-width: 58ch; margin-inline: auto;">
+            Search verified Namibian sellers by name or @username. Click any profile to explore their active carousel drops!
           </p>
 
           <form class="seller-search" data-seller-form>
@@ -31,10 +34,12 @@
               id="seller-q"
               type="search"
               data-seller-input
-              placeholder="Search sellers…"
+              placeholder="Search by name or @username…"
               autocomplete="off"
             />
-            <button type="submit" class="btn btn--primary">Search</button>
+            <button type="submit" class="btn btn--primary">
+              <i class="ico ico--search" aria-hidden="true"></i> Search
+            </button>
           </form>
 
           <p class="text-center seller-count" data-seller-count></p>

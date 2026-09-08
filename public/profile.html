@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Profile — Closet Sales Namibia</title>
+<title>Seller Profile &amp; Closet — Closet Sales Namibia</title>
+<meta name="description" content="View seller profiles, contact sellers via WhatsApp, and browse all live and curated closet drops on Closet Sales Namibia." />
+<meta property="og:title" content="Seller Profile &amp; Closet — Closet Sales Namibia" />
+<meta property="og:description" content="View seller profiles, contact sellers via WhatsApp, and browse all live and curated closet drops on Closet Sales Namibia." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Jost:wght@500;600;700&amp;family=Sacramento&amp;display=swap"
+  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Righteous&family=Sacramento&family=Syne:wght@700;800&family=Space+Grotesk:wght@600;700&display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -17,53 +20,69 @@
   <div class="page">
     <main>
       <div class="shell shell--wide">
-        <p class="text-center muted" data-profile-loading style="padding-top:80px;">Loading closet…</p>
+        <p class="text-center muted" data-profile-loading style="padding-top: 80px; font-weight: 600;">✦ Loading closet wardrobe…</p>
 
-        <div class="empty-state" data-profile-signed-out hidden style="margin-top:60px;">
+        <div class="empty-state" data-profile-signed-out hidden style="margin-top: 60px;">
           <div class="empty-state__icon"><i class="ico ico--lock ico--xl" aria-hidden="true"></i></div>
-          <p class="h3">Log in to see your profile</p>
-          <p class="muted" style="margin-top:8px;">Or open someone else's profile straight from the feed.</p>
-          <a href="login.html" class="btn btn--primary" style="margin-top:22px;">Log in</a>
+          <p class="h3" style="font-family: var(--font-display);">Sign In To View Your Profile</p>
+          <p class="muted" style="margin-top: 8px;">Or open any seller's profile directly from the homepage closet feed.</p>
+          <a href="login.html" class="btn btn--primary" style="margin-top: 22px;">Sign In / Join Now</a>
         </div>
       </div>
 
       <div data-profile-content hidden>
-        <!-- the seller, on a rose band -->
-        <section class="band band--pink">
+        <!-- The Seller Profile Header in Y2K Aero Window -->
+        <section class="band band--pink" style="padding: 36px 0 28px;">
           <div class="shell shell--wide">
-            <section class="profile-header" data-profile-header id="contact">
+            <section class="profile-header chrome-card" data-win="SELLER PROFILE &amp; BIO" data-profile-header id="contact">
               <div class="profile-header__top">
-                <label class="avatar-upload" data-avatar-upload hidden>
+                <div class="profile-avatar-wrap">
                   <img data-avatar class="avatar-bubble avatar-bubble--lg" alt="Profile picture" hidden />
                   <span data-avatar-initials class="avatar-bubble avatar-bubble--lg"></span>
-                  <input type="file" accept="image/*" data-avatar-input />
-                </label>
+                  <label class="avatar-upload-badge" data-avatar-upload hidden title="Change profile photo">
+                    <i class="ico ico--camera" aria-hidden="true"></i>
+                    <input type="file" accept="image/*" data-avatar-input />
+                  </label>
+                </div>
 
                 <div class="profile-header__name-block">
-                  <h1 class="h2" data-display-name>—</h1>
+                  <h1 class="h2" data-display-name style="font-family: var(--font-display); font-weight: 800;">—</h1>
                   <p class="profile-username" data-username-view></p>
                   <p class="profile-bio" data-bio-view></p>
                   <div class="profile-socials" data-social-view></div>
 
                   <div class="profile-actions">
-                    <button type="button" class="btn btn--chrome btn--sm" data-edit-toggle hidden><i class="ico ico--pencil" aria-hidden="true"></i> Edit profile</button>
-                    <a href="sell.html" class="btn btn--chrome btn--sm" data-sell-cta hidden>Sell more</a>
+                    <!-- Owner-only actions -->
+                    <button type="button" class="btn btn--chrome btn--sm" data-edit-toggle hidden>
+                      <i class="ico ico--pencil" aria-hidden="true"></i> Edit Profile
+                    </button>
+                    <a href="sell.html" class="btn btn--primary btn--sm" data-sell-cta hidden>
+                      <i class="ico ico--plus" aria-hidden="true"></i> Drop A New Closet
+                    </a>
+
+                    <!-- Visitor actions -->
+                    <a href="#" class="btn btn--lime btn--sm" data-visitor-whatsapp hidden target="_blank" rel="noopener noreferrer">
+                      <i class="ico ico--chat" aria-hidden="true"></i> Message on WhatsApp
+                    </a>
+                    <button type="button" class="btn btn--outline btn--sm" data-share-profile>
+                      <i class="ico ico--share" aria-hidden="true"></i> Share Closet
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div class="profile-edit-form" data-edit-form>
+              <!-- Profile Edit Form (Owner Only) -->
+              <div class="profile-edit-form" data-edit-form hidden>
                 <div class="field">
-                  <label for="username-edit">Username</label>
+                  <label for="username-edit" style="font-weight: 700;">Username / Handle</label>
                   <input id="username-edit" type="text" data-username-edit maxlength="20" placeholder="grace.closet" autocomplete="off" />
-                  <p class="muted" style="font-size:11px;">
-                    3–20 characters: lowercase letters, numbers, dots or underscores. This is how
-                    people find you, and it's your payment reference.
+                  <p class="muted" style="font-size: 11.5px; margin-top: 4px;">
+                    3–20 characters (lowercase letters, numbers, dots, underscores). This is your payment reference and storefront link.
                   </p>
                 </div>
                 <div class="field">
-                  <label for="bio-edit">Bio</label>
-                  <textarea id="bio-edit" data-bio-edit maxlength="280" placeholder="Tell buyers a bit about your closet…"></textarea>
+                  <label for="bio-edit" style="font-weight: 700;">Bio &amp; Closet Note</label>
+                  <textarea id="bio-edit" data-bio-edit maxlength="280" placeholder="Tell buyers a bit about your style, sizes, or pickup locations in Windhoek/Namibia…"></textarea>
                 </div>
                 <div class="social-edit-grid">
                   <div class="field">
@@ -79,12 +98,12 @@
                     <input id="social-facebook" type="text" name="facebook" placeholder="facebook.com/yourname" />
                   </div>
                   <div class="field">
-                    <label for="social-whatsapp"><i class="ico ico--chat" aria-hidden="true"></i> WhatsApp number</label>
+                    <label for="social-whatsapp"><i class="ico ico--chat" aria-hidden="true"></i> WhatsApp Number</label>
                     <input id="social-whatsapp" type="tel" name="whatsapp" placeholder="+264 81 234 5678" />
                   </div>
                 </div>
                 <div class="edit-actions">
-                  <button type="button" class="btn btn--primary" data-save-profile><i class="ico ico--save" aria-hidden="true"></i> Save changes</button>
+                  <button type="button" class="btn btn--primary" data-save-profile><i class="ico ico--check" aria-hidden="true"></i> Save Changes</button>
                   <button type="button" class="btn btn--outline" data-cancel-edit>Cancel</button>
                 </div>
               </div>
@@ -92,20 +111,19 @@
           </div>
         </section>
 
-        <!-- payment details, pinned while anything is awaiting approval -->
-        <section class="band band--lav" data-pinned-pay hidden style="padding-top:48px;padding-bottom:48px;">
+        <!-- Payment details, pinned while anything is awaiting approval -->
+        <section class="band band--lav" data-pinned-pay hidden style="padding-top: 40px; padding-bottom: 40px;">
           <div class="shell shell--wide">
-            <div class="pinned-pay">
+            <div class="pinned-pay" data-win="PENDING DROP PAYMENT INSTRUCTIONS">
               <p class="pinned-pay__title">
-                <span data-approval-count>1</span> closet waiting for approval
+                <i class="ico ico--hourglass" aria-hidden="true"></i> <span data-approval-count>1</span> closet drop waiting for approval
               </p>
               <p class="pinned-pay__lead">
-                Send the N$150 and it goes live as soon as we've checked it. Use your username as the
-                reference or we can't match the payment to your account.
+                Transfer the N$150 service fee to activate your drop on the homepage feed. Please make sure to use your handle as reference!
               </p>
 
               <div class="payref">
-                <span class="payref__label">Your reference</span>
+                <span class="payref__label">YOUR PAYMENT REFERENCE</span>
                 <strong class="payref__value" data-pinned-ref>—</strong>
               </div>
 
@@ -118,7 +136,7 @@
                 </div>
 
                 <div class="paybox">
-                  <p class="paybox__title"><i class="ico ico--bank" aria-hidden="true"></i> Bank transfer</p>
+                  <p class="paybox__title"><i class="ico ico--bank" aria-hidden="true"></i> Bank Transfer (EFT)</p>
                   <dl class="paybox__rows">
                     <div><dt>Bank</dt><dd data-pay-bank>—</dd></div>
                     <div><dt>Account holder</dt><dd data-pay-holder>—</dd></div>
@@ -131,41 +149,40 @@
 
               <div class="pinned-pay__foot">
                 <a class="btn btn--lime btn--sm" data-pay-cash href="#" target="_blank" rel="noopener noreferrer">
-                  <i class="ico ico--cash" aria-hidden="true"></i> Paying cash? WhatsApp <span data-pay-cash-number>—</span>
+                  <i class="ico ico--cash" aria-hidden="true"></i> Paying Cash? WhatsApp <span data-pay-cash-number>—</span>
                 </a>
                 <span class="pinned-pay__note">
-                  You can still edit a closet until it's approved — after that it's locked.
+                  ✦ You can still edit your items while waiting for approval. Once approved, the carousel is locked.
                 </span>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- their closets, pinned to the board -->
+        <!-- Their closets list -->
         <section class="band band--white">
           <div class="shell shell--wide">
-            <h2 class="listings-divider">The Closet</h2>
+            <h2 class="listings-divider">Active Wardrobe Drops</h2>
             <div class="heart-row" aria-hidden="true"></div>
 
             <div class="empty-state" data-listings-empty hidden>
               <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
-              <p class="h3">Nothing here yet</p>
-              <p class="muted" data-listings-empty-body style="margin-top:8px;"></p>
+              <p class="h3" style="font-family: var(--font-display);">No Drops Available</p>
+              <p class="muted" data-listings-empty-body style="margin-top: 8px;"></p>
             </div>
 
             <div class="frame">
               <div data-listings></div>
             </div>
 
-            <!-- owner only -->
+            <!-- Owner only danger zone -->
             <section class="danger-zone" data-danger-zone hidden>
-              <p class="danger-zone__title">Delete my account</p>
-              <p class="muted" style="font-size:13px;margin-top:6px;">
-                This permanently removes your profile, your username and every closet you've
-                posted. It can't be undone.
+              <p class="danger-zone__title">Delete Account</p>
+              <p class="muted" style="font-size: 13px; margin-top: 6px;">
+                Permanently removes your profile, your username handle, and every drop you have posted. This action cannot be undone.
               </p>
-              <button type="button" class="btn btn--outline btn--sm" data-delete-account style="margin-top:18px;">
-                <i class="ico ico--trash" aria-hidden="true"></i> Delete my account
+              <button type="button" class="btn btn--outline btn--sm" data-delete-account style="margin-top: 18px; border-color: #ef4444; color: #ef4444;">
+                <i class="ico ico--trash" aria-hidden="true"></i> Delete My Account
               </button>
             </section>
           </div>

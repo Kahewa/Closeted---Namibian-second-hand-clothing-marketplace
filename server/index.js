@@ -45,6 +45,6 @@ app.use((req, res) => {
   res.redirect("/");
 });
 
-app.listen(PORT, () => {
-  console.log(`✨ Closet Sales Namibia is running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✨ Closet Sales Namibia is running at http://0.0.0.0:${PORT}`);
 });

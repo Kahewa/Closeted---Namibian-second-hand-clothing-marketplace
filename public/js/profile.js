@@ -42,7 +42,7 @@ const signedOutState = $("[data-profile-signed-out]");
 const content = $("[data-profile-content]");
 
 const avatarImg = $("[data-avatar]");
-const avatarUploadLabel = $("[data-avatar-upload]");
+const avatarUploadBadge = $("[data-avatar-upload]");
 const avatarInput = $("[data-avatar-input]");
 const nameEl = $("[data-display-name]");
 const usernameView = $("[data-username-view]");
@@ -60,6 +60,8 @@ const listingsEmpty = $("[data-listings-empty]");
 const sellCta = $("[data-sell-cta]");
 const pinnedPay = $("[data-pinned-pay]");
 const dangerZone = $("[data-danger-zone]");
+const visitorWhatsappBtn = $("[data-visitor-whatsapp]");
+const shareProfileBtn = $("[data-share-profile]");
 
 const socialFields = ["instagram", "tiktok", "facebook", "whatsapp"];
 const socialIcon = { instagram: "instagram", tiktok: "tiktok", facebook: "facebook", whatsapp: "chat" };
@@ -118,36 +120,41 @@ async function loadProfile() {
 }
 
 function isOwner() {
-  return currentUser && currentUser.uid === targetUid;
+  return !!(currentUser && targetUid && currentUser.uid === targetUid);
 }
 
 function paintView() {
+  const owner = isOwner();
+
   if (profileData.profilePicURL) {
     avatarImg.src = sized(profileData.profilePicURL, 240, { square: true });
     avatarImg.hidden = false;
   } else {
     avatarImg.hidden = true;
   }
-  avatarImg.parentElement.querySelector("[data-avatar-initials]").textContent = initials(profileData.displayName);
-  avatarImg.parentElement.querySelector("[data-avatar-initials]").hidden = !!profileData.profilePicURL;
+  const initialsEl = avatarImg.parentElement.querySelector("[data-avatar-initials]");
+  if (initialsEl) {
+    initialsEl.textContent = initials(profileData.displayName);
+    initialsEl.hidden = !!profileData.profilePicURL;
+  }
 
   nameEl.textContent = profileData.displayName || "Closet Seller";
 
   usernameView.textContent = profileData.username
     ? `@${profileData.username}`
-    : isOwner()
+    : owner
       ? "no username yet — add one so people can find you"
       : "";
   usernameEdit.value = profileData.username || "";
 
-  bioView.textContent = profileData.bio || (isOwner() ? "Add a bio so buyers know who they're shopping from." : "No bio yet.");
+  bioView.textContent = profileData.bio || (owner ? "Add a bio so buyers know who they're shopping from." : "No bio yet.");
   bioEdit.value = profileData.bio || "";
 
   socialView.innerHTML = "";
   const links = profileData.socialLinks || {};
   const anyLinks = socialFields.some((f) => links[f]);
   if (!anyLinks) {
-    socialView.append(el("p", { class: "profile-socials__empty" }, isOwner() ? "Add your social links so people can reach you." : ""));
+    socialView.append(el("p", { class: "profile-socials__empty" }, owner ? "Add your social links so people can reach you." : ""));
   }
   socialFields.forEach((field) => {
     const value = links[field];
@@ -159,25 +166,58 @@ function paintView() {
         el("span", {}, socialLabel[field]),
       ])
     );
-    editFormWrap.querySelector(`[name="${field}"]`).value = value;
+    const fieldInput = editFormWrap.querySelector(`[name="${field}"]`);
+    if (fieldInput) fieldInput.value = value;
   });
 
-  const owner = isOwner();
-  editToggleBtn.hidden = !owner;
-  avatarUploadLabel.hidden = !owner;
-  sellCta.hidden = !owner;
-  dangerZone.hidden = !owner;
+  // Owner vs Visitor visibility: non-owners cannot edit or delete
+  if (editToggleBtn) editToggleBtn.hidden = !owner;
+  if (avatarUploadBadge) avatarUploadBadge.hidden = !owner;
+  if (sellCta) sellCta.hidden = !owner;
+  if (dangerZone) dangerZone.hidden = !owner;
+
+  // Ensure edit form is closed and hidden for non-owners
+  profileHeader.classList.remove("profile-header--editing");
+  if (editFormWrap) editFormWrap.hidden = !owner;
+
+  // Visitor WhatsApp action
+  if (visitorWhatsappBtn) {
+    if (!owner && links.whatsapp) {
+      visitorWhatsappBtn.href = whatsappHref(
+        links.whatsapp,
+        `Hi ${profileData.displayName || ""}! I saw your closet on Closet Sales Namibia and wanted to enquire about your items.`
+      );
+      visitorWhatsappBtn.hidden = false;
+    } else {
+      visitorWhatsappBtn.hidden = true;
+    }
+  }
+
+  // Window title update
+  if (owner) {
+    profileHeader.setAttribute("data-win", "MY PROFILE & BIO");
+  } else {
+    profileHeader.setAttribute("data-win", profileData.username ? `@${profileData.username}'S CLOSET & BIO` : "SELLER PROFILE & BIO");
+  }
 }
 
 editToggleBtn?.addEventListener("click", () => {
+  if (!isOwner()) return;
   profileHeader.classList.add("profile-header--editing");
+  if (editFormWrap) editFormWrap.hidden = false;
 });
+
 cancelBtn?.addEventListener("click", () => {
   paintView();
   profileHeader.classList.remove("profile-header--editing");
+  if (editFormWrap) editFormWrap.hidden = true;
 });
 
 saveBtn?.addEventListener("click", async () => {
+  if (!isOwner()) {
+    toast("You can only edit your own profile.", "error");
+    return;
+  }
   saveBtn.disabled = true;
   saveBtn.textContent = "Saving…";
   try {
@@ -191,7 +231,8 @@ saveBtn?.addEventListener("click", async () => {
 
     const socialLinks = {};
     socialFields.forEach((field) => {
-      socialLinks[field] = editFormWrap.querySelector(`[name="${field}"]`).value.trim();
+      const fieldInput = editFormWrap.querySelector(`[name="${field}"]`);
+      socialLinks[field] = fieldInput ? fieldInput.value.trim() : "";
     });
     await updateDoc(doc(db, "users", targetUid), {
       bio: bioEdit.value.trim().slice(0, 280),
@@ -200,25 +241,30 @@ saveBtn?.addEventListener("click", async () => {
     profileData = { ...profileData, bio: bioEdit.value.trim().slice(0, 280), socialLinks };
     paintView();
     profileHeader.classList.remove("profile-header--editing");
+    if (editFormWrap) editFormWrap.hidden = true;
     toast("Profile updated");
   } catch (err) {
     console.error(err);
     toast(err.message || "Couldn't save your profile. Please try again.", "error");
   } finally {
     saveBtn.disabled = false;
-    saveBtn.innerHTML = '<i class="ico ico--save" aria-hidden="true"></i> Save changes';
+    saveBtn.innerHTML = '<i class="ico ico--check" aria-hidden="true"></i> Save changes';
   }
 });
 
 avatarInput?.addEventListener("change", async () => {
+  if (!isOwner()) {
+    toast("You can only change your own profile photo.", "error");
+    return;
+  }
   const file = avatarInput.files?.[0];
-  if (!file || !isOwner()) return;
+  if (!file) return;
   if (file.size > 5 * 1024 * 1024) {
     toast("That photo is over 5MB — try a smaller one.", "error");
     return;
   }
   try {
-    avatarUploadLabel.classList.add("avatar-upload--busy");
+    avatarUploadBadge?.classList.add("avatar-upload-badge--busy");
     const { url } = await uploadImage(file, `profile-pics/${targetUid}`);
     await updateDoc(doc(db, "users", targetUid), { profilePicURL: url });
     profileData.profilePicURL = url;
@@ -228,7 +274,21 @@ avatarInput?.addEventListener("change", async () => {
     console.error(err);
     toast(err.message || "Couldn't upload that photo. Please try again.", "error");
   } finally {
-    avatarUploadLabel.classList.remove("avatar-upload--busy");
+    avatarUploadBadge?.classList.remove("avatar-upload-badge--busy");
+  }
+});
+
+shareProfileBtn?.addEventListener("click", async () => {
+  const shareUrl = location.href;
+  try {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(shareUrl);
+      toast("Closet profile link copied to clipboard!");
+    } else {
+      toast("Profile URL: " + shareUrl);
+    }
+  } catch (_) {
+    toast("Profile URL: " + shareUrl);
   }
 });
 

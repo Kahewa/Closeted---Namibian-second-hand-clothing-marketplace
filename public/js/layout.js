@@ -14,9 +14,6 @@ import { watchAuthState, renderNavAuth } from "./auth.js";
 // ---------------------------------------------------------------------
 const BRAND = { first: "closet sales", second: "namibia" };
 
-const TICKER =
-  "Build Your Closet Sale · N$150 Service Fee per Closet - Unlimited Items per Closet · Message sellers on WhatsApp";
-
 // `authOnly` items render hidden and are revealed once we know somebody is
 // signed in — a profile link means nothing to a signed-out visitor.
 const NAV = [
@@ -84,16 +81,6 @@ const sparkleField = () => `
     ${SPARKLES.map((attrs) =>
       attrs.startsWith("class") ? `<span class="sparkle ${attrs.slice(7)}></span>` : `<span class="sparkle" ${attrs}></span>`
     ).join("\n    ")}
-  </div>`;
-
-const topbar = () => `
-  <div class="topbar">
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker__track">
-        <span class="ticker__seg">${TICKER}</span>
-        <span class="ticker__seg">${TICKER}</span>
-      </div>
-    </div>
   </div>`;
 
 function navbar(cfg) {
@@ -166,7 +153,7 @@ if (shell) {
   if (cfg.chrome === false) {
     /* the decorative layer is retired in this theme */
   } else {
-    shell.insertAdjacentHTML("afterbegin", topbar() + navbar(cfg));
+    shell.insertAdjacentHTML("afterbegin", navbar(cfg));
     shell.insertAdjacentHTML("beforeend", footer() + taskbar(cfg));
   }
 }
@@ -197,40 +184,80 @@ if (clock) {
 }
 
 // ---------------------------------------------------------------------
-// Smooth navigation
+// Smooth navigation & intelligent prefetching
 // ---------------------------------------------------------------------
-// Chromium and Safari cross-fade documents natively through the view
-// transition declared in the stylesheet. Firefox doesn't, and there the
-// jump between pages is abrupt — so fade the current page out first and
-// navigate on the way down. Same idea, done by hand.
-const hasViewTransitions = "startViewTransition" in document;
+// When navigating between pages, prefetch target documents on hover/touch
+// and glide the current page out before navigating so transitions feel
+// completely fluid and instant across both desktop and mobile devices.
 const wantsMotion = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
 
-if (!hasViewTransitions && wantsMotion) {
+// In-memory cache set to avoid duplicate prefetch requests
+const prefetchedUrls = new Set();
+function prefetchUrl(urlStr) {
+  if (!urlStr || prefetchedUrls.has(urlStr)) return;
+  try {
+    const u = new URL(urlStr, location.href);
+    if (u.origin !== location.origin) return;
+    if (u.pathname === location.pathname && u.search === location.search) return;
+    prefetchedUrls.add(urlStr);
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.href = u.href;
+    document.head.appendChild(link);
+  } catch (_) {}
+}
+
+// Prefetch on hover or mobile touchstart
+document.addEventListener("mouseover", (e) => {
+  const link = e.target.closest?.("a[href]");
+  if (link) prefetchUrl(link.getAttribute("href"));
+}, { passive: true });
+
+document.addEventListener("touchstart", (e) => {
+  const link = e.target.closest?.("a[href]");
+  if (link) prefetchUrl(link.getAttribute("href"));
+}, { passive: true });
+
+if (wantsMotion) {
   document.addEventListener("click", (e) => {
-    // leave anything the browser should handle its own way well alone
+    // Leave default handling for modified clicks, non-left clicks, or cancelled events
     if (e.defaultPrevented || e.button !== 0) return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 
     const link = e.target.closest?.("a[href]");
     if (!link || link.target === "_blank" || link.hasAttribute("download")) return;
 
-    const url = new URL(link.getAttribute("href"), location.href);
+    const href = link.getAttribute("href");
+    if (!href || href.startsWith("#") || href.startsWith("javascript:") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+
+    const url = new URL(href, location.href);
     if (url.origin !== location.origin) return;
-    // an in-page anchor should scroll, not reload
+
+    // In-page anchor navigation on the same page should scroll, not reload
     if (url.pathname === location.pathname && url.hash) return;
+    // Same exact URL with no changes
+    if (url.href === location.href) return;
 
     e.preventDefault();
     document.documentElement.classList.add("is-leaving");
+    document.body.classList.add("is-leaving");
+
     setTimeout(() => {
       location.href = url.href;
-    }, 190);
+    }, 150);
+
+    // Safety fallback in case navigation is delayed or aborted
+    setTimeout(() => {
+      document.documentElement.classList.remove("is-leaving");
+      document.body.classList.remove("is-leaving");
+    }, 2500);
   });
 
-  // returning through the back button restores the page from cache mid-fade
-  window.addEventListener("pageshow", () =>
-    document.documentElement.classList.remove("is-leaving")
-  );
+  // Returning through the back/forward button restores the page cleanly
+  window.addEventListener("pageshow", () => {
+    document.documentElement.classList.remove("is-leaving");
+    document.body.classList.remove("is-leaving");
+  });
 }
 
 // ---------------------------------------------------------------------
@@ -247,6 +274,7 @@ const REVEAL = [
   ".how-intro",
   ".how-title",
   ".how-steps li",
+  ".step-card",
   ".how-cta .h2",
   ".how-cta__lead",
   ".how-cta .btn",
