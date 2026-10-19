@@ -283,10 +283,15 @@ form.addEventListener("submit", async (e) => {
     const uid = auth.currentUser.uid;
     const images = await Promise.all(
       photos.map(async (photo) => {
-        if (!photo.file) return { url: photo.url, publicId: photo.publicId || null };
+        if (!photo.file) {
+          const kept = { url: photo.url, publicId: photo.publicId || null };
+          if (photo.w && photo.h) Object.assign(kept, { w: photo.w, h: photo.h });
+          return kept;
+        }
         const uploaded = await uploadImage(photo.file, `items/${uid}`);
         uploadedNow.push(uploaded.publicId);
-        return { url: uploaded.url, publicId: uploaded.publicId };
+        // w/h let the feed reserve the photo's shape before it loads
+        return { url: uploaded.url, publicId: uploaded.publicId, w: uploaded.w, h: uploaded.h };
       })
     );
     // imageURL/publicId mirror the cover, so anything that only shows one

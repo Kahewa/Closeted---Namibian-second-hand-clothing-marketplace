@@ -1,6 +1,6 @@
 import { sized } from "./cloudinary.js";
-import { addToCart, removeFromCart, inCart, MAX_CART } from "./cart.js";
-import { el, toast, formatNAD, itemImages } from "./utils.js";
+import { addToCart, removeFromCart, inCart, MAX_CART, siteLink } from "./cart.js";
+import { el, toast, formatNAD, itemImages, whatsappHref } from "./utils.js";
 
 export const CONDITION_CLASS = {
   "New with tags": "condition-pill--new",
@@ -9,71 +9,118 @@ export const CONDITION_CLASS = {
   Fair: "condition-pill--fair",
 };
 
-/**
- * One piece on the public feed: the photo with its price, what it is, and
- * an add-to-cart button. Checkout (WhatsApp) happens from the cart page.
- *
- * @param {object} item - { images, category, size, brand, condition,
- *   price, notes, whatsapp, sold }
- */
 export function itemTitle(item) {
   return [item.brand, item.category].filter(Boolean).join(" ") || "Item";
 }
 
+/** Where a piece's own page lives. */
+export const itemHref = (item) => `item.html?id=${encodeURIComponent(item.id)}`;
+
+export function conditionPill(item) {
+  return item.condition
+    ? el("span", { class: `condition-pill ${CONDITION_CLASS[item.condition] || ""}` }, item.condition)
+    : null;
+}
+
+/**
+ * "Buy now": a WhatsApp chat with just this piece in it, skipping the
+ * cart. Null when the piece has no number buyers can reach.
+ */
+export function buyNowHref(item) {
+  const message = [
+    "Hi! I'd like to buy this from Closet Sales Namibia:",
+    `${itemTitle(item)} (size ${item.size || "?"}, ${formatNAD(item.price)})`,
+    "",
+    siteLink(itemHref(item)),
+  ].join("\n");
+  return whatsappHref(item.whatsapp, message);
+}
+
+/** Buy now + Add to cart, or a note once it's sold. */
+export function buyButtons(item, { large = false } = {}) {
+  if (item.sold) return el("p", { class: "item-card__gone" }, "This piece has been sold");
+  const href = buyNowHref(item);
+  return el("div", { class: `buy-row${large ? " buy-row--large" : ""}` }, [
+    href
+      ? el("a", { class: `btn btn--primary${large ? "" : " btn--sm"}`, href, target: "_blank", rel: "noopener noreferrer" }, [
+          el("i", { class: "ico ico--chat", "aria-hidden": "true" }),
+          " Buy now",
+        ])
+      : null,
+    cartButton(item.id, large),
+  ]);
+}
+
+/**
+ * One piece on the feed: its photos with the price, what it is, and Buy
+ * now / Add to cart. Tapping the photo or the name opens the piece's page.
+ *
+ * @param {object} item - { id, images, category, size, brand, condition,
+ *   price, notes, whatsapp, sold }
+ */
 export function renderItemCard(item) {
   const title = itemTitle(item);
+  const href = itemHref(item);
+
+  const photos = gallery(itemImages(item), title, item.size);
+  // a tap opens the piece; a swipe still just swipes (no click fires)
+  photos.addEventListener("click", (e) => {
+    if (e.target.closest("button")) return;
+    location.href = href;
+  });
 
   const media = el("div", { class: `item-card__media${item.sold ? " item-card__media--sold" : ""}` }, [
-    gallery(itemImages(item), title, item.size),
+    photos,
     el("div", { class: "price-tag" }, [el("span", { class: "price-tag__amount" }, formatNAD(item.price))]),
     item.sold ? el("div", { class: "carousel-card__sold-stamp" }, "SOLD") : null,
   ]);
 
   const details = el("div", { class: "item-card__body" }, [
     el("div", { class: "item-card__line" }, [
-      el("span", { class: "item-card__category" }, item.category || "Item"),
-      item.condition
-        ? el("span", { class: `condition-pill ${CONDITION_CLASS[item.condition] || ""}` }, item.condition)
-        : null,
+      el("a", { class: "item-card__category", href }, item.category || "Item"),
+      conditionPill(item),
     ]),
     el("p", { class: "item-card__meta" }, `Size ${item.size || "—"} · ${item.brand || "No brand"}`),
     item.notes ? el("p", { class: "item-card__notes" }, item.notes) : null,
+    buyButtons(item),
   ]);
-
-  details.append(
-    item.sold
-      ? el("p", { class: "item-card__gone" }, "This piece has been sold")
-      : cartButton(item.id)
-  );
 
   return el("article", { class: "item-card" }, [media, details]);
 }
 
 /**
  * The piece's photos as a swipeable strip — scroll-snap does the swiping,
- * so it's native on phones. Dots show where you are; arrows appear on
- * devices with a mouse.
+ * so it's native on phones. Each photo keeps its uploaded proportions, and
+ * the strip's height follows whichever photo is showing. Dots show where
+ * you are; arrows appear on devices with a mouse.
  */
-function gallery(images, title, size) {
+export function gallery(images, title, size, width = 720) {
   const alt = (i) => `${title}, size ${size || "unlisted"}${images.length > 1 ? ` — photo ${i + 1} of ${images.length}` : ""}`;
-  const track = el(
-    "div",
-    { class: "item-card__track" },
-    images.map((img, i) =>
-      el("img", {
-        class: "item-card__img",
-        src: sized(img.url, 720),
-        alt: alt(i),
-        loading: "lazy",
-        decoding: "async",
-      })
-    )
+  const imgs = images.map((img, i) =>
+    el("img", {
+      class: "item-card__img",
+      src: sized(img.url, width),
+      alt: alt(i),
+      loading: "lazy",
+      decoding: "async",
+      // known size (newer uploads): the space is right before it loads
+      style: img.w && img.h ? `aspect-ratio: ${img.w} / ${img.h}` : null,
+    })
   );
+  const track = el("div", { class: "item-card__track" }, imgs);
   if (images.length < 2) return track;
+
+  let current = 0;
+  const fit = () => {
+    const h = imgs[current]?.offsetHeight;
+    if (h) track.style.height = `${h}px`;
+  };
+  imgs.forEach((img) => img.addEventListener("load", fit));
+  // also catches the first layout and any change in card width
+  if ("ResizeObserver" in window) new ResizeObserver(fit).observe(track);
 
   const dots = images.map((_, i) => el("span", { class: `item-card__dot${i === 0 ? " item-card__dot--on" : ""}` }));
   const go = (step) => track.scrollBy({ left: step * track.clientWidth, behavior: "smooth" });
-  let current = 0;
   track.addEventListener(
     "scroll",
     () => {
@@ -82,6 +129,7 @@ function gallery(images, title, size) {
       dots[current]?.classList.remove("item-card__dot--on");
       dots[now]?.classList.add("item-card__dot--on");
       current = now;
+      fit();
     },
     { passive: true }
   );
@@ -97,15 +145,18 @@ function gallery(images, title, size) {
   ]);
 }
 
-function cartButton(id) {
+function cartButton(id, large = false) {
   const btn = el("button", {
     type: "button",
     "data-cart-id": id,
+    "data-size": large ? "lg" : "sm",
     onClick: () => {
       if (inCart(id)) {
         removeFromCart(id);
       } else if (!addToCart(id)) {
         toast(`Your cart is full (${MAX_CART} pieces max).`, "error");
+      } else {
+        toast("Added to your cart");
       }
     },
   });
@@ -116,7 +167,7 @@ function cartButton(id) {
 /** Repaints an add-to-cart button to match the cart. */
 export function syncCartButton(btn) {
   const added = inCart(btn.dataset.cartId);
-  btn.className = `btn btn--sm btn--block ${added ? "btn--outline" : "btn--primary"}`;
+  btn.className = `btn btn--outline${btn.dataset.size === "lg" ? "" : " btn--sm"}${added ? " is-added" : ""}`;
   btn.setAttribute("aria-pressed", String(added));
   btn.replaceChildren(
     el("i", { class: `ico ico--${added ? "check" : "shop"}`, "aria-hidden": "true" }),

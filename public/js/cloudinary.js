@@ -62,7 +62,7 @@ export function sized(url, width, opts = {}) {
  *
  * @param {File} file
  * @param {string} folder - e.g. `carousels/{uid}/{carouselId}`
- * @returns {Promise<{ url: string, publicId: string }>}
+ * @returns {Promise<{ url: string, publicId: string, w: number, h: number }>}
  */
 export async function uploadImage(file, folder) {
   if (!isCloudinaryConfigured) {
@@ -97,7 +97,7 @@ export async function uploadImage(file, folder) {
   }
 
   const data = await res.json();
-  return { url: data.secure_url, publicId: data.public_id };
+  return { url: data.secure_url, publicId: data.public_id, w: data.width, h: data.height };
 }
 
 /**

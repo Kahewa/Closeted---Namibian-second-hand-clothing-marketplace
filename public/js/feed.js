@@ -8,7 +8,8 @@ import {
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { renderItemCard, syncCartButton } from "./item-card.js";
-import { $, el, CATEGORIES } from "./utils.js";
+import { sized } from "./cloudinary.js";
+import { $, el, itemImages, CATEGORIES } from "./utils.js";
 
 // How many matching pieces to show per "load more". Firestore is asked for
 // pages in the same order and the category is filtered here in the
@@ -101,7 +102,26 @@ async function fill() {
   }
 }
 
+// The hero's photo collage: cover shots of the newest pieces still for
+// sale, biggest tile first. Tiles without a photo keep their soft colour.
+let heroPainted = false;
+function paintHero() {
+  const tiles = document.querySelectorAll("[data-hero-collage] .hero__tile");
+  if (heroPainted || !tiles.length) return;
+  const covers = loaded
+    .filter((item) => !item.sold)
+    .map((item) => itemImages(item)[0]?.url)
+    .filter(Boolean)
+    .slice(0, tiles.length);
+  if (!covers.length) return;
+  heroPainted = true;
+  covers.forEach((url, i) =>
+    tiles[i].replaceChildren(el("img", { src: sized(url, i === 0 ? 640 : 400), alt: "", decoding: "async" }))
+  );
+}
+
 function paint() {
+  paintHero();
   const list = matches();
   feedEl.innerHTML = "";
   list.slice(0, shown).forEach((item) => feedEl.append(renderItemCard(item)));

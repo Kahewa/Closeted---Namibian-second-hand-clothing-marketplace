@@ -20,7 +20,7 @@ const sendBtn = $("[data-cart-send]");
 let items = []; // [{ id, missing } | item]
 
 if (sharedIds) {
-  $("[data-cart-eyebrow]").textContent = "✦ SHARED CART ✦";
+  $("[data-cart-eyebrow]").textContent = "Shared cart";
   $("[data-cart-title]").textContent = "A Shopper's Cart";
   $("[data-cart-note]").textContent =
     "The pieces a shopper picked and sent you. Prices and sold status are live — anything sold or deleted since is flagged.";

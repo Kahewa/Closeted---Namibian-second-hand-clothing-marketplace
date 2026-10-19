@@ -69,6 +69,9 @@ export function keepOnly(ids) {
   if (keep.length !== memory.length) write(keep);
 }
 
+/** A full link to a page on the live site, e.g. siteLink("item.html?id=x"). */
+export const siteLink = (path) => `${siteUrl}/${path}`;
+
 /** The link the admin follows from WhatsApp to see this exact cart. */
 export function cartLink(ids = memory) {
   return `${siteUrl}/cart.html?items=${ids.join(",")}`;

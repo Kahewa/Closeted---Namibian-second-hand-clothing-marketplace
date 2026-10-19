@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Righteous&family=Sacramento&family=Syne:wght@700;800&family=Space+Grotesk:wght@600;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -20,37 +20,36 @@
   <div class="page">
     <main>
       <section class="hero">
-        <div class="sparkle-field" aria-hidden="true">
-          <span class="sparkle" style="top:12%; left:8%;"></span>
-          <span class="sparkle sparkle--sm" style="top:26%; right:10%; animation-delay: 1.2s;"></span>
-          <span class="sparkle" style="bottom:18%; left:16%; animation-delay: 0.7s;"></span>
-          <span class="sparkle sparkle--sm" style="top:70%; right:14%; animation-delay: 1.8s;"></span>
-        </div>
-
-        <div class="hero__inner">
-          <div class="hero__badge">
-            <span>✦ PRE-LOVED FASHION · NAMIBIA ✦</span>
+        <div class="shell shell--wide hero__inner">
+          <div class="hero__copy">
+            <p class="eyebrow">Pre-loved fashion · Namibia</p>
+            <h1 class="hero__title">Curated pre-loved style for Namibia's <em>conscious closets.</em></h1>
+            <p class="hero__lead">
+              Photographed individually, styled for everyday wear. Add the pieces you love to your cart
+              and send it to us on WhatsApp.
+            </p>
+            <div class="hero__cta-row">
+              <a href="#browse" class="btn btn--primary">Shop pre-loved</a>
+            </div>
           </div>
 
-          <h1 class="hero__title">
-            FRESH DROPS.
-            <span class="hero__highlight">Second Life</span>
-          </h1>
-
-          <p class="hero__lead">
-            Hand-picked pre-loved pieces, photographed one by one. Pick a category, find your size,
-            and tap to ask about it on WhatsApp.
-          </p>
-
-          <div class="hero__cta-row">
-            <a href="#browse" class="btn btn--primary">Shop the feed</a>
-          </div>
+          <!-- filled with the newest pieces by feed.js; soft tiles until then.
+               The whole collage jumps down to the feed. -->
+          <a href="#browse" class="hero__collage" data-hero-collage aria-label="See the latest arrivals">
+            <span class="hero__tile"></span>
+            <span class="hero__tile"></span>
+            <span class="hero__tile"></span>
+            <span class="hero__tile"></span>
+            <span class="hero__arrivals" aria-hidden="true">Latest arrivals <span class="hero__arrivals-arrow">↓</span></span>
+          </a>
         </div>
       </section>
 
       <section class="browse" id="browse">
         <div class="shell shell--wide">
-          <h2 class="browse__title">Browse Pieces</h2>
+          <div class="browse__head">
+            <p class="eyebrow">Just in</p>
+          </div>
 
           <div class="filter-bar" role="group" aria-label="Filter by category" data-filters></div>
 
@@ -63,7 +62,7 @@
           <div class="item-grid" data-feed></div>
 
           <div class="text-center" style="margin-top:48px;">
-            <button type="button" class="btn btn--chrome" data-load-more>Load more</button>
+            <button type="button" class="btn btn--outline" data-load-more>Load more</button>
           </div>
         </div>
       </section>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Closet Sales Namibia — Pre-Loved Piece</title>
+<meta name="robots" content="noindex" />
+<meta name="description" content="A pre-loved piece on Closet Sales Namibia. Buy it now on WhatsApp or add it to your cart." />
+<meta property="og:title" content="Closet Sales Namibia — Pre-Loved Piece" />
+<meta property="og:description" content="A pre-loved piece on Closet Sales Namibia. Buy it now on WhatsApp or add it to your cart." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+  rel="stylesheet"
+/>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="item">
+  <div class="page">
+    <main>
+      <div class="shell shell--wide item-shell">
+        <p class="text-center muted" data-item-loading>Loading…</p>
+
+        <div class="empty-state" data-item-missing hidden>
+          <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
+          <p class="h3">This piece isn't listed any more</p>
+          <p class="muted" style="margin-top: 6px;">It may have been removed. Plenty more on the feed.</p>
+          <a href="index.html#browse" class="btn btn--primary" style="margin-top: 20px;">Shop pre-loved</a>
+        </div>
+
+        <article class="item-view" data-item hidden>
+          <div class="item-view__photos" data-item-photos></div>
+          <div class="item-view__info">
+            <p class="eyebrow" data-item-eyebrow></p>
+            <h1 class="item-view__title" data-item-title></h1>
+            <p class="item-view__price" data-item-price></p>
+            <dl class="item-view__facts" data-item-facts></dl>
+            <p class="item-view__notes" data-item-notes hidden></p>
+            <div data-item-buy></div>
+          </div>
+        </article>
+
+        <section class="related" data-related hidden>
+          <p class="eyebrow">You might also like</p>
+          <h2 class="related__title" data-related-title>Similar pieces</h2>
+          <div class="item-grid" data-related-grid></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/item-page.js"></script>
+</body>
+</html>

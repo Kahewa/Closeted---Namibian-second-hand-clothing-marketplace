@@ -7,20 +7,33 @@
 //
 // ...and this module builds the rest around whatever <main> it finds.
 import { cartIds } from "./cart.js";
+import "./glass.js";
 
 // ---------------------------------------------------------------------
 // Everything editable lives here.
 // ---------------------------------------------------------------------
 const BRAND = { first: "closet sales", second: "namibia" };
 
+// The sliding announcement strip at the very top of every page. Keep each
+// one short and true — it's the first thing anyone reads.
+const TICKER = [
+  "New drop live",
+  "Pre-loved fashion, made for Namibia",
+  "Sustainable style",
+  "Every piece photographed individually",
+  "Order straight on WhatsApp",
+];
+
 // The footer's one link; the logo already leads back to the feed.
 const FOOTER_LINKS = [{ href: "admin.html", label: "admin login" }];
 
-// Per-page: the links under the wordmark, and whether the cart button
-// shows. The feed needs no links — the logo leads back to it.
+// Per-page: the links under the wordmark, whether the cart button shows,
+// and whether there's a back button. The feed needs no links — the logo
+// leads back to it.
 const PAGES = {
   home: { links: [], cart: true },
-  cart: { links: [], cart: true },
+  cart: { links: [], cart: true, back: true },
+  item: { links: [], cart: true, back: true },
   admin: { links: [{ href: "index.html", label: "view the feed" }], logoHref: "admin.html" },
 };
 
@@ -41,7 +54,13 @@ function navbar(cfg) {
   return `
   <header class="navbar">
     <div class="navbar__top${cfg.cart ? "" : " navbar__top--solo"}">
-      ${cfg.cart ? `<span aria-hidden="true"></span>` : ""}
+      ${
+        cfg.back
+          ? `<a class="navbar__icon navbar__back" href="index.html" aria-label="Back to the shop" data-back>${ico("back")}</a>`
+          : cfg.cart
+            ? `<span aria-hidden="true"></span>`
+            : ""
+      }
       <a href="${cfg.logoHref || "index.html"}" class="logo">
         <span class="logo__closet">${BRAND.first}</span><span class="logo__bg">${BRAND.second}</span>
       </a>
@@ -49,6 +68,19 @@ function navbar(cfg) {
     </div>${links}
   </header>`;
 }
+
+// The list runs twice in a row and slides left by exactly one copy, so the
+// loop is seamless. The second copy is hidden from screen readers.
+const ticker = () => {
+  const run = TICKER.map((t) => `<span class="ticker__item">${t}</span>`).join("");
+  return `
+  <div class="ticker" role="marquee" aria-label="${TICKER.join(". ")}">
+    <div class="ticker__track">
+      <div class="ticker__run">${run}</div>
+      <div class="ticker__run" aria-hidden="true">${run}</div>
+    </div>
+  </div>`;
+};
 
 const footer = () => `
   <footer class="site-footer">
@@ -73,9 +105,25 @@ const cfg = PAGES[document.body.dataset.page] || PAGES.home;
 const shell = document.querySelector(".page");
 
 if (shell) {
-  shell.insertAdjacentHTML("afterbegin", navbar(cfg));
+  shell.insertAdjacentHTML("afterbegin", ticker() + navbar(cfg));
   shell.insertAdjacentHTML("beforeend", footer());
 }
+
+// Back: if they came from a page on this site, step back to it (the feed
+// keeps its filter and scroll position that way); from a WhatsApp link or a
+// fresh tab there's nothing to go back to, so it goes to the shop.
+document.querySelector("[data-back]")?.addEventListener("click", (e) => {
+  let fromHere = false;
+  try {
+    fromHere = !!document.referrer && new URL(document.referrer).origin === location.origin;
+  } catch {
+    /* no usable referrer */
+  }
+  if (fromHere && history.length > 1) {
+    e.preventDefault();
+    history.back();
+  }
+});
 
 // the cart button's count, kept current as pieces are added or removed
 const cartLinkEl = document.querySelector("[data-cart-link]");
