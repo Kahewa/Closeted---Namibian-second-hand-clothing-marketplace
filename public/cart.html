@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cart — Closet Sales Namibia</title>
+<meta name="robots" content="noindex" />
+<meta name="description" content="The pieces in your cart on Closet Sales Namibia." />
+<meta property="og:title" content="Cart — Closet Sales Namibia" />
+<meta property="og:description" content="The pieces in your cart on Closet Sales Namibia." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Righteous&family=Sacramento&family=Syne:wght@700;800&family=Space+Grotesk:wght@600;700&display=swap"
+  rel="stylesheet"
+/>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="cart">
+  <div class="page">
+    <main>
+      <div class="shell cart-shell">
+        <p class="eyebrow" data-cart-eyebrow>✦ YOUR CART ✦</p>
+        <h1 class="h1" style="margin-top: 6px; font-family: var(--font-display); font-weight: 800;" data-cart-title>Your Cart</h1>
+        <p class="muted cart-note" data-cart-note>
+          When you're ready, send your cart on WhatsApp — it includes a link so we can see exactly which pieces you picked.
+        </p>
+
+        <p class="text-center muted" data-cart-loading>Loading…</p>
+
+        <div class="empty-state" data-cart-empty hidden>
+          <div class="empty-state__icon"><i class="ico ico--shop ico--xl" aria-hidden="true"></i></div>
+          <p class="h3" data-cart-empty-title>Your cart is empty</p>
+          <p class="muted" style="margin-top: 6px;" data-cart-empty-body>Add pieces from the feed and they'll show up here.</p>
+          <a href="index.html" class="btn btn--primary" style="margin-top: 20px;">Shop the feed</a>
+        </div>
+
+        <div data-cart-list></div>
+
+        <div data-cart-summary hidden>
+          <p class="cart-total"><span>Total</span><span data-cart-total>N$0</span></p>
+          <div class="cart-actions">
+            <a class="btn btn--lime btn--block" data-cart-send href="#" target="_blank" rel="noopener noreferrer">
+              <i class="ico ico--chat" aria-hidden="true"></i> Send cart on WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/cart-page.js"></script>
+</body>
+</html>

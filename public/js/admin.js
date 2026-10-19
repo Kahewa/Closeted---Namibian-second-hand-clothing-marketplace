@@ -1,403 +1,625 @@
-import { db } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import {
   collection,
   query,
-  where,
   orderBy,
   limit,
   getDocs,
   doc,
+  setDoc,
+  addDoc,
   updateDoc,
   deleteDoc,
   writeBatch,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { requireAdmin, adminDeleteAccount, setBanned } from "./auth.js";
-import { deleteImages, sized } from "./cloudinary.js";
-import { auth } from "./firebase-config.js";
-import { $, $all, el, toast, initials, formatNAD, timeAgo, toFirestoreDate } from "./utils.js";
+import { watchAuthState, signInWithPassword, signOutUser, friendlyAuthError, isAdminUser } from "./auth.js";
+import { uploadImage, deleteImages, sized } from "./cloudinary.js";
+import {
+  $,
+  el,
+  toast,
+  formatNAD,
+  timeAgo,
+  toFirestoreDate,
+  whatsappHref,
+  itemImages,
+  CATEGORIES,
+  CONDITIONS,
+  MAX_PHOTOS,
+} from "./utils.js";
 
-const PAGE = 60;
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const WHATSAPP_KEY = "csn.admin.whatsapp";
 
-const pendingList = $("[data-pending-list]");
-const pendingEmpty = $("[data-pending-empty]");
-const pendingLoading = $("[data-pending-loading]");
-const liveList = $("[data-live-list]");
-const liveEmpty = $("[data-live-empty]");
-const liveLoading = $("[data-live-loading]");
-const usersList = $("[data-users-list]");
-const usersLoading = $("[data-users-loading]");
-const accountSearch = $("[data-account-search]");
+// folder ids that aren't a client
+const ALL = "__all";
+const NO_CLIENT = "__none";
 
-let allUsers = [];
+const signinView = $("[data-signin]");
+const dashboardView = $("[data-dashboard]");
 
-requireAdmin(() => {
-  loadPending();
-  loadLive();
-  loadUsers();
-  findLegacyCarousels();
-});
+const form = $("[data-post-form]");
+const field = (name) => form.querySelector(`[data-field="${name}"]`);
+const photoGrid = $("[data-photo-grid]");
+const submitBtn = $("[data-submit]");
+const cancelEditBtn = $("[data-cancel-edit]");
+const formTitle = $("[data-form-title]");
 
-// ---------------------------------------------------------------------
-// Carousels posted before `status` existed. Firestore can't query for a
-// missing field, so this reads the collection and filters in the client —
-// fine at this size, and it only has to be used once.
-// ---------------------------------------------------------------------
-let legacyDocs = [];
+const mineList = $("[data-mine]");
+const mineLoading = $("[data-mine-loading]");
+const mineEmpty = $("[data-mine-empty]");
+const foldersView = $("[data-folders-view]");
+const folderView = $("[data-folder-view]");
 
-async function findLegacyCarousels() {
-  try {
-    const snap = await getDocs(query(collection(db, "carousels"), limit(300)));
-    legacyDocs = snap.docs.filter((d) => !d.data().status);
-    const banner = $("[data-legacy]");
-    if (!legacyDocs.length) {
-      banner.hidden = true;
-      return;
-    }
-    $("[data-legacy-count]").textContent = legacyDocs.length;
-    banner.hidden = false;
-  } catch (err) {
-    console.error("Couldn't check for older carousels:", err);
-  }
-}
+let items = [];
+let clients = []; // [{ id, name }], A–Z
+let editing = null; // the item being edited, if any
+let openFolder = null; // ALL, NO_CLIENT, a client id, or null for the folder grid
 
-async function stampLegacy(status) {
-  if (!legacyDocs.length) return;
-  const batch = writeBatch(db);
-  legacyDocs.forEach((d) => batch.update(d.ref, { status }));
-  try {
-    await batch.commit();
-    toast(`${legacyDocs.length} carousel(s) set to ${status}`);
-    legacyDocs = [];
-    $("[data-legacy]").hidden = true;
-    refreshLists();
-  } catch (err) {
-    console.error(err);
-    toast("Couldn't update those carousels.", "error");
-  }
-}
-
-$("[data-legacy-approve]")?.addEventListener("click", () => stampLegacy("approved"));
-$("[data-legacy-pending]")?.addEventListener("click", () => stampLegacy("pending"));
+// The form's photos, cover first: { url, publicId } already uploaded, or
+// { file, preview } picked but not uploaded yet.
+let photos = [];
 
 // ---------------------------------------------------------------------
-// tabs
+// who's here
 // ---------------------------------------------------------------------
-$all("[data-tab]").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    $all("[data-tab]").forEach((t) => t.classList.remove("admin-tab--active"));
-    tab.classList.add("admin-tab--active");
-    $all("[data-panel]").forEach((panel) => {
-      panel.hidden = panel.dataset.panel !== tab.dataset.tab;
-    });
-  });
-});
-
-// ---------------------------------------------------------------------
-// carousels awaiting approval
-// ---------------------------------------------------------------------
-async function loadPending() {
-  try {
-    const snap = await getDocs(
-      query(
-        collection(db, "carousels"),
-        where("status", "==", "pending"),
-        orderBy("createdAt", "desc"),
-        limit(PAGE)
-      )
-    );
-    pendingLoading.hidden = true;
-    pendingList.innerHTML = "";
-    $("[data-count-pending]").textContent = snap.size;
-    pendingEmpty.hidden = snap.size > 0;
-
-    snap.forEach((docSnap) => {
-      pendingList.append(reviewRow({ id: docSnap.id, ...docSnap.data() }, true));
-    });
-  } catch (err) {
-    console.error(err);
-    pendingLoading.innerHTML = indexHint(err);
-  }
+function show(signedIn) {
+  signinView.hidden = signedIn;
+  dashboardView.hidden = !signedIn;
 }
 
-async function loadLive() {
-  try {
-    const snap = await getDocs(
-      query(
-        collection(db, "carousels"),
-        where("status", "==", "approved"),
-        orderBy("createdAt", "desc"),
-        limit(PAGE)
-      )
-    );
-    liveLoading.hidden = true;
-    liveList.innerHTML = "";
-    liveEmpty.hidden = snap.size > 0;
-    snap.forEach((docSnap) => {
-      liveList.append(reviewRow({ id: docSnap.id, ...docSnap.data() }, false));
-    });
-  } catch (err) {
-    console.error(err);
-    liveLoading.innerHTML = indexHint(err);
-  }
-}
-
-/** One carousel, with its photos, payment reference and the action buttons. */
-function reviewRow(carousel, isPending) {
-  const items = carousel.items || [];
-  const total = items.reduce((sum, it) => sum + Number(it.price || 0), 0);
-
-  const thumbs = el(
-    "div",
-    { class: "review__thumbs" },
-    items.slice(0, 8).map((it) =>
-      el("img", { class: "review__thumb", src: sized(it.imageURL, 200), alt: it.category || "item", loading: "lazy", decoding: "async" })
-    )
-  );
-
-  const actions = el("div", { class: "review__actions" });
-
-  if (isPending) {
-    actions.append(
-      el(
-        "button",
-        {
-          class: "btn btn--primary btn--sm",
-          type: "button",
-          onClick: async (e) => setStatus(e.target, carousel, "approved"),
-        },
-        [el("i", { class: "ico ico--check", "aria-hidden": "true" }), " approve"]
-      ),
-      el(
-        "button",
-        {
-          class: "btn btn--outline btn--sm",
-          type: "button",
-          onClick: async (e) => setStatus(e.target, carousel, "rejected"),
-        },
-        [el("i", { class: "ico ico--close", "aria-hidden": "true" }), " reject"]
-      )
-    );
-  } else {
-    actions.append(
-      el(
-        "button",
-        {
-          class: "btn btn--outline btn--sm",
-          type: "button",
-          onClick: async (e) => setStatus(e.target, carousel, "pending"),
-        },
-        [el("i", { class: "ico ico--undo", "aria-hidden": "true" }), " pull down"]
-      )
-    );
-  }
-
-  actions.append(
-    el(
-      "a",
-      { class: "btn btn--chrome btn--sm", href: `profile.html?uid=${carousel.sellerId}`, target: "_blank" },
-      "view seller"
-    ),
-    el(
-      "button",
-      {
-        class: "btn btn--chrome btn--sm",
-        type: "button",
-        onClick: async (e) => removeCarousel(e.target, carousel),
-      },
-      [el("i", { class: "ico ico--trash", "aria-hidden": "true" }), " delete"]
-    )
-  );
-
-  return el("article", { class: "review", "data-carousel": carousel.id }, [
-    el("div", { class: "review__head" }, [
-      el("div", {}, [
-        el("p", { class: "review__seller" }, carousel.sellerName || "Closet Seller"),
-        el(
-          "p",
-          { class: "review__meta" },
-          `${carousel.sellerUsername ? "@" + carousel.sellerUsername + " · " : ""}${items.length} item${
-            items.length === 1 ? "" : "s"
-          } · ${formatNAD(total)} total · ${timeAgo(toFirestoreDate(carousel.createdAt))}`
-        ),
-      ]),
-      el("span", { class: `status-pill status-pill--${carousel.status || "pending"}` }, carousel.status || "pending"),
-    ]),
-    el("p", { class: "review__ref" }, [
-      el("span", { class: "review__ref-label" }, "payment reference"),
-      el("strong", {}, carousel.paymentRef || carousel.sellerUsername || "— none —"),
-    ]),
-    thumbs,
-    actions,
-  ]);
-}
-
-async function setStatus(btn, carousel, status) {
-  btn.disabled = true;
-  try {
-    await updateDoc(doc(db, "carousels", carousel.id), { status });
-    toast(
-      status === "approved" ? "Approved — it's live now" : status === "rejected" ? "Rejected" : "Pulled down"
-    );
-    refreshLists();
-  } catch (err) {
-    console.error(err);
-    toast("Couldn't update that listing.", "error");
-    btn.disabled = false;
-  }
-}
-
-async function removeCarousel(btn, carousel) {
-  if (!confirm("Delete this carousel and its photos? This can't be undone.")) return;
-  btn.disabled = true;
-  try {
-    // Best-effort image cleanup — the listing still goes even if the
-    // server or Cloudinary keys aren't available.
-    try {
-      const idToken = await auth.currentUser.getIdToken();
-      await deleteImages((carousel.items || []).map((i) => i.publicId), idToken);
-    } catch (err) {
-      console.warn("Image cleanup failed (deleting the listing anyway):", err);
-    }
-    await deleteDoc(doc(db, "carousels", carousel.id));
-    toast("Carousel deleted");
-    refreshLists();
-  } catch (err) {
-    console.error(err);
-    toast("Couldn't delete that carousel.", "error");
-    btn.disabled = false;
-  }
-}
-
-function refreshLists() {
-  pendingLoading.hidden = false;
-  pendingLoading.textContent = "Loading…";
-  liveLoading.hidden = false;
-  liveLoading.textContent = "Loading…";
-  loadPending();
-  loadLive();
-}
-
-// ---------------------------------------------------------------------
-// accounts
-// ---------------------------------------------------------------------
-async function loadUsers() {
-  try {
-    const snap = await getDocs(query(collection(db, "users"), limit(300)));
-    allUsers = snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
-    allUsers.sort((a, b) => (a.displayName || "").localeCompare(b.displayName || ""));
-    usersLoading.hidden = true;
-    $("[data-count-users]").textContent = allUsers.length;
-    paintUsers();
-  } catch (err) {
-    console.error(err);
-    usersLoading.textContent = `Couldn't load accounts: ${err.message}`;
-  }
-}
-
-function paintUsers() {
-  const term = (accountSearch.value || "").trim().toLowerCase();
-  const rows = allUsers.filter(
-    (u) =>
-      !term ||
-      (u.displayName || "").toLowerCase().includes(term) ||
-      (u.username || "").toLowerCase().includes(term) ||
-      (u.email || "").toLowerCase().includes(term)
-  );
-
-  usersList.innerHTML = "";
-  if (!rows.length) {
-    usersList.append(el("p", { class: "muted text-center" }, "No accounts match that."));
+watchAuthState(async (user) => {
+  if (user && !isAdminUser(user)) {
+    // left over from an older login — only the admin account belongs here
+    await signOutUser();
     return;
   }
+  show(!!user);
+  if (user) loadAll();
+  else $("[data-password]").focus();
+});
 
-  rows.forEach((u) => {
-    const avatar = u.profilePicURL
-      ? el("img", { class: "avatar-bubble avatar-bubble--sm", src: sized(u.profilePicURL, 72, { square: true }), alt: "", loading: "lazy", decoding: "async" })
-      : el("span", { class: "avatar-bubble avatar-bubble--sm" }, initials(u.displayName));
+$("[data-login-form]").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const input = $("[data-password]");
+  const btn = $("[data-login-btn]");
+  if (!input.value) {
+    toast("Enter the password.", "error");
+    input.focus();
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = "Logging in…";
+  try {
+    await signInWithPassword(input.value);
+    input.value = "";
+  } catch (err) {
+    toast(friendlyAuthError(err), "error");
+    input.select();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Log in";
+  }
+});
 
-    const actions = el("div", { class: "account__actions" }, [
-      el("a", { class: "btn btn--chrome btn--sm", href: `profile.html?uid=${u.uid}`, target: "_blank" }, "view"),
-      el(
-        "button",
-        {
-          class: "btn btn--outline btn--sm",
-          type: "button",
-          onClick: async (e) => toggleBan(e.target, u),
-        },
-        u.banned ? "unban" : "ban"
-      ),
-      el(
-        "button",
-        {
-          class: "btn btn--chrome btn--sm",
-          type: "button",
-          onClick: async (e) => wipeAccount(e.target, u),
-        },
-        [el("i", { class: "ico ico--trash", "aria-hidden": "true" }), " delete"]
-      ),
-    ]);
+$("[data-signout]").addEventListener("click", () => signOutUser());
 
-    usersList.append(
-      el("div", { class: "account" }, [
-        avatar,
-        el("div", { class: "account__who" }, [
-          el("p", { class: "account__name" }, [
-            u.displayName || "Closet Seller",
-            u.banned ? el("span", { class: "status-pill status-pill--rejected" }, "banned") : null,
-            u.deleted ? el("span", { class: "status-pill status-pill--pending" }, "deleted") : null,
-          ]),
-          el("p", { class: "account__meta" }, `${u.username ? "@" + u.username + " · " : ""}${u.email || ""}`),
-        ]),
-        actions,
+// ---------------------------------------------------------------------
+// the form
+// ---------------------------------------------------------------------
+const option = (value, label = value) => el("option", { value }, label);
+field("category").append(el("option", { value: "", disabled: true, selected: true }, "Pick one"), ...CATEGORIES.map((c) => option(c)));
+field("condition").append(el("option", { value: "", disabled: true, selected: true }, "Pick one"), ...CONDITIONS.map((c) => option(c)));
+
+function paintClientSelect() {
+  const select = field("client");
+  const current = select.value;
+  select.replaceChildren(option("", "Me — not for a client"), ...clients.map((c) => option(c.id, c.name)));
+  select.value = clients.some((c) => c.id === current) ? current : "";
+}
+
+function rememberedWhatsapp() {
+  try {
+    return localStorage.getItem(WHATSAPP_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function rememberWhatsapp(value) {
+  try {
+    localStorage.setItem(WHATSAPP_KEY, value);
+  } catch {
+    /* it'll just need typing again next time */
+  }
+}
+
+field("whatsapp").value = rememberedWhatsapp();
+
+function paintPhotos() {
+  photoGrid.innerHTML = "";
+  photos.forEach((photo, i) => {
+    const src = photo.preview || sized(photo.url, 300, { square: true });
+    photoGrid.append(
+      el("div", { class: `photo-slot${i === 0 ? " photo-slot--cover" : ""}` }, [
+        el(
+          "button",
+          {
+            type: "button",
+            class: "photo-slot__pick",
+            "aria-label": i === 0 ? `Photo ${i + 1}, the cover` : `Photo ${i + 1} — make it the cover`,
+            onClick: () => makeCover(i),
+          },
+          el("img", { src, alt: "" })
+        ),
+        i === 0 ? el("span", { class: "photo-slot__badge" }, "Cover") : null,
+        el(
+          "button",
+          { type: "button", class: "photo-slot__remove", "aria-label": `Remove photo ${i + 1}`, onClick: () => removePhoto(i) },
+          el("i", { class: "ico ico--close", "aria-hidden": "true" })
+        ),
       ])
     );
   });
-}
 
-accountSearch?.addEventListener("input", paintUsers);
-
-async function toggleBan(btn, user) {
-  btn.disabled = true;
-  try {
-    await setBanned(user.uid, !user.banned);
-    user.banned = !user.banned;
-    toast(user.banned ? "Account banned" : "Account unbanned");
-    paintUsers();
-  } catch (err) {
-    console.error(err);
-    toast("Couldn't change that account.", "error");
-    btn.disabled = false;
+  if (photos.length < MAX_PHOTOS) {
+    photoGrid.append(
+      el("label", { class: `photo-slot photo-slot--add${photos.length ? "" : " photo-slot--first"}`, for: "post-photo" }, [
+        el("i", { class: `ico ico--${photos.length ? "plus" : "camera"} ico--xl`, "aria-hidden": "true" }),
+        el("span", {}, photos.length ? `Add (${photos.length}/${MAX_PHOTOS})` : "Tap to add photos"),
+      ])
+    );
   }
 }
 
-async function wipeAccount(btn, user) {
-  if (
-    !confirm(
-      `Delete ${user.displayName || "this account"}?\n\n` +
-        "This removes their listings and profile details and blocks them from coming back. " +
-        "Their login itself can only be removed from the Firebase console."
-    )
-  ) {
+function makeCover(i) {
+  if (i === 0) return;
+  photos.unshift(...photos.splice(i, 1));
+  paintPhotos();
+}
+
+function removePhoto(i) {
+  const [gone] = photos.splice(i, 1);
+  if (gone?.preview) URL.revokeObjectURL(gone.preview);
+  paintPhotos();
+}
+
+field("image").addEventListener("change", () => {
+  const files = [...(field("image").files || [])];
+  field("image").value = "";
+  const room = MAX_PHOTOS - photos.length;
+  const tooBig = files.filter((f) => f.size > MAX_IMAGE_BYTES);
+  const ok = files.filter((f) => f.size <= MAX_IMAGE_BYTES);
+
+  if (tooBig.length) toast(`${tooBig.length === 1 ? "A photo was" : `${tooBig.length} photos were`} over 8MB and skipped.`, "error");
+  if (ok.length > room) toast(`Only ${MAX_PHOTOS} photos per piece — kept the first ${room}.`, "error");
+
+  ok.slice(0, room).forEach((file) => photos.push({ file, preview: URL.createObjectURL(file) }));
+  paintPhotos();
+});
+
+function clearPhotos() {
+  photos.forEach((p) => p.preview && URL.revokeObjectURL(p.preview));
+  photos = [];
+  paintPhotos();
+}
+
+/** The client a new post defaults to: whoever's folder is open. */
+const folderClient = () => (clients.some((c) => c.id === openFolder) ? openFolder : "");
+
+function resetForm() {
+  const whatsapp = field("whatsapp").value;
+  form.reset();
+  field("whatsapp").value = whatsapp;
+  field("client").value = folderClient();
+  clearPhotos();
+  editing = null;
+  formTitle.textContent = "Post a Piece";
+  submitBtn.textContent = "Post to feed";
+  cancelEditBtn.hidden = true;
+}
+
+function startEdit(item) {
+  editing = item;
+  form.reset();
+  field("client").value = clients.some((c) => c.id === item.clientId) ? item.clientId : "";
+  field("category").value = item.category || "";
+  field("condition").value = item.condition || "";
+  field("price").value = item.price ?? "";
+  field("size").value = item.size || "";
+  field("brand").value = item.brand || "";
+  field("whatsapp").value = item.whatsapp || field("whatsapp").value;
+  field("notes").value = item.notes || "";
+  clearPhotos();
+  photos = itemImages(item).map((img) => ({ ...img }));
+  paintPhotos();
+  formTitle.textContent = "Edit Piece";
+  submitBtn.textContent = "Save changes";
+  cancelEditBtn.hidden = false;
+  form.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+cancelEditBtn.addEventListener("click", resetForm);
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const draft = {
+    clientId: field("client").value || null,
+    category: field("category").value,
+    condition: field("condition").value,
+    price: Number(field("price").value),
+    size: field("size").value.trim(),
+    brand: field("brand").value.trim(),
+    whatsapp: field("whatsapp").value.trim(),
+    notes: field("notes").value.trim(),
+  };
+
+  const problem = !photos.length
+    ? "Add at least one photo."
+    : !draft.category
+      ? "Pick a category."
+      : !draft.price || draft.price <= 0
+        ? "Add a price."
+        : !draft.size
+          ? "Add a size."
+          : !draft.condition
+            ? "Pick a condition."
+            : !whatsappHref(draft.whatsapp)
+              ? "Add a WhatsApp number buyers can reach (e.g. 081 234 5678)."
+              : null;
+  if (problem) {
+    toast(problem, "error");
     return;
   }
-  btn.disabled = true;
+
+  submitBtn.disabled = true;
+  submitBtn.classList.add("btn--loading");
+  submitBtn.textContent = editing ? "Saving…" : "Posting…";
+
+  const uploadedNow = [];
   try {
-    const removed = await adminDeleteAccount(user.uid);
-    Object.assign(user, { deleted: true, banned: true, username: "", displayName: "Deleted account" });
-    toast(`Account wiped (${removed} carousel${removed === 1 ? "" : "s"} removed)`);
-    paintUsers();
-    refreshLists();
+    const uid = auth.currentUser.uid;
+    const images = await Promise.all(
+      photos.map(async (photo) => {
+        if (!photo.file) return { url: photo.url, publicId: photo.publicId || null };
+        const uploaded = await uploadImage(photo.file, `items/${uid}`);
+        uploadedNow.push(uploaded.publicId);
+        return { url: uploaded.url, publicId: uploaded.publicId };
+      })
+    );
+    // imageURL/publicId mirror the cover, so anything that only shows one
+    // photo (cart rows, older code) keeps working
+    const media = { images, imageURL: images[0].url, publicId: images[0].publicId };
+
+    if (editing) {
+      await updateDoc(doc(db, "items", editing.id), { ...draft, ...media });
+      // photos taken off the post are no longer referenced anywhere
+      const kept = new Set(images.map((img) => img.publicId));
+      cleanUpImages(itemImages(editing).map((img) => img.publicId).filter((id) => !kept.has(id)));
+      toast("Changes saved");
+    } else {
+      await setDoc(doc(collection(db, "items")), {
+        ...draft,
+        ...media,
+        sold: false,
+        createdAt: serverTimestamp(),
+      });
+      toast("Posted — it's on the feed");
+    }
+
+    rememberWhatsapp(draft.whatsapp);
+    resetForm();
+    loadMine();
   } catch (err) {
     console.error(err);
-    toast("Couldn't delete that account.", "error");
+    // the post didn't save, so whatever just uploaded belongs to nothing
+    if (uploadedNow.length) cleanUpImages(uploadedNow);
+    toast(saveError(err), "error");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.classList.remove("btn--loading");
+    submitBtn.textContent = editing ? "Save changes" : "Post to feed";
+  }
+});
+
+function saveError(err) {
+  const denied = err?.code === "permission-denied" || /insufficient permissions/i.test(err?.message || "");
+  return denied
+    ? "Firestore turned that down — the security rules may need redeploying (firebase deploy --only firestore:rules)."
+    : err?.message || "Couldn't save that. Please try again.";
+}
+
+// ---------------------------------------------------------------------
+// clients — the people whose pieces you sell
+// ---------------------------------------------------------------------
+async function loadClients() {
+  const snap = await getDocs(query(collection(db, "clients"), orderBy("name")));
+  clients = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  paintClientSelect();
+}
+
+const clientName = (id) => clients.find((c) => c.id === id)?.name;
+const sameName = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+$("[data-client-add]").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const input = $("[data-client-name]");
+  const name = input.value.trim().replace(/\s+/g, " ");
+  if (!name) {
+    toast("Type the client's name first.", "error");
+    return;
+  }
+  if (clients.some((c) => sameName(c.name, name))) {
+    toast(`${name} is already in your list.`, "error");
+    return;
+  }
+
+  const btn = e.submitter;
+  if (btn) btn.disabled = true;
+  try {
+    const ref = await addDoc(collection(db, "clients"), { name, createdAt: serverTimestamp() });
+    clients = [...clients, { id: ref.id, name }].sort((a, b) => a.name.localeCompare(b.name));
+    input.value = "";
+    paintClientSelect();
+    paintMine();
+    toast(`Added ${name}`);
+  } catch (err) {
+    console.error(err);
+    toast(saveError(err), "error");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+});
+
+$("[data-folder-rename]").addEventListener("click", async () => {
+  const client = clients.find((c) => c.id === openFolder);
+  if (!client) return;
+  const name = (prompt("Rename this client:", client.name) || "").trim().replace(/\s+/g, " ");
+  if (!name || name === client.name) return;
+  if (clients.some((c) => c.id !== client.id && sameName(c.name, name))) {
+    toast(`${name} is already in your list.`, "error");
+    return;
+  }
+  try {
+    await updateDoc(doc(db, "clients", client.id), { name });
+    client.name = name;
+    clients.sort((a, b) => a.name.localeCompare(b.name));
+    paintClientSelect();
+    paintMine();
+    toast("Renamed");
+  } catch (err) {
+    console.error(err);
+    toast(saveError(err), "error");
+  }
+});
+
+$("[data-folder-delete]").addEventListener("click", async () => {
+  const client = clients.find((c) => c.id === openFolder);
+  if (!client) return;
+  const theirs = items.filter((i) => i.clientId === client.id);
+  const warning = theirs.length
+    ? `Remove ${client.name} from your clients? Their ${theirs.length} piece${theirs.length === 1 ? "" : "s"} stay on the feed and move to “Not for a client”.`
+    : `Remove ${client.name} from your clients?`;
+  if (!confirm(warning)) return;
+
+  try {
+    // 500 writes per batch is Firestore's cap; one client won't come close
+    const batch = writeBatch(db);
+    theirs.forEach((i) => batch.update(doc(db, "items", i.id), { clientId: null }));
+    batch.delete(doc(db, "clients", client.id));
+    await batch.commit();
+    theirs.forEach((i) => (i.clientId = null));
+    clients = clients.filter((c) => c.id !== client.id);
+    paintClientSelect();
+    openFolderView(null);
+    toast(`Removed ${client.name}`);
+  } catch (err) {
+    console.error(err);
+    toast(saveError(err), "error");
+  }
+});
+
+// ---------------------------------------------------------------------
+// what's posted — folders by client
+// ---------------------------------------------------------------------
+async function loadAll() {
+  try {
+    await loadClients();
+  } catch (err) {
+    console.error("Couldn't load clients:", err);
+    toast(saveError(err), "error");
+  }
+  loadMine();
+}
+
+async function loadMine() {
+  try {
+    const snap = await getDocs(query(collection(db, "items"), orderBy("createdAt", "desc"), limit(300)));
+    items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // pre-fill the number from the latest post on a fresh device
+    if (!field("whatsapp").value && items[0]?.whatsapp) field("whatsapp").value = items[0].whatsapp;
+    paintMine();
+  } catch (err) {
+    console.error(err);
+    mineLoading.hidden = false;
+    mineLoading.textContent = `Couldn't load your posts: ${err.message}`;
+  }
+}
+
+/** The posts in a folder. A post whose client was removed counts as no client. */
+function inFolder(folder) {
+  if (folder === ALL) return items;
+  if (folder === NO_CLIENT) return items.filter((i) => !clientName(i.clientId));
+  return items.filter((i) => i.clientId === folder);
+}
+
+function folderLabel(folder) {
+  if (folder === ALL) return "All posts";
+  if (folder === NO_CLIENT) return "Not for a client";
+  return clientName(folder) || "Client";
+}
+
+function openFolderView(folder) {
+  openFolder = folder;
+  if (!editing) field("client").value = folderClient();
+  paintMine();
+  (folder ? folderView : foldersView).scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+$("[data-folder-back]").addEventListener("click", () => openFolderView(null));
+
+function paintMine() {
+  mineLoading.hidden = true;
+  $("[data-count]").textContent = clients.length;
+
+  // a folder that's been removed elsewhere closes itself
+  if (openFolder && openFolder !== ALL && openFolder !== NO_CLIENT && !clientName(openFolder)) openFolder = null;
+
+  foldersView.hidden = !!openFolder;
+  folderView.hidden = !openFolder;
+  $("[data-folders-note]").hidden = !!openFolder;
+
+  if (!openFolder) {
+    paintFolders();
+    return;
+  }
+
+  const list = inFolder(openFolder);
+  const sold = list.filter((i) => i.sold).length;
+  $("[data-folder-title]").replaceChildren(
+    folderLabel(openFolder),
+    el("span", { class: "folder-head__meta" }, `${list.length} posted · ${sold} sold`)
+  );
+  $("[data-folder-actions]").hidden = openFolder === ALL || openFolder === NO_CLIENT;
+  mineEmpty.hidden = list.length > 0;
+  mineList.innerHTML = "";
+  list.forEach((item) => mineList.append(row(item)));
+}
+
+function paintFolders() {
+  const folders = [ALL, ...clients.map((c) => c.id), NO_CLIENT];
+  const grid = $("[data-folders]");
+  grid.innerHTML = "";
+  folders.forEach((folder) => {
+    const list = inFolder(folder);
+    if (folder === NO_CLIENT && !list.length) return;
+    const available = list.filter((i) => !i.sold);
+    const covers = list.slice(0, 3).map((i) => itemImages(i)[0]?.url).filter(Boolean);
+    grid.append(
+      el(
+        "button",
+        {
+          type: "button",
+          class: `folder${folder === ALL ? " folder--all" : ""}`,
+          onClick: () => openFolderView(folder),
+        },
+        [
+          el(
+            "span",
+            { class: "folder__peek", "aria-hidden": "true" },
+            covers.length
+              ? covers.map((url) => el("img", { src: sized(url, 160, { square: true }), alt: "", loading: "lazy", decoding: "async" }))
+              : el("i", { class: `ico ico--${folder === ALL ? "grid" : "user"} ico--lg` })
+          ),
+          el("span", { class: "folder__name" }, folderLabel(folder)),
+          el(
+            "span",
+            { class: "folder__meta" },
+            list.length ? `${list.length} piece${list.length === 1 ? "" : "s"} · ${available.length} available` : "Nothing posted yet"
+          ),
+        ]
+      )
+    );
+  });
+}
+
+function row(item) {
+  const button = (label, icon, onClick, cls = "btn--chrome") =>
+    el("button", { class: `btn ${cls} btn--sm`, type: "button", onClick }, [
+      el("i", { class: `ico ico--${icon}`, "aria-hidden": "true" }),
+      ` ${label}`,
+    ]);
+
+  const photoCount = itemImages(item).length;
+  const owner = openFolder === ALL ? clientName(item.clientId) : null;
+
+  return el("article", { class: "review posted" }, [
+    el("div", { class: "posted__thumb-wrap" }, [
+      el("img", { class: "posted__thumb", src: sized(item.imageURL, 200, { square: true }), alt: "", loading: "lazy", decoding: "async" }),
+      photoCount > 1 ? el("span", { class: "posted__photo-count" }, `${photoCount} photos`) : null,
+    ]),
+    el("div", { class: "posted__body" }, [
+      el("div", { class: "review__head" }, [
+        el("div", {}, [
+          el("p", { class: "review__seller" }, `${item.category || "Item"}${item.brand ? ` · ${item.brand}` : ""}`),
+          el(
+            "p",
+            { class: "review__meta" },
+            `Size ${item.size || "—"} · ${formatNAD(item.price)} · ${item.condition || ""} · ${timeAgo(toFirestoreDate(item.createdAt))}${owner ? ` · for ${owner}` : ""}`
+          ),
+        ]),
+        el(
+          "span",
+          { class: `status-pill status-pill--${item.sold ? "rejected" : "approved"}` },
+          item.sold ? "sold" : "available"
+        ),
+      ]),
+      el("div", { class: "review__actions" }, [
+        button("edit", "pencil", () => startEdit(item)),
+        button(item.sold ? "mark available" : "mark sold", item.sold ? "undo" : "check", (e) => toggleSold(e.currentTarget, item), "btn--outline"),
+        button("delete", "trash", (e) => remove(e.currentTarget, item)),
+      ]),
+    ]),
+  ]);
+}
+
+async function toggleSold(btn, item) {
+  btn.disabled = true;
+  try {
+    await updateDoc(doc(db, "items", item.id), { sold: !item.sold });
+    item.sold = !item.sold;
+    toast(item.sold ? "Marked as sold" : "Back on the rack");
+    paintMine();
+  } catch (err) {
+    console.error(err);
+    toast("Couldn't update that piece.", "error");
     btn.disabled = false;
   }
 }
 
-/** Firestore refuses these queries until the composite index exists. */
-function indexHint(err) {
-  const base = `Couldn't load: ${err.message}`;
-  return /index/i.test(err.message)
-    ? `${base}<br><small>Firestore needs a one-time index (status + createdAt). Open the browser console and click the link Firebase printed, or deploy <code>firebase/firestore.indexes.json</code>.</small>`
-    : base;
+async function remove(btn, item) {
+  if (!confirm("Delete this piece from the feed? This can't be undone.")) return;
+  btn.disabled = true;
+  try {
+    await deleteDoc(doc(db, "items", item.id));
+    cleanUpImages(itemImages(item).map((img) => img.publicId));
+    if (editing?.id === item.id) resetForm();
+    items = items.filter((i) => i.id !== item.id);
+    toast("Deleted");
+    paintMine();
+  } catch (err) {
+    console.error(err);
+    toast("Couldn't delete that piece.", "error");
+    btn.disabled = false;
+  }
 }
+
+/**
+ * Best-effort: if the server or Cloudinary keys aren't available the post
+ * is still gone from the feed — worst case a photo lingers in Cloudinary.
+ */
+async function cleanUpImages(publicIds) {
+  const ids = publicIds.filter(Boolean);
+  if (!ids.length) return;
+  try {
+    const idToken = await auth.currentUser.getIdToken();
+    await deleteImages(ids, idToken);
+  } catch (err) {
+    console.warn("Couldn't delete the photo from Cloudinary:", err);
+  }
+}
+
+paintClientSelect();
+paintPhotos();

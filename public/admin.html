@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin Dashboard.exe — Closet Sales Namibia</title>
-<meta name="description" content="Moderation, approval queue, and account control panel for Closet Sales Namibia." />
-<meta property="og:title" content="Admin Dashboard.exe — Closet Sales Namibia" />
-<meta property="og:description" content="Moderation, approval queue, and account control panel for Closet Sales Namibia." />
+<title>Admin — Closet Sales Namibia</title>
+<meta name="robots" content="noindex" />
+<meta name="description" content="Post and manage pieces on Closet Sales Namibia." />
+<meta property="og:title" content="Admin — Closet Sales Namibia" />
+<meta property="og:description" content="Post and manage pieces on Closet Sales Namibia." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -20,77 +21,115 @@
   <div class="page">
     <main>
       <div class="shell shell--wide" style="padding-top: 24px;">
-        <p class="eyebrow">✦ SYSTEM ADMINISTRATION · CLOSET.EXE ✦</p>
-        <h1 class="h1" style="margin-top: 6px; font-family: var(--font-display); font-weight: 800;">Moderation Center</h1>
 
-        <div class="admin-tabs" role="tablist">
-          <button type="button" class="admin-tab admin-tab--active" data-tab="pending">
-            Waiting For Approval <span class="admin-tab__count" data-count-pending>0</span>
-          </button>
-          <button type="button" class="admin-tab" data-tab="live">Live Feed</button>
-          <button type="button" class="admin-tab" data-tab="accounts">
-            Accounts <span class="admin-tab__count" data-count-users>0</span>
-          </button>
-        </div>
-
-        <!-- Carousels saved before the approval system existed -->
-        <div class="legacy-fix" data-legacy hidden>
-          <p class="legacy-fix__title">
-            <span data-legacy-count>0</span> older carousel(s) have no approval status
-          </p>
-          <p class="legacy-fix__body">
-            These were posted before approvals existed, so they show up nowhere — not on the feed,
-            not in the queue below. Choose what to do with them.
-          </p>
-          <div class="legacy-fix__actions">
-            <button type="button" class="btn btn--primary btn--sm" data-legacy-approve>
-              <i class="ico ico--check" aria-hidden="true"></i> Put Them Live
-            </button>
-            <button type="button" class="btn btn--outline btn--sm" data-legacy-pending>
-              <i class="ico ico--hourglass" aria-hidden="true"></i> Send To Queue
-            </button>
+        <!-- Signed out -->
+        <section data-signin hidden>
+          <div class="auth-card" style="margin: 24px auto;">
+            <p class="eyebrow text-center">✦ ADMIN ONLY ✦</p>
+            <h1 class="h2 text-center" style="font-family: var(--font-display); font-weight: 800; margin: 6px 0 22px;">Enter Password</h1>
+            <form data-login-form novalidate>
+              <div class="field">
+                <label for="admin-password"><i class="ico ico--lock" aria-hidden="true"></i> Password</label>
+                <input id="admin-password" type="password" autocomplete="current-password" required data-password />
+              </div>
+              <button type="submit" class="btn btn--primary btn--block" data-login-btn>Log in</button>
+            </form>
           </div>
-        </div>
-
-        <!-- Pending approvals -->
-        <section data-panel="pending">
-          <p class="muted" style="font-size: 13.5px; margin-bottom: 16px;">
-            Each carousel below is waiting on a N$150 payment confirmation. Check the reference handle
-            against your bank or wallet, then approve or reject.
-          </p>
-          <p class="text-center muted" data-pending-loading>Loading moderation queue…</p>
-          <div class="empty-state" data-pending-empty hidden>
-            <div class="empty-state__icon"><i class="ico ico--check ico--xl" aria-hidden="true"></i></div>
-            <p class="h3" style="font-family: var(--font-display);">Queue Clear</p>
-            <p class="muted" style="margin-top: 6px;">Every closet drop has been reviewed and actioned!</p>
-          </div>
-          <div data-pending-list></div>
         </section>
 
-        <!-- Live feed -->
-        <section data-panel="live" hidden>
-          <p class="muted" style="font-size: 13.5px; margin-bottom: 16px;">
-            Everything currently active and visible on the feed. You can pull any of these back down.
-          </p>
-          <p class="text-center muted" data-live-loading>Loading live closets…</p>
-          <div class="empty-state" data-live-empty hidden>
-            <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
-            <p class="h3" style="font-family: var(--font-display);">Nothing Live</p>
+        <!-- The dashboard -->
+        <section data-dashboard hidden>
+          <div class="admin-head">
+            <div>
+              <p class="eyebrow">✦ YOUR CLOSET ✦</p>
+              <h1 class="h1" style="margin-top: 6px; font-family: var(--font-display); font-weight: 800;" data-form-title>Post a Piece</h1>
+            </div>
+            <button type="button" class="btn btn--outline btn--sm" data-signout>Sign out</button>
           </div>
-          <div data-live-list></div>
-        </section>
 
-        <!-- Accounts -->
-        <section data-panel="accounts" hidden>
-          <p class="muted" style="font-size: 13.5px; margin-bottom: 16px;">
-            Registered sellers and buyers across Namibia. Banning blocks new carousels and locks users out of publishing; deleting also wipes their listings.
-          </p>
-          <div class="field" style="max-width: 360px;">
-            <label for="account-search" style="font-weight: 700;">Search By Name Or @Username</label>
-            <input id="account-search" type="text" data-account-search placeholder="e.g. grace…" autocomplete="off" />
+          <form class="post-form" data-post-form novalidate>
+            <div class="post-form__photos">
+              <div class="photo-grid" data-photo-grid></div>
+              <input id="post-photo" class="visually-hidden-file" type="file" accept="image/*" multiple data-field="image" />
+              <p class="photo-hint muted" data-photo-hint>Up to 5 photos from different angles. The first one is the cover — tap another to make it the cover.</p>
+            </div>
+
+            <div class="post-form__fields">
+              <div class="post-form__grid">
+                <div class="field post-form__span">
+                  <label for="post-client"><i class="ico ico--user" aria-hidden="true"></i> Selling for</label>
+                  <select id="post-client" data-field="client"></select>
+                </div>
+                <div class="field">
+                  <label for="post-category">Category</label>
+                  <select id="post-category" data-field="category" required></select>
+                </div>
+                <div class="field">
+                  <label for="post-price">Price (N$)</label>
+                  <input id="post-price" type="number" min="1" step="0.01" inputmode="decimal" data-field="price" required />
+                </div>
+                <div class="field">
+                  <label for="post-size">Size</label>
+                  <input id="post-size" type="text" maxlength="20" placeholder="e.g. M, 32, UK 7" data-field="size" required />
+                </div>
+                <div class="field">
+                  <label for="post-brand">Brand / Store</label>
+                  <input id="post-brand" type="text" maxlength="40" placeholder="e.g. Zara, Mr Price" data-field="brand" />
+                </div>
+                <div class="field">
+                  <label for="post-condition">Condition</label>
+                  <select id="post-condition" data-field="condition" required></select>
+                </div>
+                <div class="field">
+                  <label for="post-whatsapp"><i class="ico ico--chat" aria-hidden="true"></i> WhatsApp Number</label>
+                  <input id="post-whatsapp" type="tel" placeholder="081 234 5678" autocomplete="tel" data-field="whatsapp" required />
+                </div>
+              </div>
+              <div class="field">
+                <label for="post-notes">Notes <span class="muted" style="text-transform:none; letter-spacing:0;">(optional)</span></label>
+                <textarea id="post-notes" maxlength="300" rows="2" placeholder="Fit, colour, flaws, anything a buyer should know" data-field="notes"></textarea>
+              </div>
+
+              <div class="post-form__actions">
+                <button type="submit" class="btn btn--primary" data-submit>Post to feed</button>
+                <button type="button" class="btn btn--outline" data-cancel-edit hidden>Cancel edit</button>
+              </div>
+            </div>
+          </form>
+
+          <h2 class="h2" style="font-family: var(--font-display); font-weight: 800; margin: 40px 0 6px;">
+            Clients <span class="admin-tab__count admin-tab__count--ink" data-count>0</span>
+          </h2>
+          <p class="muted" style="font-size: 13.5px; margin-bottom: 16px;" data-folders-note>A folder for everyone you sell for. Open one to see what you've posted for them.</p>
+          <p class="text-center muted" data-mine-loading>Loading…</p>
+
+          <!-- every client as a folder -->
+          <div data-folders-view>
+            <div class="folder-grid" data-folders></div>
+            <form class="client-add" data-client-add novalidate>
+              <label class="visually-hidden" for="client-name">New client name</label>
+              <input id="client-name" type="text" maxlength="60" placeholder="Add a client, e.g. Maria K." autocomplete="off" data-client-name />
+              <button type="submit" class="btn btn--primary btn--sm"><i class="ico ico--plus" aria-hidden="true"></i> Add client</button>
+            </form>
           </div>
-          <p class="text-center muted" data-users-loading>Loading user accounts…</p>
-          <div data-users-list></div>
+
+          <!-- one folder opened -->
+          <div data-folder-view hidden>
+            <div class="folder-head">
+              <button type="button" class="btn btn--outline btn--sm" data-folder-back>← All folders</button>
+              <h3 class="h3 folder-head__title" data-folder-title></h3>
+              <div class="folder-head__actions" data-folder-actions>
+                <button type="button" class="btn btn--chrome btn--sm" data-folder-rename><i class="ico ico--pencil" aria-hidden="true"></i> rename</button>
+                <button type="button" class="btn btn--chrome btn--sm" data-folder-delete><i class="ico ico--trash" aria-hidden="true"></i> remove</button>
+              </div>
+            </div>
+            <div class="empty-state" data-mine-empty hidden>
+              <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
+              <p class="h3">Nothing posted here yet</p>
+              <p class="muted" style="margin-top: 6px;">Pick this name under “Selling for” when you post a piece.</p>
+            </div>
+            <div data-mine></div>
+          </div>
         </section>
       </div>
     </main>

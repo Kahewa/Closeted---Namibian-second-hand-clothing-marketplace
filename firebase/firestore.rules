@@ -5,85 +5,46 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(uid) {
-      return isSignedIn() && request.auth.uid == uid;
-    }
-
-    // The one admin account. Email comes from the verified auth token, so
-    // this can't be spoofed by a client.
+    // The one admin account — the only login on the site, opened by the
+    // admin password. The uid comes from the verified auth token, so it
+    // can't be spoofed by a client. Set by `npm run admin:password`;
+    // mirrored in public/js/utils.js (ADMIN_UID).
     function isAdmin() {
-      return isSignedIn() && request.auth.token.email == 'bygreys.na@gmail.com';
-    }
-
-    // A banned user keeps their login but can't write anything new.
-    // Costs one extra read, so it's only checked on carousel creation.
-    // `.get(field, default)` rather than `.field`: reading a key that isn't
-    // on the document raises an error and fails the whole rule, which would
-    // lock out every account created before `banned` was added.
-    function notBanned() {
-      return isSignedIn() && (
-        !exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('banned', false) != true
-      );
+      return request.auth != null && request.auth.uid == 'aNHz1YdC6De9S7aS0GZqBUlBlp73';
     }
 
     // ---------------------------------------------------------------
-    // users/{uid} — public profile: username, pic, bio, social links.
-    // Admin can update (to ban) and delete (to remove an account).
+    // items/{itemId} — one posted piece: up to 5 photos (images, with the
+    // cover mirrored in imageURL), category, size, brand, condition, price,
+    // notes, WhatsApp number, sold, and clientId (who it's sold for).
+    // Anyone can browse; only the admin can post, edit or delete.
     // ---------------------------------------------------------------
-    match /users/{uid} {
-      allow read: if true;                 // profiles + username search are public
-      allow create: if isOwner(uid);
-      allow update: if isOwner(uid) || isAdmin();
-      allow delete: if isOwner(uid) || isAdmin();
+    match /items/{itemId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.data.category in
+             ['Shirt', 'Top', 'Belt', 'Pants', 'Skirt', 'Shorts', 'Dress', 'Shoes', 'Heels', 'Accessories']
+        && request.resource.data.price is number
+        && request.resource.data.price > 0
+        && (!('images' in request.resource.data)
+            || (request.resource.data.images is list && request.resource.data.images.size() <= 5));
+      allow delete: if isAdmin();
     }
 
     // ---------------------------------------------------------------
-    // usernames/{username} — one doc per taken username, holding the uid
-    // that owns it. Firestore has no unique-column constraint; this is
-    // the standard substitute. `create` fails automatically if the doc
-    // already exists, which is what makes the name unique.
+    // clients/{clientId} — the people whose pieces the admin sells for
+    // them: { name, createdAt }. Private: only the admin sees the names;
+    // items carry just the opaque clientId.
     // ---------------------------------------------------------------
-    match /usernames/{name} {
-      allow read: if true;                 // so signup can check availability
-      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
-      allow delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
-      allow update: if false;              // release and re-claim instead
+    match /clients/{clientId} {
+      allow read, delete: if isAdmin();
+      allow create, update: if isAdmin()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 60;
     }
 
-    // ---------------------------------------------------------------
-    // carousels/{carouselId} — a seller's closet drop.
-    // The N$150 fee is paid manually (bank transfer / wallet), so a new
-    // carousel lands as 'pending' and only the admin can move it to
-    // 'approved'. The feed reads approved ones; a seller sees their own
-    // pending ones on their profile with a "waiting for approval" note.
-    // ---------------------------------------------------------------
-    match /carousels/{carouselId} {
-      allow read: if true;                 // the feed is public
-
-      allow create: if isSignedIn()
-        && notBanned()
-        && request.resource.data.sellerId == request.auth.uid
-        && request.resource.data.keys().hasAll(['sellerId', 'items', 'createdAt', 'status'])
-        // admin posts go live immediately; everyone else waits for approval
-        && (isAdmin()
-              ? request.resource.data.status == 'approved'
-              : request.resource.data.status == 'pending');
-
-      // Sellers can edit their own listing (mark items sold) but must not
-      // change `status` — that's what would let them approve themselves.
-      // Defaulted reads again, so carousels posted before `status` existed
-      // stay editable by their owner instead of erroring.
-      allow update: if isAdmin()
-        || (isSignedIn()
-            && resource.data.sellerId == request.auth.uid
-            && request.resource.data.get('status', '') == resource.data.get('status', ''));
-
-      allow delete: if isAdmin() || (isSignedIn() && resource.data.sellerId == request.auth.uid);
-    }
+    // Everything else (the old users / usernames / carousels collections
+    // included) is closed. Firestore denies anything not matched above.
   }
 }

@@ -25,3 +25,7 @@ export const FIREBASE_CONFIG = {
 
 export const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUD_NAME";
 export const CLOUDINARY_UPLOAD_PRESET = "YOUR_UNSIGNED_PRESET";
+
+// The live site's address, e.g. https://closet-sales.vercel.app — used in
+// the cart link shoppers send over WhatsApp, so it never says localhost.
+export const SITE_URL = "https://YOUR-SITE.vercel.app";

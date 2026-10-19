@@ -1,82 +1,131 @@
-import { db, auth } from "./firebase-config.js";
+import { db } from "./firebase-config.js";
 import {
   collection,
   query,
-  where,
   orderBy,
   limit,
   startAfter,
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { renderCarouselCard } from "./carousel-card.js";
-import { $ } from "./utils.js";
+import { renderItemCard, syncCartButton } from "./item-card.js";
+import { $, el, CATEGORIES } from "./utils.js";
 
-const PAGE_SIZE = 8;
+// How many matching pieces to show per "load more". Firestore is asked for
+// pages in the same order and the category is filtered here in the
+// browser — at this catalogue size that's cheaper than maintaining a
+// composite index per filter, and it keeps "newest first" exact.
+const PAGE_SIZE = 24;
 
 const feedEl = $("[data-feed]");
+const filterBar = $("[data-filters]");
 const loadMoreBtn = $("[data-load-more]");
 const emptyState = $("[data-empty-state]");
 
-let currentUser = null;
+const loaded = [];
 let lastDoc = null;
 let reachedEnd = false;
 let loading = false;
-const loadedCarousels = [];
+let shown = PAGE_SIZE;
 
-// The feed starts loading before Firebase has resolved who's signed in, so
-// once it does, repaint — that's what makes a seller's own "mark sold" and
-// "delete" controls appear on their cards.
-onAuthStateChanged(auth, (user) => {
-  const changed = (currentUser?.uid || null) !== (user?.uid || null);
-  currentUser = user;
-  if (changed && loadedCarousels.length) repaintFeed();
-});
+// ?c=Shoes keeps a filter across reloads and makes it shareable.
+let active = CATEGORIES.includes(new URLSearchParams(location.search).get("c"))
+  ? new URLSearchParams(location.search).get("c")
+  : "";
 
-function repaintFeed() {
-  feedEl.innerHTML = "";
-  loadedCarousels.forEach((carousel) => feedEl.append(renderCarouselCard(carousel, currentUser)));
-  emptyState.hidden = loadedCarousels.length > 0;
+// ---------------------------------------------------------------------
+// filter chips
+// ---------------------------------------------------------------------
+function paintFilters() {
+  filterBar.innerHTML = "";
+  ["", ...CATEGORIES].forEach((cat) => {
+    filterBar.append(
+      el(
+        "button",
+        {
+          type: "button",
+          class: `filter-chip${cat === active ? " filter-chip--on" : ""}`,
+          "aria-pressed": String(cat === active),
+          onClick: () => setFilter(cat),
+        },
+        cat || "All"
+      )
+    );
+  });
 }
 
-async function loadPage() {
-  if (loading || reachedEnd) return;
+function setFilter(cat) {
+  active = cat;
+  shown = PAGE_SIZE;
+  const url = new URL(location.href);
+  if (cat) url.searchParams.set("c", cat);
+  else url.searchParams.delete("c");
+  history.replaceState(null, "", url);
+  paintFilters();
+  fill();
+}
+
+// ---------------------------------------------------------------------
+// data
+// ---------------------------------------------------------------------
+const matches = () => loaded.filter((item) => !active || item.category === active);
+
+async function fetchPage() {
+  const constraints = [orderBy("createdAt", "desc"), limit(PAGE_SIZE * 2)];
+  if (lastDoc) constraints.push(startAfter(lastDoc));
+  const snap = await getDocs(query(collection(db, "items"), ...constraints));
+  snap.forEach((d) => loaded.push({ id: d.id, ...d.data() }));
+  lastDoc = snap.docs.at(-1) || lastDoc;
+  if (snap.size < PAGE_SIZE * 2) reachedEnd = true;
+}
+
+/** Fetches until there are enough matches to show, or nothing's left. */
+async function fill() {
+  if (loading) return;
   loading = true;
-  loadMoreBtn.textContent = "Loading…";
   loadMoreBtn.disabled = true;
+  loadMoreBtn.textContent = "Loading…";
 
   try {
-    // Only approved drops reach the feed. Pending ones are visible to
-    // their own seller on their profile, and to the admin dashboard.
-    const constraints = [
-      where("status", "==", "approved"),
-      orderBy("createdAt", "desc"),
-      limit(PAGE_SIZE),
-    ];
-    if (lastDoc) constraints.push(startAfter(lastDoc));
-    const snap = await getDocs(query(collection(db, "carousels"), ...constraints));
-
-    snap.forEach((docSnap) => {
-      loadedCarousels.push({ id: docSnap.id, ...docSnap.data() });
-    });
-    lastDoc = snap.docs.at(-1) || lastDoc;
-    if (snap.size < PAGE_SIZE) reachedEnd = true;
-
-    repaintFeed();
+    while (matches().length < shown && !reachedEnd) await fetchPage();
+    paint();
   } catch (err) {
     console.error("Couldn't load the feed:", err);
     emptyState.hidden = false;
     emptyState.querySelector("[data-empty-title]").textContent = "Couldn't load the feed";
-    emptyState.querySelector("[data-empty-body]").innerHTML = /index/i.test(err.message)
-      ? `Firestore needs a one-time index (status + createdAt). Open the browser console and click the link Firebase printed, or deploy <code>firebase/firestore.indexes.json</code>.<br><small>${err.message}</small>`
-      : `Double check your config in <code>public/js/local-config.js</code>.<br><small>${err.message}</small>`;
+    emptyState.querySelector("[data-empty-body]").textContent =
+      "Check your connection and refresh the page.";
   } finally {
     loading = false;
-    loadMoreBtn.textContent = "Load more closets";
     loadMoreBtn.disabled = false;
-    loadMoreBtn.hidden = reachedEnd;
+    loadMoreBtn.textContent = "Load more";
   }
 }
 
-loadMoreBtn.addEventListener("click", loadPage);
-loadPage();
+function paint() {
+  const list = matches();
+  feedEl.innerHTML = "";
+  list.slice(0, shown).forEach((item) => feedEl.append(renderItemCard(item)));
+
+  emptyState.hidden = list.length > 0;
+  emptyState.querySelector("[data-empty-title]").textContent = active
+    ? `No ${active.toLowerCase()} right now`
+    : "Nothing posted yet";
+  emptyState.querySelector("[data-empty-body]").textContent = active
+    ? "Try another category, or check back soon."
+    : "New pieces are on the way. Check back soon.";
+
+  loadMoreBtn.hidden = list.length <= shown && reachedEnd;
+}
+
+// one listener for every card, rather than one per card per repaint
+window.addEventListener("cart:change", () => {
+  feedEl.querySelectorAll("[data-cart-id]").forEach(syncCartButton);
+});
+
+loadMoreBtn.addEventListener("click", () => {
+  shown += PAGE_SIZE;
+  fill();
+});
+
+paintFilters();
+fill();

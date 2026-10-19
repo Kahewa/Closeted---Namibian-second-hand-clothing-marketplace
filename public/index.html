@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closet Sales Namibia — Pre-Loved Fashion Marketplace</title>
-<meta name="description" content="Shop authentic pre-loved wardrobes or sell your entire closet in one flat N$150 drop. Chat directly on WhatsApp with Namibian sellers." />
-<meta property="og:title" content="Closet Sales Namibia — Pre-Loved Fashion Marketplace" />
-<meta property="og:description" content="Shop authentic pre-loved wardrobes or sell your entire closet in one flat N$150 drop. Chat directly on WhatsApp with Namibian sellers." />
+<title>Closet Sales Namibia — Pre-Loved Fashion</title>
+<meta name="description" content="Pre-loved shirts, dresses, shoes and more, posted fresh in Namibia. Filter by what you want and ask about any piece on WhatsApp." />
+<meta property="og:title" content="Closet Sales Namibia — Pre-Loved Fashion" />
+<meta property="og:description" content="Pre-loved shirts, dresses, shoes and more, posted fresh in Namibia. Filter by what you want and ask about any piece on WhatsApp." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -19,7 +19,6 @@
 <body data-page="home">
   <div class="page">
     <main>
-      <!-- Y2K High-Impact Metallic Hero -->
       <section class="hero">
         <div class="sparkle-field" aria-hidden="true">
           <span class="sparkle" style="top:12%; left:8%;"></span>
@@ -30,95 +29,48 @@
 
         <div class="hero__inner">
           <div class="hero__badge">
-            <span>✦ NAMIBIA'S 2000s &amp; PRE-LOVED MARKETPLACE ✦</span>
+            <span>✦ PRE-LOVED FASHION · NAMIBIA ✦</span>
           </div>
-          
+
           <h1 class="hero__title">
-            BUY WHAT'S DROPPED.
-            <span class="hero__highlight">Sell Your Closet</span>
+            FRESH DROPS.
+            <span class="hero__highlight">Second Life</span>
           </h1>
 
           <p class="hero__lead">
-            Shop real Namibian wardrobes piece-by-piece. Tap any item to message verified sellers directly on WhatsApp. Keep 100% of your earnings. No middleman cuts, no wait.
+            Hand-picked pre-loved pieces, photographed one by one. Pick a category, find your size,
+            and tap to ask about it on WhatsApp.
           </p>
 
-          <!-- Feature Badges -->
-          <div class="hero__ribbon">
-            <span class="hero__pill"><i class="ico ico--chat" aria-hidden="true"></i> Direct WhatsApp Chats</span>
-            <span class="hero__pill"><i class="ico ico--tag" aria-hidden="true"></i> N$150 Unlimited Pieces</span>
-            <span class="hero__pill"><i class="ico ico--check" aria-hidden="true"></i> 0% Commission Fees</span>
+          <div class="hero__cta-row">
+            <a href="#browse" class="btn btn--primary">Shop the feed</a>
           </div>
         </div>
       </section>
 
-      <!-- Newest Closet Sellers -->
-      <section class="band band--white">
-        <div class="shell shell--wide">
-          <h2 class="section-title">Newest Closet Sellers</h2>
-          <div class="heart-row" aria-hidden="true"></div>
-
-          <p class="text-center muted" data-newest-status>Loading sellers…</p>
-          <div class="seller-row" data-newest></div>
-        </div>
-      </section>
-
-      <!-- Browse Closets Feed -->
       <section class="browse" id="browse">
         <div class="shell shell--wide">
-          <h2 class="browse__title">Browse Fresh Drops</h2>
-          <p class="browse__subtitle">
-            Every drop is someone's authentic wardrobe clear-out. Swipe each carousel to see all pieces, sizes, and prices.
-          </p>
+          <h2 class="browse__title">Browse Pieces</h2>
+
+          <div class="filter-bar" role="group" aria-label="Filter by category" data-filters></div>
 
           <div class="empty-state" data-empty-state hidden>
             <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
-            <p class="h3" data-empty-title>No closets dropped yet</p>
-            <p class="muted" data-empty-body style="margin-top:6px;">Be the first — your closet could be today's top drop.</p>
-            <a href="sell.html" class="btn btn--primary" style="margin-top:20px;">Sell your closet</a>
+            <p class="h3" data-empty-title>Nothing posted yet</p>
+            <p class="muted" data-empty-body style="margin-top:6px;">New pieces are on the way. Check back soon.</p>
           </div>
 
-          <div id="feed-start" data-feed></div>
+          <div class="item-grid" data-feed></div>
 
           <div class="text-center" style="margin-top:48px;">
-            <button type="button" class="btn btn--chrome" data-load-more>Load More Closets</button>
+            <button type="button" class="btn btn--chrome" data-load-more>Load more</button>
           </div>
         </div>
       </section>
     </main>
-
-    <!-- Welcome Modal for new visitors -->
-    <div class="modal welcome" data-welcome hidden>
-      <div class="modal__backdrop" data-welcome-close></div>
-      <div class="modal__panel" data-win="WELCOME TO CLOSET SALES" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
-        <button type="button" class="modal__x" data-welcome-close aria-label="Close">
-          <i class="ico ico--close" aria-hidden="true"></i>
-        </button>
-
-        <p class="text-center" style="font-family: var(--font-mono); font-size: 11px; font-weight: 800; letter-spacing: 0.15em; color: var(--hot-pink); margin-top: 14px;">
-          ✦ NAMIBIA'S ONLINE WARDROBE ✦
-        </p>
-        <h2 class="split__title text-center" id="welcome-title" style="font-family: var(--font-display); font-weight: 800; font-size: 26px; text-transform: uppercase; margin: 8px 0 16px;">
-          ABOUT THE <span style="color: var(--hot-pink); font-family: var(--font-script); text-transform: none; font-size: 1.4em;">Closet</span>
-        </h2>
-
-        <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px;">
-          Closet Sales Namibia was created with one idea in mind — that good clothes deserve a second life. Every listing here is somebody's real wardrobe clear-out, photographed piece by piece, priced honestly.
-        </p>
-        <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px;">
-          Sellers pay one flat N$150 fee to post a whole closet, however many pieces it holds. Buyers find something they love and message the seller directly on WhatsApp. No middlemen, no commission, no fuss.
-        </p>
-
-        <div class="hero__cta-row" style="margin-top: 20px;">
-          <a href="#browse" class="btn btn--primary" data-welcome-close>Explore Closets</a>
-          <a href="sell.html" class="btn btn--chrome">Sell Your Closet</a>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script type="module" src="js/layout.js"></script>
-  <script type="module" src="js/newest.js"></script>
   <script type="module" src="js/feed.js"></script>
-  <script type="module" src="js/welcome.js"></script>
 </body>
 </html>

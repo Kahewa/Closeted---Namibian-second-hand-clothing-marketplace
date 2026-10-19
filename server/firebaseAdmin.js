@@ -16,9 +16,8 @@ if (fs.existsSync(serviceAccountPath)) {
 } else {
   console.warn(
     "!  serviceAccountKey.json not found.\n" +
-      "   The site runs fine without it: the N$150 fee is paid manually and\n" +
-      "   approved from the admin dashboard, which never touches this server.\n" +
-      "   What it does affect is /api/media/delete (removing a listing's photos\n" +
+      "   The site runs fine without it. What it does affect is\n" +
+      "   /api/media/delete (removing a post's photo\n" +
       "   from Cloudinary): login tokens there fall back to being read WITHOUT\n" +
       "   signature verification. Fine on localhost, never on a public URL.\n" +
       "   Add the key — README.md, 'Connect the backend' — to turn that off."

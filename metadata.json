@@ -1,6 +1,6 @@
 {
   "name": "Closet Sales Namibia",
-  "description": "Pre-loved fashion marketplace for Namibia featuring Y2K & 2000s aesthetics, flat N$150 carousel drops, and direct WhatsApp shopping.",
+  "description": "Pre-loved fashion feed for Namibia featuring Y2K & 2000s aesthetics, filterable by category, with direct WhatsApp enquiries.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

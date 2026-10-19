@@ -3,7 +3,6 @@ require("dotenv").config();
 const path = require("path");
 const express = require("express");
 
-const paymentsRouter = require("./routes/payments");
 const mediaRouter = require("./routes/media");
 
 const app = express();
@@ -11,10 +10,10 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// The whole frontend is plain static HTML/CSS/JS — Firebase Auth,
-// Firestore and Storage are called directly from the browser via the
-// Firebase client SDK, so this server's only real job is the N$150
-// listing-fee flow below (and, eventually, real payment webhooks).
+// The whole frontend is plain static HTML/CSS/JS — Firebase Auth and
+// Firestore are called directly from the browser via the Firebase
+// client SDK, so this server's only real job is deleting photos from
+// Cloudinary, which needs the API secret.
 app.use(
   express.static(path.join(__dirname, "..", "public"), {
     // Nothing here is fingerprinted — style.css keeps its name through every
@@ -35,7 +34,6 @@ app.use(
   })
 );
 
-app.use("/api/carousel-fee", paymentsRouter);
 app.use("/api/media", mediaRouter);
 
 // Anything else (typos, stray links) just goes back to the feed rather

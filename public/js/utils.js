@@ -1,49 +1,29 @@
 // Shared constants + tiny DOM/format helpers used across every page.
 
-export const CATEGORIES = ["Tops", "Bottoms", "Dresses & Skirts", "Outerwear", "Shoes", "Other Clothing"];
+// The only categories a post can have — also the filter chips on the feed.
+export const CATEGORIES = [
+  "Shirt",
+  "Top",
+  "Belt",
+  "Pants",
+  "Skirt",
+  "Shorts",
+  "Dress",
+  "Shoes",
+  "Heels",
+  "Accessories",
+];
 
 export const CONDITIONS = ["New with tags", "Like new", "Good", "Fair"];
 
-export const CAROUSEL_FEE = 150;
-export const CAROUSEL_FEE_CURRENCY = "NAD";
-
-// The single admin account. Mirrored in firebase/firestore.rules — change
-// it in both places or the dashboard and the rules will disagree.
-export const ADMIN_EMAIL = "bygreys.na@gmail.com";
+// The single admin account — the only login on the site — identified by
+// its Firebase account id. Not a secret: knowing it doesn't let anyone log
+// in, only the password does. Written here and in firebase/firestore.rules
+// by `npm run admin:password`; the two must match.
+export const ADMIN_UID = "aNHz1YdC6De9S7aS0GZqBUlBlp73";
 
 export function isAdminUser(user) {
-  return !!user && (user.email || "").toLowerCase() === ADMIN_EMAIL;
-}
-
-// Where sellers send the N$150 listing fee. Shown in the payment dialog
-// on the sell page; the reference is filled in with their username so
-// payments can be matched to accounts in the admin dashboard.
-export const PAYMENT_DETAILS = {
-  walletNumber: "081 652 8920",
-  walletLabel: "Pay2Cell or any wallet transfer",
-  bank: "FNB / RMB",
-  accountHolder: "Grace Shuuya",
-  accountType: "Bankwise Regular Account",
-  accountNumber: "62269784487",
-  branchCode: "282672",
-  cashWhatsapp: "0818093631",
-};
-
-// Usernames: lowercase letters, numbers, underscore and dot, 3–20 chars.
-// Kept tight so they stay usable as a payment reference and in a URL.
-export const USERNAME_RE = /^[a-z0-9._]{3,20}$/;
-
-export function normalizeUsername(value = "") {
-  return value.trim().toLowerCase().replace(/^@/, "");
-}
-
-export function usernameError(value) {
-  const name = normalizeUsername(value);
-  if (!name) return "Pick a username.";
-  if (!USERNAME_RE.test(name)) {
-    return "3–20 characters, lowercase letters, numbers, dots or underscores only.";
-  }
-  return null;
+  return !!user && user.uid === ADMIN_UID;
 }
 
 export function formatNAD(amount) {
@@ -57,9 +37,6 @@ export function $(selector, scope = document) {
   return scope.querySelector(selector);
 }
 
-export function $all(selector, scope = document) {
-  return Array.from(scope.querySelectorAll(selector));
-}
 
 export function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag);
@@ -79,16 +56,6 @@ export function el(tag, attrs = {}, children = []) {
   return node;
 }
 
-export function initials(name = "") {
-  return (
-    name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase() || "")
-      .join("") || "?"
-  );
-}
 
 export function timeAgo(date) {
   if (!date) return "";
@@ -158,52 +125,15 @@ export function whatsappHref(value = "", message = "") {
   return `https://wa.me/${digits}${query}`;
 }
 
-export function isValidUrl(value = "") {
-  try {
-    const u = new URL(value);
-    return u.protocol === "http:" || u.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
+// A post holds up to this many photos; the first is the cover.
+export const MAX_PHOTOS = 5;
 
-// ---------------------------------------------------------------------
-// Modals
-// ---------------------------------------------------------------------
-// Opening was animated by CSS, but closing just flipped `hidden` and the
-// panel vanished mid-frame. These play the exit first, then hide.
-
-export function openModal(node) {
-  if (!node) return;
-  node.classList.remove("modal--closing");
-  node.hidden = false;
-  document.body.style.overflow = "hidden";
-}
-
-export function closeModal(node) {
-  if (!node || node.hidden) return;
-
-  const finish = () => {
-    node.hidden = true;
-    node.classList.remove("modal--closing");
-    document.body.style.overflow = "";
-  };
-
-  const panel = node.querySelector(".modal__panel, .lightbox__panel");
-  const wantsMotion = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
-  if (!panel || !wantsMotion) return finish();
-
-  node.classList.add("modal--closing");
-
-  // animationend is the signal, but a timeout backs it up — a modal that
-  // never closes because an event didn't fire is far worse than one that
-  // closes a frame early.
-  let done = false;
-  const once = () => {
-    if (done) return;
-    done = true;
-    finish();
-  };
-  panel.addEventListener("animationend", once, { once: true });
-  setTimeout(once, 400);
+/**
+ * Every photo of a piece as [{ url, publicId }], cover first. Posts from
+ * before multi-photo only have imageURL/publicId, so those become a list
+ * of one.
+ */
+export function itemImages(item) {
+  if (Array.isArray(item?.images) && item.images.length) return item.images.filter((img) => img?.url);
+  return item?.imageURL ? [{ url: item.imageURL, publicId: item.publicId || null }] : [];
 }
