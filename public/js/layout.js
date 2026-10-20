@@ -26,7 +26,6 @@ const PAGES = {
   cart: { links: [], cart: true, back: true },
   item: { links: [], cart: true, back: true },
   sell: { links: [], cart: true, back: true },
-  buy: { links: [], cart: true, back: true },
   admin: { links: [{ href: "index.html", label: "view the feed" }], logoHref: "admin.html" },
 };
 

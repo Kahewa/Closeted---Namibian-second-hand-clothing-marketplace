@@ -1586,7 +1586,7 @@ a.item-card__category:hover { text-decoration: underline; text-underline-offset:
 .hero > .shell { max-width: none; padding-left: var(--hero-left); padding-right: var(--hero-left); }
 
 /* ---- hero: sewn-on denim patches ----------------------------------------
-   How to sell / How to buy / Advertise your business. Each is a scrap of
+   How to sell / Advertise your business. Each is a scrap of
    the denim photo with a dashed line of jeans thread just inside the
    edge, a pale frayed rim and embroidered white lettering. */
 .hero__patches {
@@ -2369,3 +2369,188 @@ body::before, body::after { display: none; }
     background: var(--glass-sheen), rgba(255, 244, 249, 0.94);
   }
 }
+
+/* =========================================================================
+   FILTERS ON PHONES (and anywhere the pills don't fit in the top bar):
+   a "Filter items" button opens a glass side panel with a wavy edge; the
+   chosen categories show in the top bar as tags with an ×. js/feed.js.
+   ========================================================================= */
+.filter-strip { display: none; }
+@media (max-width: 1179px) {
+  .navbar .navbar__filters { display: none; }
+  .filter-strip {
+    order: 3;
+    flex: 0 0 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 2px 0 8px;
+  }
+}
+
+/* shared look for the pink denim pieces: the button, and the panel's choices */
+.filter-open,
+.filter-drawer .filter-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 16px;
+  border: 0;
+  border-radius: 10px;
+  background:
+    linear-gradient(rgba(255, 196, 220, 0.32), rgba(255, 196, 220, 0.32)),
+    url("../assets/denim.webp") center / 330px auto,
+    #f07aa9;
+  background-blend-mode: normal, luminosity;
+  color: #fff;
+  font-family: "Poppins", var(--font-body);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow:
+    inset 0 -3px 6px rgba(110, 20, 60, 0.3),
+    0 0 0 2px #f9c9dc,
+    0 0 0 3px rgba(150, 40, 85, 0.45),
+    0 3px 6px rgba(80, 30, 55, 0.18);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.filter-open::before,
+.filter-drawer .filter-chip::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.85);
+  border-radius: 7px;
+  pointer-events: none;
+}
+.filter-open__icon { display: inline-flex; }
+.filter-open:active, .filter-drawer .filter-chip:active { transform: scale(0.97); }
+
+/* a chosen filter in the top bar: a small blue denim tag with an × */
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 6px 4px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: #4a6487 url("../assets/denim.webp") center / 330px auto;
+  color: #fff;
+  font-family: "Poppins", var(--font-body);
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 0 0 2px #c9d6e6, 0 0 0 3px rgba(45, 68, 102, 0.5);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.filter-tag__x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2d4466;
+  font-size: 15px;
+  line-height: 1;
+}
+.filter-tags { display: contents; }
+
+/* the side panel: glass, wavy right edge, slides in from the left */
+.filter-drawer {
+  --wave: 16px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 210;
+  display: flex;
+  flex-direction: column;
+  width: min(330px, 86vw);
+  padding: 22px calc(18px + var(--wave)) 22px 18px;
+  overflow-y: auto;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 232, 242, 0.72) 100%);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-mask:
+    linear-gradient(#000 0 0) left / calc(100% - var(--wave)) 100% no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 80' preserveAspectRatio='none'%3E%3Cpath d='M0 0H7C7 10 14 10 14 20S7 30 7 40 14 50 14 60 7 70 7 80H0Z'/%3E%3C/svg%3E") right / var(--wave) 80px repeat-y;
+  mask:
+    linear-gradient(#000 0 0) left / calc(100% - var(--wave)) 100% no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 80' preserveAspectRatio='none'%3E%3Cpath d='M0 0H7C7 10 14 10 14 20S7 30 7 40 14 50 14 60 7 70 7 80H0Z'/%3E%3C/svg%3E") right / var(--wave) 80px repeat-y;
+  transform: translateX(-105%);
+  visibility: hidden;
+  transition: transform 0.38s var(--ease), visibility 0s linear 0.38s;
+}
+.filters-open .filter-drawer {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.38s var(--ease), visibility 0s;
+}
+.filter-drawer:focus { outline: none; }
+.filter-drawer__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.filter-drawer__title {
+  font-family: "Fredoka", system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #2d4466;
+}
+.filter-drawer__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #2d4466;
+  box-shadow: 0 2px 8px rgba(80, 30, 55, 0.15);
+  cursor: pointer;
+}
+.filter-drawer__hint { margin: 4px 0 18px; font-size: 13px; color: var(--ink-soft); }
+.filter-drawer__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 12px;
+  padding: 4px;
+}
+.filter-drawer .filter-chip { width: 100%; min-height: 42px; }
+.filter-drawer .filter-chip.filter-chip--on {
+  background: #4a6487 url("../assets/denim.webp") center / 330px auto;
+  box-shadow: 0 0 0 2px #c9d6e6, 0 0 0 3px rgba(45, 68, 102, 0.6), 0 3px 8px rgba(30, 30, 60, 0.25);
+}
+.filter-drawer__foot {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 22px;
+}
+.filter-drawer__foot .btn { flex: 1; }
+
+/* dim the page behind, and tuck the top bar away while the panel is open */
+.filter-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(59, 36, 48, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.filters-open .filter-backdrop { opacity: 1; pointer-events: auto; }
+.navbar { transition: transform 0.35s var(--ease); }
+.filters-open .navbar { transform: translateY(-110%); }
+.filters-open { overflow: hidden; }
+
+/* while filtering, the hero steps aside so the results come first; the
+   "Shop now" area keeps a little room under the top bar's wave */
+.is-filtering .hero { display: none; }
+.is-filtering .browse { padding-top: 40px; }
