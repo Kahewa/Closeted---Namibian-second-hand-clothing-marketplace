@@ -28,7 +28,7 @@ export function conditionPill(item) {
  */
 export function buyNowHref(item) {
   const message = [
-    "Hi! I'd like to buy this from Closet Sales Namibia:",
+    "Hi! I'd like to buy this from Closeted By Grace:",
     `${itemTitle(item)} (size ${item.size || "?"}, ${formatNAD(item.price)})`,
     "",
     siteLink(itemHref(item)),

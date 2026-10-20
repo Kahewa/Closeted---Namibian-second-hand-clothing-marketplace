@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin — Closet Sales Namibia</title>
+<title>Admin — Closeted By Grace</title>
 <meta name="robots" content="noindex" />
-<meta name="description" content="Post and manage pieces on Closet Sales Namibia." />
-<meta property="og:title" content="Admin — Closet Sales Namibia" />
-<meta property="og:description" content="Post and manage pieces on Closet Sales Namibia." />
+<meta name="description" content="Post and manage pieces on Closeted By Grace." />
+<meta property="og:title" content="Admin — Closeted By Grace" />
+<meta property="og:description" content="Post and manage pieces on Closeted By Grace." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
@@ -97,6 +97,27 @@
             </div>
           </form>
 
+          <!-- the three poster spaces in the home page hero -->
+          <section>
+            <h2 class="h2" style="margin: 48px 0 6px;">Local Business Feature</h2>
+            <p class="muted" style="font-size: 13.5px; margin-bottom: 16px;">
+              The three poster spaces on the home page. Shoppers tap a poster to see its description and WhatsApp number. Empty spaces say “Advertise your business here”.
+            </p>
+            <div class="ad-admin" data-ad-admin></div>
+          </section>
+
+          <!-- people who applied on sell.html -->
+          <section data-apps-section>
+            <h2 class="h2" style="margin: 48px 0 6px;">
+              Seller applications <span class="admin-tab__count admin-tab__count--ink" data-apps-count>0</span>
+            </h2>
+            <p class="muted" style="font-size: 13.5px; margin-bottom: 16px;">
+              People who applied to sell through you. Approving adds them to your clients, with their number and bank details.
+            </p>
+            <p class="muted apps-empty" data-apps-empty hidden>No new applications right now.</p>
+            <div data-apps></div>
+          </section>
+
           <h2 class="h2" style="margin: 48px 0 6px;">
             Clients <span class="admin-tab__count admin-tab__count--ink" data-count>0</span>
           </h2>
@@ -109,6 +130,8 @@
             <form class="client-add" data-client-add novalidate>
               <label class="visually-hidden" for="client-name">New client name</label>
               <input id="client-name" type="text" maxlength="60" placeholder="Add a client, e.g. Maria K." autocomplete="off" data-client-name />
+              <label class="visually-hidden" for="client-number">Their WhatsApp number (optional)</label>
+              <input id="client-number" type="tel" maxlength="30" placeholder="WhatsApp number (optional)" autocomplete="off" data-client-number />
               <button type="submit" class="btn btn--primary btn--sm"><i class="ico ico--plus" aria-hidden="true"></i> Add client</button>
             </form>
           </div>
@@ -120,9 +143,11 @@
               <h3 class="h3 folder-head__title" data-folder-title></h3>
               <div class="folder-head__actions" data-folder-actions>
                 <button type="button" class="btn btn--chrome btn--sm" data-folder-rename><i class="ico ico--pencil" aria-hidden="true"></i> rename</button>
+                <button type="button" class="btn btn--chrome btn--sm" data-folder-number><i class="ico ico--phone" aria-hidden="true"></i> number</button>
                 <button type="button" class="btn btn--chrome btn--sm" data-folder-delete><i class="ico ico--trash" aria-hidden="true"></i> remove</button>
               </div>
             </div>
+            <div class="client-info" data-client-info hidden></div>
             <div class="empty-state" data-mine-empty hidden>
               <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
               <p class="h3">Nothing posted here yet</p>

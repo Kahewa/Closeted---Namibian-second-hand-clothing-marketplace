@@ -12,34 +12,31 @@ import "./glass.js";
 // ---------------------------------------------------------------------
 // Everything editable lives here.
 // ---------------------------------------------------------------------
-const BRAND = { first: "closet sales", second: "namibia" };
-
-// The sliding announcement strip at the very top of every page. Keep each
-// one short and true — it's the first thing anyone reads.
-const TICKER = [
-  "New drop live",
-  "Pre-loved fashion, made for Namibia",
-  "Sustainable style",
-  "Every piece photographed individually",
-  "Order straight on WhatsApp",
-];
+const BRAND = { first: "Closeted", second: "by Grace" };
 
 // The footer's one link; the logo already leads back to the feed.
 const FOOTER_LINKS = [{ href: "admin.html", label: "admin login" }];
 
 // Per-page: the links under the wordmark, whether the cart button shows,
-// and whether there's a back button. The feed needs no links — the logo
+// whether there's a back button, and whether the category filters sit in
+// the header (feed.js fills them). The feed needs no links — the logo
 // leads back to it.
 const PAGES = {
-  home: { links: [], cart: true },
+  home: { links: [], cart: true, filters: true },
   cart: { links: [], cart: true, back: true },
   item: { links: [], cart: true, back: true },
+  sell: { links: [], cart: true, back: true },
+  buy: { links: [], cart: true, back: true },
   admin: { links: [{ href: "index.html", label: "view the feed" }], logoHref: "admin.html" },
 };
 
 // ---------------------------------------------------------------------
 // Builders
 // ---------------------------------------------------------------------
+// The cart button's icon: a 3D shopping basket (assets/cart.webp, cut out
+// of its background so the page shows through the holes).
+const CART_3D = `<img class="cart-3d" src="assets/cart.webp" alt="" width="180" height="192" decoding="async" />`;
+
 const ico = (name, extra = "") =>
   `<i class="ico ico--${name}${extra ? " " + extra : ""}" aria-hidden="true"></i>`;
 
@@ -51,36 +48,28 @@ function navbar(cfg) {
     </nav>`
     : "";
 
+  // on wide screens the filter pills sit in the top row between logo and
+  // cart; narrower, CSS wraps them onto a row of their own underneath
+  const filters = cfg.filters
+    ? `
+      <div class="filter-bar navbar__filters" role="group" aria-label="Filter by category" data-filters></div>`
+    : "";
+
   return `
   <header class="navbar">
-    <div class="navbar__top${cfg.cart ? "" : " navbar__top--solo"}">
+    <div class="navbar__top">
       ${
         cfg.back
           ? `<a class="navbar__icon navbar__back" href="index.html" aria-label="Back to the shop" data-back>${ico("back")}</a>`
-          : cfg.cart
-            ? `<span aria-hidden="true"></span>`
-            : ""
+          : ""
       }
       <a href="${cfg.logoHref || "index.html"}" class="logo">
         <span class="logo__closet">${BRAND.first}</span><span class="logo__bg">${BRAND.second}</span>
-      </a>
-      ${cfg.cart ? `<a class="navbar__icon navbar__cart" href="cart.html" data-cart-link>${ico("shop")}<span class="navbar__cart-count" data-cart-count hidden></span></a>` : ""}
+      </a>${filters}
+      ${cfg.cart ? `<a class="navbar__icon navbar__cart" href="cart.html" data-cart-link>${CART_3D}<span class="navbar__cart-count" data-cart-count hidden></span></a>` : ""}
     </div>${links}
   </header>`;
 }
-
-// The list runs twice in a row and slides left by exactly one copy, so the
-// loop is seamless. The second copy is hidden from screen readers.
-const ticker = () => {
-  const run = TICKER.map((t) => `<span class="ticker__item">${t}</span>`).join("");
-  return `
-  <div class="ticker" role="marquee" aria-label="${TICKER.join(". ")}">
-    <div class="ticker__track">
-      <div class="ticker__run">${run}</div>
-      <div class="ticker__run" aria-hidden="true">${run}</div>
-    </div>
-  </div>`;
-};
 
 const footer = () => `
   <footer class="site-footer">
@@ -88,14 +77,14 @@ const footer = () => `
       <div class="footer-brand">
         <p class="footer-brand__name">${BRAND.first}<br />${BRAND.second}</p>
         <p class="footer-brand__sub">
-          © ${new Date().getFullYear()} Closet Sales Namibia.<br />Made for Namibia's secondhand fashion scene
+          © ${new Date().getFullYear()} Closeted By Grace.<br />Made for Namibia's secondhand fashion scene
         </p>
       </div>
       <div class="footer-col">
         ${FOOTER_LINKS.map((l) => `<a href="${l.href}">${l.label}</a>`).join("\n        ")}
       </div>
     </div>
-    <p class="footer-bottom">let's be friends! ${ico("heart", "ico--pink")} ${BRAND.first} ${BRAND.second}</p>
+    <p class="footer-bottom">let's be friends! ${ico("heart", "ico--pink")} ${BRAND.first.toLowerCase()} ${BRAND.second.toLowerCase()}</p>
   </footer>`;
 
 // ---------------------------------------------------------------------
@@ -105,7 +94,7 @@ const cfg = PAGES[document.body.dataset.page] || PAGES.home;
 const shell = document.querySelector(".page");
 
 if (shell) {
-  shell.insertAdjacentHTML("afterbegin", ticker() + navbar(cfg));
+  shell.insertAdjacentHTML("afterbegin", navbar(cfg));
   shell.insertAdjacentHTML("beforeend", footer());
 }
 

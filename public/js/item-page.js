@@ -11,12 +11,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { gallery, buyButtons, conditionPill, itemTitle, renderItemCard, syncCartButton } from "./item-card.js";
 import { $, el, formatNAD, itemImages, timeAgo, toFirestoreDate } from "./utils.js";
+import { masonry } from "./masonry.js";
 
 // item.html?id=<firestore id> — one piece, big, with similar pieces below.
 const RELATED = 8;
 
 const id = new URLSearchParams(location.search).get("id") || "";
 const view = $("[data-item]");
+masonry($("[data-related-grid]"));
 
 load();
 
@@ -40,7 +42,7 @@ async function load() {
 
 function paint(item) {
   const title = itemTitle(item);
-  document.title = `${title} — Closet Sales Namibia`;
+  document.title = `${title} — Closeted By Grace`;
 
   const photos = $("[data-item-photos]");
   photos.classList.toggle("item-view__photos--sold", !!item.sold);

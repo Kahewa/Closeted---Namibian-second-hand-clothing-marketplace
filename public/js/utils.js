@@ -11,6 +11,7 @@ export const CATEGORIES = [
   "Dress",
   "Shoes",
   "Heels",
+  "Bags",
   "Accessories",
 ];
 
@@ -137,3 +138,25 @@ export function itemImages(item) {
   if (Array.isArray(item?.images) && item.images.length) return item.images.filter((img) => img?.url);
   return item?.imageURL ? [{ url: item.imageURL, publicId: item.publicId || null }] : [];
 }
+
+// Selling through Closeted By Grace: one service fee per batch, by how many
+// pieces are in it. Shown on sell.html and the admin's applications.
+export const SELL_MIN = 5;
+export const SELL_MAX = 50;
+export const SELL_TIERS = [
+  { from: 5, to: 10, fee: 80 },
+  { from: 11, to: 20, fee: 150 },
+  { from: 21, to: 30, fee: 200 },
+  { from: 31, to: 40, fee: 300 },
+  { from: 41, to: 50, fee: 400 },
+];
+
+/** The service fee for a batch, or null outside 5–50 pieces. */
+export function sellFee(pieces) {
+  const n = Number(pieces);
+  return SELL_TIERS.find((t) => n >= t.from && n <= t.to)?.fee ?? null;
+}
+
+// The Local Business Feature on the home page: three poster spaces, stored
+// as ads/slot1 … ads/slot3 (firebase/firestore.rules).
+export const AD_SLOTS = ["slot1", "slot2", "slot3"];

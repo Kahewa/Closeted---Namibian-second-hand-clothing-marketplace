@@ -1,5 +1,5 @@
 /* =========================================================================
-   CLOSET SALES NAMIBIA — boutique / editorial
+   CLOSETED BY GRACE — boutique / editorial
    Warm cream ground, espresso ink, muted taupe and sage accents.
    Cormorant Garamond for headings, Plus Jakarta Sans for everything else.
    ========================================================================= */
@@ -79,7 +79,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 
-html { scroll-behavior: smooth; scroll-padding-top: 88px; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; scroll-padding-top: 136px; -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
@@ -229,18 +229,16 @@ p, h1, h2, h3 { margin: 0; }
   backdrop-filter: saturate(1.4) blur(14px);
   border-bottom: 1px solid var(--line);
 }
+/* back button (some pages), logo in the left corner, cart on the right */
 .navbar__top {
-  display: grid;
-  grid-template-columns: 44px 1fr 44px;
+  display: flex;
   align-items: center;
-  max-width: var(--shell-width);
-  margin: 0 auto;
-  padding: 12px var(--gutter);
+  gap: 10px;
+  padding: 12px max(var(--gutter), 24px);
 }
-.navbar__top--solo { grid-template-columns: 1fr; justify-items: center; }
 
 .logo {
-  justify-self: center;
+  margin-right: auto;
   display: inline-flex;
   align-items: baseline;
   gap: 0.35em;
@@ -313,7 +311,7 @@ p, h1, h2, h3 { margin: 0; }
 .hero {
   position: relative;
   overflow: hidden;
-  padding: 44px 0 20px;
+  padding: 18px 0 8px;
   background:
     radial-gradient(1000px 460px at 85% 0%, rgba(154, 133, 115, 0.14), transparent 70%),
     radial-gradient(700px 380px at 0% 100%, rgba(111, 130, 100, 0.1), transparent 70%),
@@ -322,33 +320,35 @@ p, h1, h2, h3 { margin: 0; }
 .hero__inner {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 40px;
+  gap: 18px;
   align-items: center;
 }
 @media (min-width: 880px) {
-  .hero { padding: 64px 0 28px; }
-  .hero__inner { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 64px; }
+  .hero { padding: 28px 0 8px; }
+  /* text on the left, the Local Business Feature on the right */
+  .hero__inner { grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); gap: 40px; align-items: end; }
 }
 
 .hero__copy { max-width: 560px; }
 .hero__title {
-  margin: 14px 0 20px;
-  font-size: clamp(40px, 6.4vw, 68px);
+  margin: 8px 0 10px;
+  font-size: clamp(28px, 3.5vw, 42px);
   font-weight: 500;
   line-height: 1.02;
   letter-spacing: -0.02em;
 }
 .hero__title em { font-style: italic; color: var(--taupe); }
-.hero__lead { max-width: 460px; font-size: 16px; color: var(--ink-soft); line-height: 1.7; }
-.hero__cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+.hero__lead { max-width: 460px; font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; }
+/* "How to sell" sits under "Shop pre-loved", both the same width */
 
 /* editorial collage: one tall shot, three supporting */
 .hero__collage {
   display: grid;
   grid-template-columns: 1.15fr 1fr;
   grid-template-rows: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  aspect-ratio: 5 / 5.2;
+  gap: 10px;
+  aspect-ratio: 16 / 9;
+  max-height: 270px;
 }
 .hero__tile {
   position: relative;
@@ -371,11 +371,80 @@ p, h1, h2, h3 { margin: 0; }
 .hero__tile:nth-child(4) img { animation-delay: 0.24s; }
 @keyframes tile-in { from { opacity: 0; transform: scale(1.04); } }
 @media (max-width: 879px) {
-  .hero__collage { width: 100%; aspect-ratio: 4 / 3; max-width: 560px; }
+  /* phones: one slim strip of four photos */
+  .hero__collage {
+    width: 100%;
+    max-width: 560px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    gap: 8px;
+    aspect-ratio: 4 / 1.25;
+  }
+  .hero__tile:nth-child(1) { grid-row: auto; }
+  .hero__tile, .hero__tile:nth-child(2), .hero__tile:nth-child(4) { padding: 5px; border-radius: var(--radius-md); }
+  .hero__tile img { border-radius: calc(var(--radius-md) - 4px); }
+  /* .hero__collage prefix: outranks the button's base rule further down */
+  .hero__collage { margin-bottom: 14px; }
 }
 
 /* ---- browse ------------------------------------------------------------- */
-.browse { padding: 16px 0 88px; }
+/* the shop sits on denim, under the pink hero (cream fallback while the
+   photo loads). The cards' glass goes more opaque here so text stays
+   crisp over the blue weave. */
+.browse {
+  position: relative;
+  padding: 28px 0 88px;
+  background: #4a6487;
+  /* the denim stays still while the clothes scroll over it: a
+     screen-sized fixed layer, clipped to this section. (background-
+     attachment: fixed would be simpler, but iPhone Safari ignores it.)
+     clip-path also keeps the layer behind this section's content only;
+     when the footer arrives the section's bottom edge moves up and the
+     footer covers the denim. */
+  clip-path: inset(0);
+  isolation: isolate;
+}
+.browse::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: #4a6487 url("../assets/denim.jpg") center / cover;
+  pointer-events: none;
+}
+/* "SHOP NOW": plush pink fur cushion letters. The look — piping rim,
+   seam, puffed body, fur clumps and hairs, fuzzy edge, shadow — comes
+   from the #plush SVG filter in index.html; the text supplies the shape
+   and the body pink. Wide letter-spacing keeps each letter's rim from
+   merging into the next. */
+.puffy-title {
+  display: inline-block;
+  margin: 0 0 18px;
+  padding: 4px 10px;
+  font-family: "Fredoka", "Cherry Bomb One", system-ui, sans-serif;
+  font-size: clamp(48px, 7.5vw, 92px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f592b9;
+  filter: url(#plush);
+  animation: puffy-float 4.5s ease-in-out infinite;
+}
+/* phones: the heading is smaller, so use the finer-grained version of the
+   plush (thinner rim, shorter fur) or the letters clog up */
+@media (max-width: 700px) {
+  .puffy-title { filter: url(#plush-sm); letter-spacing: 0.12em; }
+}
+@keyframes puffy-float {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-5px) rotate(0.5deg); }
+}
+.browse .item-card { background: var(--glass-sheen), var(--grain), rgba(255, 244, 249, 0.82); }
+.browse .empty-state { color: #fff; }
+.browse .empty-state .muted, .browse .empty-state .h3 { color: #fff; }
+/* the white runs straight into the footer, no pink strip between */
+body[data-page="home"] .site-footer { margin-top: 0; }
 
 /* filter pills: one scrolling row on phones, centred on wide screens */
 .filter-bar {
@@ -1160,48 +1229,22 @@ body::after {
 ::selection { background: rgba(244, 170, 198, 0.6); }
 :focus-visible { outline-color: var(--rose); }
 
-/* ---- ticker -------------------------------------------------------------- */
-.ticker {
-  position: relative;
-  z-index: 60;
-  overflow: hidden;
-  background: var(--glass-sheen), var(--rose-glass);
-  color: #fff;
-  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.35);
-}
-.ticker__track { display: flex; width: max-content; animation: ticker 38s linear infinite; }
-.ticker:hover .ticker__track { animation-play-state: paused; }
-.ticker__run { display: flex; flex-shrink: 0; }
-.ticker__item {
-  padding: 8px 0;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.ticker__item::after { content: "✦"; margin: 0 22px; opacity: 0.85; }
-@keyframes ticker { to { transform: translateX(-50%); } }
-
 /* ---- product grid: cards side by side, tops in line ---------------------- */
-.browse__head { text-align: left; margin-bottom: 10px; }
-.browse .filter-bar { margin-bottom: 28px; }
-
-/* on wide screens the pills sit in a floating glass dock */
-@media (min-width: 900px) {
-  .browse .filter-bar {
-    justify-content: flex-start;
-    width: fit-content;
-    max-width: 100%;
-    margin-left: 0;
-    padding: 6px;
-    border-radius: var(--radius-pill);
-    background: var(--glass-sheen), var(--grain), rgba(255, 240, 246, 0.6);
-    box-shadow: var(--glass-edge), var(--glass-shadow);
-  }
-}
+.browse__head { text-align: left; margin-bottom: 18px; }
 
 .item-grid { align-items: start; }
+
+/* Pinterest-style board (js/masonry.js): 1px rows, no row gap, and each
+   card spans its own height plus --masonry-gap. The vertical gap is
+   wider than the horizontal one to leave room for the price tags that
+   float above each card's corner. */
+.item-grid.is-masonry {
+  --masonry-gap: 30px;
+  grid-auto-rows: 1px;
+  row-gap: 0;
+}
+@media (min-width: 680px) { .item-grid.is-masonry { --masonry-gap: 36px; } }
+.item-grid.is-masonry > * { grid-row-end: span var(--span, 400); }
 
 /* the price tag floats off the photo's corner, over the frame's edge */
 .item-card,
@@ -1285,6 +1328,237 @@ body::after {
 }
 .item-card.is-tilting { transition: transform 0.12s ease-out, box-shadow var(--t-mid) var(--ease); }
 
+/* ---- filters in the header ---------------------------------------------
+   The navbar is already sticky and frosted, so the pills just ride along
+   in it: no sticky, background or mask of their own on wide screens.
+   ------------------------------------------------------------------------- */
+/* narrow screens: the pills wrap onto their own full-bleed row under the
+   logo and cart, and scroll sideways */
+.navbar__top { flex-wrap: wrap; }
+.navbar .navbar__filters {
+  position: static;
+  order: 3;
+  flex: 0 0 auto;
+  width: calc(100% + 2 * max(var(--gutter), 24px));
+  margin: 0 calc(-1 * max(var(--gutter), 24px)) -4px;
+  padding: 4px max(var(--gutter), 24px) 2px;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/* wide screens: one row — logo, pills, cart */
+@media (min-width: 1180px) {
+  .navbar__top { flex-wrap: nowrap; }
+  .navbar .navbar__filters {
+    order: 0;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0 12px;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  .logo { margin-right: 0; }
+}
+.navbar__filters .filter-chip { min-height: 34px; padding: 6px 16px; font-size: 12.5px; }
+/* the top bar is plain white; the pills and icon buttons on it get a
+   soft pink tint and edge, since white-on-white glass would vanish */
+.navbar {
+  background: #fff;
+  border-bottom: 1px solid rgba(178, 87, 121, 0.14);
+  box-shadow: 0 6px 24px rgba(150, 52, 92, 0.07);
+}
+.navbar .filter-chip,
+.navbar .navbar__icon {
+  background: #fdf1f6;
+  border: 1px solid rgba(178, 87, 121, 0.18);
+  box-shadow: none;
+}
+.navbar .filter-chip:hover,
+.navbar .navbar__icon:hover { background: #fae3ed; border-color: rgba(178, 87, 121, 0.32); }
+.navbar .filter-chip--on,
+.navbar .filter-chip--on:hover {
+  background: var(--glass-sheen), var(--rose-glass);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(184, 78, 120, 0.28);
+}
+
+/* ---- hero sticker collage ----------------------------------------------
+   Cut-out stickers (assets/stickers/, transparent WebP) with a thin white
+   die-cut edge and a soft shadow, each at its own tilt. All 14 show at
+   every screen size, spread evenly over the whole hero on a loose
+   staggered grid (three rows), and sit behind the text and photos.
+   --x/--y: the sticker's centre, as % of the hero
+   --s:     its size; it scales with the screen width, never below 55% */
+.hero__stickers { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+/* on the denim: fixed to the screen like the denim itself (and clipped to
+   the shop section the same way), so the stickers stay where they are
+   while the clothes scroll over them; the footer covers them at the end */
+.denim-stickers { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.hero__inner { position: relative; z-index: 1; }
+.sticker {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: clamp(calc(var(--s) * 0.55px), calc(var(--s) * 0.075vw), calc(var(--s) * 1px));
+  height: auto;
+  transform: translate(-50%, -50%) rotate(var(--tilt, 0deg));
+  filter:
+    drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff)
+    drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)
+    drop-shadow(0 6px 8px rgba(80, 30, 55, 0.22));
+}
+
+/* top row */
+.sticker--vinyl        { --x: 7%;  --y: 16%; --s: 84;  --tilt: -12deg; }
+.sticker--gummy-bear   { --x: 29%; --y: 12%; --s: 60;  --tilt: -9deg; }
+.sticker--push-pin     { --x: 50%; --y: 18%; --s: 48;  --tilt: -8deg; }
+.sticker--jelly-star   { --x: 71%; --y: 11%; --s: 54;  --tilt: 12deg; }
+.sticker--phone        { --x: 93%; --y: 0%;  --s: 30;  --tilt: 0deg; transform: translate(-50%, 0); }
+
+/* middle row */
+.sticker--pink-star    { --x: 4%;  --y: 52%; --s: 54;  --tilt: -14deg; }
+.sticker--cherries     { --x: 23%; --y: 47%; --s: 62;  --tilt: 8deg; }
+.sticker--heart-button { --x: 43%; --y: 55%; --s: 52;  --tilt: -10deg; }
+.sticker--leopard-star { --x: 62%; --y: 48%; --s: 60;  --tilt: 15deg; }
+.sticker--kirby        { --x: 82%; --y: 54%; --s: 64;  --tilt: -6deg; }
+
+/* bottom row */
+.sticker--safety-pin       { --x: 12%; --y: 86%; --s: 40;  --tilt: 60deg; }
+.sticker--handle-with-love { --x: 36%; --y: 88%; --s: 136; --tilt: -5deg; }
+.sticker--megaphone        { --x: 61%; --y: 85%; --s: 72;  --tilt: -4deg; }
+.sticker--denim-pocket     { --x: 88%; --y: 87%; --s: 80;  --tilt: 9deg; }
+
+/* wide screens: the product columns cover the middle of the denim, so the
+   stickers are tossed down the two open side strips instead — uneven
+   gaps, jumping in and out, mixed tilts and sizes — over the whole length
+   of the shop, so they keep turning up as you scroll */
+@media (min-width: 1100px) {
+  .sticker { width: clamp(calc(var(--s) * 0.45px), calc(var(--s) * 0.05vw), calc(var(--s) * 0.95px)); }
+  .sticker--vinyl            { --x: 5.5%;  --y: 9%;  --s: 92;  --tilt: -18deg; }
+  .sticker--pink-star        { --x: 2.6%;  --y: 21%; --s: 46;  --tilt: 21deg; }
+  .sticker--cherries         { --x: 6.8%;  --y: 33%; --s: 58;  --tilt: -7deg; }
+  .sticker--safety-pin       { --x: 3%;    --y: 49%; --s: 44;  --tilt: 118deg; }
+  .sticker--heart-button     { --x: 7%;    --y: 61%; --s: 44;  --tilt: 14deg; }
+  .sticker--handle-with-love { --x: 3.8%;  --y: 76%; --s: 104; --tilt: 72deg; }
+  .sticker--megaphone        { --x: 6.4%;  --y: 92%; --s: 64;  --tilt: -24deg; }
+  .sticker--phone            { --x: 96%;   --y: 0%;  --s: 28; }
+  .sticker--jelly-star       { --x: 92.8%; --y: 14%; --s: 62;  --tilt: -16deg; }
+  .sticker--gummy-bear       { --x: 97.2%; --y: 28%; --s: 50;  --tilt: 19deg; }
+  .sticker--leopard-star     { --x: 93.4%; --y: 41%; --s: 50;  --tilt: -28deg; }
+  .sticker--kirby            { --x: 96.6%; --y: 56%; --s: 58;  --tilt: 11deg; }
+  .sticker--push-pin         { --x: 92.6%; --y: 70%; --s: 40;  --tilt: 32deg; }
+  .sticker--denim-pocket     { --x: 96.2%; --y: 86%; --s: 72;  --tilt: -12deg; }
+}
+
+/* phones: the hero is tall and narrow, so five rows of three instead */
+@media (max-width: 879px) {
+  .sticker--vinyl            { --x: 14%; --y: 8%;  }
+  .sticker--gummy-bear       { --x: 50%; --y: 6%;  }
+  .sticker--phone            { --x: 88%; --y: 0%;  }
+  .sticker--pink-star        { --x: 10%; --y: 28%; }
+  .sticker--push-pin         { --x: 52%; --y: 25%; }
+  .sticker--jelly-star       { --x: 86%; --y: 30%; }
+  .sticker--cherries         { --x: 14%; --y: 47%; }
+  .sticker--heart-button     { --x: 48%; --y: 50%; }
+  .sticker--leopard-star     { --x: 85%; --y: 46%; }
+  .sticker--safety-pin       { --x: 12%; --y: 67%; }
+  .sticker--kirby            { --x: 50%; --y: 69%; }
+  .sticker--handle-with-love { --x: 82%; --y: 64%; }
+  .sticker--megaphone        { --x: 30%; --y: 89%; }
+  .sticker--denim-pocket     { --x: 72%; --y: 90%; }
+}
+
+/* ---- hero text as a sticker --------------------------------------------
+   The eyebrow, headline and line under it get a smooth white die-cut
+   edge hugging every letter, then one soft shadow underneath — as if the
+   words were a sticker pasted onto the page, like the ones around them.
+   The edge is a ring of text-shadows (16 directions at two radii, so the
+   curves stay round and the inside fills in); the soft shadow is a
+   single drop-shadow on the block. */
+.hero__sticker-text {
+  display: inline-block;
+  max-width: 100%;
+  filter:
+    drop-shadow(0 3px 3px rgba(80, 30, 55, 0.32))
+    drop-shadow(0 10px 14px rgba(80, 30, 55, 0.28));
+}
+.hero__sticker-text > * {
+  text-shadow:
+    4.50px 0.00px 0 #fff,
+    4.16px 1.72px 0 #fff,
+    3.18px 3.18px 0 #fff,
+    1.72px 4.16px 0 #fff,
+    0.00px 4.50px 0 #fff,
+    -1.72px 4.16px 0 #fff,
+    -3.18px 3.18px 0 #fff,
+    -4.16px 1.72px 0 #fff,
+    -4.50px 0.00px 0 #fff,
+    -4.16px -1.72px 0 #fff,
+    -3.18px -3.18px 0 #fff,
+    -1.72px -4.16px 0 #fff,
+    -0.00px -4.50px 0 #fff,
+    1.72px -4.16px 0 #fff,
+    3.18px -3.18px 0 #fff,
+    4.16px -1.72px 0 #fff,
+    2.48px 0.00px 0 #fff,
+    2.29px 0.95px 0 #fff,
+    1.75px 1.75px 0 #fff,
+    0.95px 2.29px 0 #fff,
+    0.00px 2.48px 0 #fff,
+    -0.95px 2.29px 0 #fff,
+    -1.75px 1.75px 0 #fff,
+    -2.29px 0.95px 0 #fff,
+    -2.48px 0.00px 0 #fff,
+    -2.29px -0.95px 0 #fff,
+    -1.75px -1.75px 0 #fff,
+    -0.95px -2.29px 0 #fff,
+    -0.00px -2.48px 0 #fff,
+    0.95px -2.29px 0 #fff,
+    1.75px -1.75px 0 #fff,
+    2.29px -0.95px 0 #fff;
+}
+.hero__sticker-text .eyebrow {
+  text-shadow:
+    3.50px 0.00px 0 #fff,
+    3.23px 1.34px 0 #fff,
+    2.47px 2.47px 0 #fff,
+    1.34px 3.23px 0 #fff,
+    0.00px 3.50px 0 #fff,
+    -1.34px 3.23px 0 #fff,
+    -2.47px 2.47px 0 #fff,
+    -3.23px 1.34px 0 #fff,
+    -3.50px 0.00px 0 #fff,
+    -3.23px -1.34px 0 #fff,
+    -2.47px -2.47px 0 #fff,
+    -1.34px -3.23px 0 #fff,
+    -0.00px -3.50px 0 #fff,
+    1.34px -3.23px 0 #fff,
+    2.47px -2.47px 0 #fff,
+    3.23px -1.34px 0 #fff,
+    1.93px 0.00px 0 #fff,
+    1.78px 0.74px 0 #fff,
+    1.36px 1.36px 0 #fff,
+    0.74px 1.78px 0 #fff,
+    0.00px 1.93px 0 #fff,
+    -0.74px 1.78px 0 #fff,
+    -1.36px 1.36px 0 #fff,
+    -1.78px 0.74px 0 #fff,
+    -1.93px 0.00px 0 #fff,
+    -1.78px -0.74px 0 #fff,
+    -1.36px -1.36px 0 #fff,
+    -0.74px -1.78px 0 #fff,
+    -0.00px -1.93px 0 #fff,
+    0.74px -1.78px 0 #fff,
+    1.36px -1.36px 0 #fff,
+    1.78px -0.74px 0 #fff;
+}
+.hero__sticker-text .eyebrow { font-size: clamp(12px, 1.1vw, 15px); }
+.hero__sticker-text .hero__title { margin: 0 0 12px; font-size: clamp(38px, 4.8vw, 64px); }
+.hero__sticker-text .hero__lead { margin: 0; color: var(--ink); font-size: clamp(16px, 1.45vw, 20px); }
+
 /* ---- buy now / add to cart ---------------------------------------------- */
 .buy-row { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; }
 .buy-row .btn { width: 100%; }
@@ -1301,36 +1575,375 @@ a.item-card__category { text-decoration: none; }
 a.item-card__category:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 
 /* ---- back button -------------------------------------------------------- */
-.navbar__back { justify-self: start; }
 
-/* ---- hero: the collage is a link down to the feed ----------------------- */
-.hero__collage { position: relative; text-decoration: none; color: inherit; cursor: pointer; }
-.hero__arrivals {
-  position: absolute;
-  left: 50%;
-  bottom: 16px;
-  z-index: 4;
+/* ---- hero edges -----------------------------------------------------------
+   The hero's text and buttons sit close to the screen's left edge
+   (--hero-left) instead of in the centred content column, with a steady
+   gap (--hero-bottom) between the buttons and the hero's bottom edge. */
+.hero { --hero-left: 40px; --hero-bottom: 40px; padding-bottom: var(--hero-bottom); }
+/* phones: 40px would squeeze the headline, so the usual phone margin */
+@media (max-width: 520px) { .hero { --hero-left: 16px; } }
+.hero > .shell { max-width: none; padding-left: var(--hero-left); padding-right: var(--hero-left); }
+
+/* ---- hero: sewn-on denim patches ----------------------------------------
+   How to sell / How to buy / Advertise your business. Each is a scrap of
+   the denim photo with a dashed line of jeans thread just inside the
+   edge, a pale frayed rim and embroidered white lettering. */
+.hero__patches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+  margin-top: 26px;
+  margin-bottom: 0;
+}
+.denim-patch {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: var(--radius-pill);
-  background: var(--glass-sheen), rgba(255, 244, 249, 0.72);
-  -webkit-backdrop-filter: blur(14px) saturate(1.6);
-  backdrop-filter: blur(14px) saturate(1.6);
-  box-shadow: var(--glass-edge), 0 10px 26px rgba(150, 52, 92, 0.2);
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 600;
+  justify-content: center;
+  min-height: 52px;
+  padding: 14px 26px;
+  border-radius: 10px;
+  /* the same denim, at the same scale, as the headline's letters: no tint */
+  background: #4a6487 url("../assets/denim.jpg") center / 330px auto;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 800;
   letter-spacing: 0.04em;
   white-space: nowrap;
-  transform: translateX(-50%);
+  text-decoration: none;
+  text-shadow: 0 1px 0 rgba(20, 30, 50, 0.55), 0 0 1px rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 0 0 3px #c9d6e6,
+    0 0 0 4px rgba(45, 68, 102, 0.6),
+    0 6px 14px rgba(30, 30, 60, 0.28);
+  transition: transform var(--t-mid) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+/* the stitching */
+.denim-patch::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 2px dashed rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.denim-patch:hover { transform: scale(1.04); }
+.denim-patch:active { transform: scale(0.97); }
+.denim-patch:focus-visible { outline: 2px solid var(--rose); outline-offset: 4px; }
+@media (max-width: 520px) {
+  .denim-patch { min-height: 46px; padding: 12px 20px; font-size: 13px; }
+}
+
+/* ---- Local Business Feature (js/ads.js) ---------------------------------- */
+.biz-feature { min-width: 0; }
+.biz-feature__title {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.6vw, 36px);
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink);
+  text-shadow:
+    3px 0 0 #fff, -3px 0 0 #fff, 0 3px 0 #fff, 0 -3px 0 #fff,
+    2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;
+  filter: drop-shadow(0 3px 4px rgba(80, 30, 55, 0.25));
+}
+.biz-feature__slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.biz-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: #fff;
+  box-shadow: 0 0 0 4px #fff, 0 8px 18px rgba(80, 30, 55, 0.22);
+  font: inherit;
+  cursor: pointer;
   transition: transform var(--t-mid) var(--ease), box-shadow var(--t-mid) var(--ease);
 }
-.hero__arrivals-arrow { display: inline-block; color: var(--rose); animation: nudge 1.8s var(--ease) infinite; }
-@keyframes nudge { 50% { transform: translateY(3px); } }
-.hero__collage:hover .hero__arrivals { transform: translateX(-50%) translateY(-2px); box-shadow: var(--glass-edge), 0 14px 32px rgba(150, 52, 92, 0.26); }
-.hero__collage:focus-visible { outline: 2px solid var(--rose); outline-offset: 6px; border-radius: var(--radius-lg); }
+.biz-slot img { width: 100%; height: 100%; object-fit: cover; }
+.biz-slot:hover { transform: translateY(-3px); box-shadow: 0 0 0 4px #fff, 0 14px 26px rgba(80, 30, 55, 0.28); }
+.biz-slot:focus-visible { outline: 2px solid var(--rose); outline-offset: 6px; }
+.biz-slot--empty {
+  padding: 14px;
+  background: var(--glass-sheen), rgba(255, 240, 246, 0.7);
+  box-shadow: inset 0 0 0 2px rgba(178, 87, 121, 0.35), 0 6px 14px rgba(80, 30, 55, 0.12);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+}
+.biz-slot--empty::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 2px dashed rgba(178, 87, 121, 0.4);
+  border-radius: calc(var(--radius-md) - 5px);
+  pointer-events: none;
+}
+.biz-slot--empty .ico { width: 22px; height: 22px; color: var(--rose); }
+.biz-slot--empty:hover { color: var(--ink); box-shadow: inset 0 0 0 2px var(--rose), 0 12px 22px rgba(80, 30, 55, 0.18); }
+@media (max-width: 520px) {
+  .biz-feature__slots { gap: 10px; }
+  .biz-slot--empty { padding: 8px; font-size: 11.5px; }
+}
+
+/* the pop-up */
+.biz-modal {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 24px 60px rgba(40, 15, 30, 0.35);
+  overflow: auto;
+}
+.biz-modal::backdrop { background: rgba(40, 15, 30, 0.45); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.biz-modal__img { display: block; width: 100%; max-height: 60vh; object-fit: contain; background: var(--sand); }
+.biz-modal__body { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 20px; }
+.biz-modal__title { font-family: var(--font-display); font-size: 28px; font-weight: 600; line-height: 1.1; }
+.biz-modal__desc { margin-bottom: 8px; font-size: 14.5px; line-height: 1.65; color: var(--ink-soft); white-space: pre-line; }
+.biz-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  box-shadow: 0 2px 8px rgba(40, 15, 30, 0.2);
+  cursor: pointer;
+}
+
+/* admin: the three feature slots */
+.ad-admin { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.ad-admin__card { margin-bottom: 0; }
+.ad-admin__card .field { margin-bottom: 4px; }
+.ad-admin__pick { display: block; cursor: pointer; }
+.ad-admin__preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--sand);
+  border: 1.5px dashed var(--line-strong);
+}
+.ad-admin__preview img { width: 100%; height: 100%; object-fit: cover; }
+.ad-admin__empty { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-soft); }
+.ad-admin__pick:focus-within .ad-admin__preview { outline: 2px solid var(--rose); outline-offset: 2px; }
+
+/* the advertising prices pop-up */
+.biz-modal--pricing .biz-modal__body { padding-top: 26px; }
+.biz-modal--pricing .biz-modal__title { padding-right: 36px; }
+.adprice-table { margin: 4px 0 6px; }
+.adprice-note {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--rose-soft);
+  color: #8a4f49;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* only the headline keeps the white sticker edge; the line below it is
+   plain text */
+.hero__sticker-text .hero__lead { text-shadow: none; }
+
+/* ---- headline: bold, no white edge, "second" up on the first line --------
+   The text column is a size container, so the headline's size is a share
+   of its width: "Made for Namibia's second" (about 9.7× the font size
+   wide in bold) fills the column on one line, which on wide screens ends
+   at about the middle of the page. */
+.hero__copy { container-type: inline-size; max-width: none; }
+.hero__sticker-text { display: block; }
+.hero__sticker-text .hero__title {
+  font-size: 10.1cqi;
+  font-weight: 700;
+  text-shadow: none;
+}
+.hero__title-1 { display: block; white-space: nowrap; }
+
+/* ---- no shadows on text -------------------------------------------------
+   Plain, flat lettering everywhere: the hero headline and line, the Local
+   Business Feature heading and the denim patch labels. (The fur "SHOP
+   NOW" keeps its shadow: that's part of the 3D lettering, not a text
+   shadow.) */
+.hero__sticker-text,
+.hero__sticker-text > *,
+.biz-feature__title,
+.denim-patch {
+  text-shadow: none;
+  filter: none;
+}
+/* clear, bold lettering: Poppins ExtraBold, crisp at small sizes */
+.denim-patch {
+  font-family: "Poppins", var(--font-body);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+@media (max-width: 520px) { .denim-patch { font-size: 14px; } }
+
+/* ---- denim patch headline (the SVG in index.html, fitted by js/headline.js)
+   Letters filled with the denim photo, with a pale fabric rim behind
+   them. */
+.hero__title--denim { margin: 0 0 12px; }
+.denim-title {
+  --align: left;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: "Fredoka", system-ui, sans-serif;
+  font-size: 100px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.denim-title.is-ready { opacity: 1; }
+.denim-title__rim text {
+  fill: #c9d6e6;
+  stroke: #c9d6e6;
+  stroke-width: 12px;
+  stroke-linejoin: round;
+}
+.denim-title__fill text { fill: url(#denim-fill); stroke: #2d4466; stroke-width: 1.5px; }
+@media (max-width: 879px) { .denim-title { --align: center; } }
+
+/* ---- "Local Business Feature" as a pink denim patch --------------------
+   The denim photo recoloured pink (the photo's light and dark weave laid
+   over pink with the luminosity blend), white stitching inside the edge,
+   padded shading so it looks raised, a pale rim, a tilt and a shadow. */
+.biz-feature__title.biz-feature__title {
+  position: relative;
+  display: inline-block;
+  /* overlaps the top of the poster spaces, as if stuck across them */
+  z-index: 3;
+  margin: 0 0 -22px 14px;
+  padding: 12px 28px 14px;
+  border-radius: 14px;
+  background:
+    linear-gradient(rgba(255, 196, 220, 0.32), rgba(255, 196, 220, 0.32)),
+    url("../assets/denim.jpg") center / 330px auto,
+    #f07aa9;
+  background-blend-mode: normal, luminosity;
+  color: #fff;
+  font-family: "Poppins", var(--font-body);
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.35),
+    inset 0 -4px 10px rgba(110, 20, 60, 0.35),
+    inset 0 0 14px rgba(110, 20, 60, 0.25),
+    0 0 0 3px #f9c9dc,
+    0 0 0 4px rgba(150, 40, 85, 0.55),
+    0 8px 16px rgba(80, 30, 55, 0.3);
+  transform: rotate(-3deg);
+  filter: none;
+}
+/* the stitching */
+.biz-feature__title.biz-feature__title::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 2px dashed rgba(255, 255, 255, 0.9);
+  border-radius: 9px;
+  pointer-events: none;
+}
+/* wide screens: over the last poster space instead of the first */
+@media (min-width: 880px) {
+  .biz-feature { text-align: right; }
+  .biz-feature__title.biz-feature__title { margin: 0 14px -22px 0; transform: rotate(3deg); }
+  .biz-feature__slots { text-align: center; }
+}
+@media (max-width: 879px) { .biz-feature__title.biz-feature__title { margin: 6px auto -18px; } }
+
+/* ---- filter pills as denim patches ---------------------------------------
+   Pink denim (the denim photo recoloured, like the "Local Business
+   Feature" patch) with white stitching; the selected one is blue denim,
+   like the hero buttons. */
+.navbar .filter-chip.filter-chip {
+  position: relative;
+  min-height: 36px;
+  padding: 7px 16px;
+  border: 0;
+  border-radius: 10px;
+  background:
+    linear-gradient(rgba(255, 196, 220, 0.32), rgba(255, 196, 220, 0.32)),
+    url("../assets/denim.jpg") center / 330px auto,
+    #f07aa9;
+  background-blend-mode: normal, luminosity;
+  color: #fff;
+  font-family: "Poppins", var(--font-body);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow:
+    inset 0 -3px 6px rgba(110, 20, 60, 0.3),
+    0 0 0 2px #f9c9dc,
+    0 0 0 3px rgba(150, 40, 85, 0.45),
+    0 3px 6px rgba(80, 30, 55, 0.18);
+  transition: transform var(--t-fast) var(--ease);
+}
+.navbar .filter-chip.filter-chip::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.85);
+  border-radius: 7px;
+  pointer-events: none;
+}
+.navbar .filter-chip.filter-chip:hover { transform: translateY(-1px) scale(1.04); color: #fff; }
+.navbar .filter-chip.filter-chip--on,
+.navbar .filter-chip.filter-chip--on:hover {
+  background: #4a6487 url("../assets/denim.jpg") center / 330px auto;
+  box-shadow:
+    0 0 0 2px #c9d6e6,
+    0 0 0 3px rgba(45, 68, 102, 0.6),
+    0 3px 8px rgba(30, 30, 60, 0.25);
+}
+/* room for the patch rims in the scrolling row */
+.navbar .navbar__filters { gap: 10px; padding-top: 6px; padding-bottom: 14px; }
+@media (min-width: 1180px) { .navbar .navbar__filters { padding-top: 4px; padding-bottom: 4px; } }
+
+/* ---- phones: the hero centred ------------------------------------------- */
+@media (max-width: 879px) {
+  .hero__copy, .biz-feature { text-align: center; }
+  .hero__sticker-text { display: block; }
+  .hero__patches { justify-content: center; }
+  .hero { --hero-left: 16px; }
+}
 
 /* ---- product page ------------------------------------------------------- */
 .item-shell { padding-top: 28px; padding-bottom: 40px; }
@@ -1391,6 +2004,128 @@ a.item-card__category:hover { text-decoration: underline; text-underline-offset:
   font-style: italic;
 }
 
+/* ---- sell with us ------------------------------------------------------- */
+.sell-shell { max-width: 760px; padding-top: 32px; padding-bottom: 56px; }
+.sell-intro { margin-bottom: 36px; }
+.sell-intro__title {
+  margin: 8px 0 12px;
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5.4vw, 56px);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+.sell-intro__title em { color: var(--taupe); }
+.sell-intro__lead { max-width: 560px; margin-bottom: 20px; font-size: 15.5px; line-height: 1.7; color: var(--ink-soft); }
+
+.sell-block {
+  margin-bottom: 22px;
+  padding: 26px 24px;
+  border-radius: var(--radius-lg);
+  background: var(--glass-sheen), var(--grain), var(--glass-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
+}
+@media (max-width: 520px) { .sell-block { padding: 22px 18px; } }
+.sell-block__title { font-family: var(--font-display); font-size: 30px; font-weight: 600; line-height: 1.1; margin-bottom: 6px; }
+.sell-block__lead { margin-bottom: 18px; font-size: 14px; }
+
+.sell-steps { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 18px; }
+.sell-step { display: flex; gap: 16px; align-items: flex-start; }
+.sell-step__num {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--glass-sheen), var(--rose-glass);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(184, 78, 120, 0.25);
+}
+.sell-step__title { font-family: var(--font-display); font-size: 21px; font-weight: 600; line-height: 1.2; margin: 4px 0 2px; }
+.sell-step p { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+
+.fee-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.fee-table th {
+  padding: 0 0 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--taupe);
+  text-align: left;
+}
+.fee-table th:last-child, .fee-table td:last-child { text-align: right; }
+.fee-table td { padding: 12px 0; border-top: 1px solid rgba(178, 87, 121, 0.14); }
+.fee-table td:last-child { font-weight: 700; }
+
+.sell-included { margin-top: 20px; padding: 16px 18px; border-radius: var(--radius-md); background: rgba(255, 250, 252, 0.6); }
+.sell-included__title { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.sell-included ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; font-size: 14px; color: var(--ink-soft); }
+.sell-included li::before { content: "✓"; margin-right: 8px; color: var(--sage); font-weight: 700; }
+@media (max-width: 420px) { .sell-included ul { grid-template-columns: 1fr; } }
+
+.sell-note p { font-size: 15px; line-height: 1.7; color: var(--ink-soft); }
+
+.apply-form__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 520px) { .apply-form__grid { grid-template-columns: 1fr; } }
+.apply-fee {
+  margin: 14px 0 22px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 250, 252, 0.6);
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.apply-fee--set { color: var(--ink); font-weight: 600; background: var(--sage-soft); }
+.apply-bank { margin: 0 0 20px; padding: 0; border: 0; }
+.apply-bank legend { padding: 0; margin-bottom: 12px; font-family: var(--font-display); font-size: 21px; font-weight: 600; }
+.apply-bank legend .muted { font-family: var(--font-body); font-size: 13px; font-weight: 400; }
+.apply-private { margin-top: 12px; font-size: 12.5px; color: var(--ink-soft); }
+.apply-agree { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 20px; font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); cursor: pointer; }
+.apply-agree input { margin-top: 3px; width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--rose); }
+.apply-done { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 0 4px; text-align: center; }
+.apply-done .empty-state__icon { margin-bottom: 4px; color: var(--sage); }
+
+/* ---- admin: applications and client details ----------------------------- */
+.apps-empty { font-size: 13.5px; }
+.status-pill--pending { background: var(--rose-soft); color: #8a4f49; }
+.app-card__contact { display: flex; gap: 8px; flex-wrap: wrap; }
+.bank-list {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 250, 252, 0.6);
+  font-size: 13px;
+}
+.bank-list dt { color: var(--ink-soft); }
+.bank-list dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+
+.client-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--glass-sheen), var(--grain), var(--glass);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
+}
+.client-info__row { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; }
+.client-info__none, .client-info__batch { font-size: 13.5px; }
+.client-info__bank summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.client-info__bank[open] summary { margin-bottom: 8px; }
+.client-add input[type="tel"] { flex: 1 1 180px; }
+
 /* ---- motion ------------------------------------------------------------- */
 html.is-leaving .page,
 body.is-leaving .page {
@@ -1407,8 +2142,6 @@ body.is-leaving .page {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  .ticker__track { flex-wrap: wrap; width: auto; }
-  .ticker__run[aria-hidden] { display: none; }
   .reveal { opacity: 1; transform: none; }
 }
 
@@ -1444,3 +2177,41 @@ body.is-leaving .page {
 .ico--shirt { --ico: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 3 3 6l2 4 2-1v12h10V9l2 1 2-4-6-3a3 3 0 0 1-6 0z'/></svg>"); }
 .ico--hourglass { --ico: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 2h12M6 22h12'/><path d='M6 2c0 5 6 6 6 10s-6 5-6 10'/><path d='M18 2c0 5-6 6-6 10s6 5 6 10'/></svg>"); }
 .ico--back { --ico: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M19 12H5'/><path d='m12 19-7-7 7-7'/></svg>"); }
+
+/* phones: the "Local Business Feature" patch small, straight, in the
+   left corner, overlapping the top of the first poster space a little */
+@media (max-width: 879px) {
+  .hero .biz-feature { text-align: left; }
+  .biz-feature__title.biz-feature__title {
+    margin: 4px 0 -10px 10px;
+    padding: 6px 12px 7px;
+    border-radius: 8px;
+    font-size: 11px;
+    transform: none;
+  }
+  .biz-feature__title.biz-feature__title::before { inset: 3px; border-width: 1.5px; border-radius: 6px; }
+  .biz-feature__slots { text-align: center; }
+}
+
+/* the 3D cart icon in the top bar */
+.navbar__cart .cart-3d { width: 30px; display: block; transition: transform var(--t-fast) var(--ease); }
+.navbar__cart:hover .cart-3d { transform: translateY(-1px) rotate(-4deg); }
+/* no circle behind the cart: just the 3D cart itself */
+.navbar .navbar__cart.navbar__cart,
+.navbar .navbar__cart.navbar__cart:hover {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.navbar__cart .cart-3d { width: 40px; height: auto; }
+/* the cart always sits at the right edge, with or without the filters
+   between it and the logo */
+.navbar__top > .navbar__cart { margin-left: auto; }
+
+/* the hero's background: pink waves (assets/hero-waves.webp), covering the
+   whole hero; the flat pink behind it shows while it loads */
+.hero.hero {
+  background: #fccad9 url("../assets/hero-waves.webp") center / cover no-repeat;
+}

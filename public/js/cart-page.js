@@ -109,7 +109,7 @@ function paintSend(available) {
   );
   const total = available.reduce((sum, i) => sum + Number(i.price || 0), 0);
   const message = [
-    "Hi! I'd like to buy these from Closet Sales Namibia:",
+    "Hi! I'd like to buy these from Closeted By Grace:",
     ...lines,
     `Total: ${formatNAD(total)}`,
     "",

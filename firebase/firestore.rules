@@ -23,7 +23,7 @@ service cloud.firestore {
       allow read: if true;
       allow create, update: if isAdmin()
         && request.resource.data.category in
-             ['Shirt', 'Top', 'Belt', 'Pants', 'Skirt', 'Shorts', 'Dress', 'Shoes', 'Heels', 'Accessories']
+             ['Shirt', 'Top', 'Belt', 'Pants', 'Skirt', 'Shorts', 'Dress', 'Shoes', 'Heels', 'Bags', 'Accessories']
         && request.resource.data.price is number
         && request.resource.data.price > 0
         && (!('images' in request.resource.data)
@@ -33,7 +33,8 @@ service cloud.firestore {
 
     // ---------------------------------------------------------------
     // clients/{clientId} — the people whose pieces the admin sells for
-    // them: { name, createdAt }. Private: only the admin sees the names;
+    // them: { name, createdAt }, plus whatsapp, pieces, bank and
+    // applicationId when they came in through an approved application. Private: only the admin sees the names;
     // items carry just the opaque clientId.
     // ---------------------------------------------------------------
     match /clients/{clientId} {
@@ -42,6 +43,55 @@ service cloud.firestore {
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 60;
+    }
+
+    // ---------------------------------------------------------------
+    // applications/{appId} — someone applying on sell.html to sell
+    // through the admin: name, surname, WhatsApp, how many pieces (5–50)
+    // and the bank details to pay them. Anyone can send one; the fields
+    // are pinned down so nothing else can be stored. Only the admin can
+    // read them (they hold bank details), approve or delete them.
+    // ---------------------------------------------------------------
+    match /applications/{appId} {
+      allow create: if request.resource.data.keys().hasOnly(
+            ['firstName', 'surname', 'whatsapp', 'pieces', 'bank', 'status', 'createdAt'])
+        && request.resource.data.firstName is string
+        && request.resource.data.firstName.size() > 0 && request.resource.data.firstName.size() <= 60
+        && request.resource.data.surname is string
+        && request.resource.data.surname.size() > 0 && request.resource.data.surname.size() <= 60
+        && request.resource.data.whatsapp is string
+        && request.resource.data.whatsapp.size() >= 6 && request.resource.data.whatsapp.size() <= 30
+        && request.resource.data.pieces is int
+        && request.resource.data.pieces >= 5 && request.resource.data.pieces <= 50
+        && request.resource.data.bank is map
+        && request.resource.data.bank.keys().hasOnly(['bankName', 'accountHolder', 'accountNumber', 'branchCode'])
+        && request.resource.data.bank.bankName is string && request.resource.data.bank.bankName.size() <= 60
+        && request.resource.data.bank.accountHolder is string
+        && request.resource.data.bank.accountHolder.size() > 0 && request.resource.data.bank.accountHolder.size() <= 80
+        && request.resource.data.bank.accountNumber is string
+        && request.resource.data.bank.accountNumber.size() >= 4 && request.resource.data.bank.accountNumber.size() <= 30
+        && request.resource.data.bank.branchCode is string && request.resource.data.bank.branchCode.size() <= 20
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ---------------------------------------------------------------
+    // ads/{slot} — the Local Business Feature on the home page: three
+    // poster spaces (slot1–slot3), each a poster, optional business name,
+    // description and WhatsApp number. Anyone can see them; only the
+    // admin can fill, change or clear them.
+    // ---------------------------------------------------------------
+    match /ads/{slot} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && slot in ['slot1', 'slot2', 'slot3']
+        && request.resource.data.imageURL is string
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 400
+        && request.resource.data.whatsapp is string
+        && request.resource.data.whatsapp.size() <= 30;
+      allow delete: if isAdmin();
     }
 
     // Everything else (the old users / usernames / carousels collections

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sell With Us — Closeted By Grace</title>
+<meta name="robots" content="noindex" />
+<meta name="description" content="Sell your pre-loved clothes through Closeted By Grace. We collect, photograph, list and market your pieces — you get paid whenever one sells." />
+<meta property="og:title" content="Sell With Us — Closeted By Grace" />
+<meta property="og:description" content="Sell your pre-loved clothes through Closeted By Grace. We collect, photograph, list and market your pieces — you get paid whenever one sells." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+  rel="stylesheet"
+/>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="sell">
+  <div class="page">
+    <main>
+      <div class="shell sell-shell">
+
+        <header class="sell-intro">
+          <p class="eyebrow">Sell with us</p>
+          <h1 class="sell-intro__title">Turn your closet into <em>cash.</em></h1>
+          <p class="sell-intro__lead">
+            Got pieces you no longer wear? Hand them to us and we'll do the rest — we collect them,
+            photograph every piece, list them in the shop and find them new homes. Whenever something
+            sells, your money comes straight to you.
+          </p>
+          <a href="#apply" class="btn btn--primary">Apply to sell</a>
+        </header>
+
+        <section class="sell-block">
+          <h2 class="sell-block__title">How it works</h2>
+          <ol class="sell-steps">
+            <li class="sell-step">
+              <span class="sell-step__num">1</span>
+              <div>
+                <h3 class="sell-step__title">Apply online</h3>
+                <p>Fill in the short form below with your details and roughly how many pieces you'd like to sell.</p>
+              </div>
+            </li>
+            <li class="sell-step">
+              <span class="sell-step__num">2</span>
+              <div>
+                <h3 class="sell-step__title">We get in touch on WhatsApp</h3>
+                <p>Once we've reviewed your application, we'll message you to confirm and arrange a time to pick up your items.</p>
+              </div>
+            </li>
+            <li class="sell-step">
+              <span class="sell-step__num">3</span>
+              <div>
+                <h3 class="sell-step__title">We photograph &amp; list</h3>
+                <p>Every piece is photographed individually, posted to the shop and marketed to our buyers.</p>
+              </div>
+            </li>
+            <li class="sell-step">
+              <span class="sell-step__num">4</span>
+              <div>
+                <h3 class="sell-step__title">We handle the sale</h3>
+                <p>Buyers order through us, and we sort out delivery — you don't have to deal with a thing.</p>
+              </div>
+            </li>
+            <li class="sell-step">
+              <span class="sell-step__num">5</span>
+              <div>
+                <h3 class="sell-step__title">You get paid</h3>
+                <p>Every time one of your pieces sells, the money is sent to your bank account.</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="sell-block">
+          <h2 class="sell-block__title">Service fee</h2>
+          <p class="muted sell-block__lead">One fee per batch, based on how many pieces you bring.</p>
+          <table class="fee-table">
+            <thead>
+              <tr><th scope="col">Pieces</th><th scope="col">Service fee</th></tr>
+            </thead>
+            <tbody data-fee-rows></tbody>
+          </table>
+          <div class="sell-included">
+            <p class="sell-included__title">Your fee covers</p>
+            <ul>
+              <li>Picking up your items</li>
+              <li>Taking the photos</li>
+              <li>Sorting out delivery</li>
+              <li>Marketing your pieces</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="sell-block sell-note">
+          <h2 class="sell-block__title">Good to know</h2>
+          <p>
+            We can't guarantee that your pieces will sell within a particular time frame — pre-loved
+            fashion finds its buyer at its own pace. But whenever something does sell, the money is
+            sent to you.
+          </p>
+        </section>
+
+        <section class="sell-block apply" id="apply">
+          <h2 class="sell-block__title">Apply to sell</h2>
+          <p class="muted sell-block__lead">Takes about two minutes. We'll be in touch on WhatsApp.</p>
+
+          <form class="apply-form" data-apply-form novalidate>
+            <div class="apply-form__grid">
+              <div class="field">
+                <label for="apply-first">Name</label>
+                <input id="apply-first" type="text" maxlength="60" autocomplete="given-name" required data-a="firstName" />
+              </div>
+              <div class="field">
+                <label for="apply-surname">Surname</label>
+                <input id="apply-surname" type="text" maxlength="60" autocomplete="family-name" required data-a="surname" />
+              </div>
+              <div class="field">
+                <label for="apply-number">WhatsApp number</label>
+                <input id="apply-number" type="tel" maxlength="30" placeholder="081 234 5678" autocomplete="tel" required data-a="whatsapp" />
+              </div>
+              <div class="field">
+                <label for="apply-pieces">Number of pieces</label>
+                <input id="apply-pieces" type="number" min="5" max="50" step="1" inputmode="numeric" placeholder="5 – 50" required data-a="pieces" />
+              </div>
+            </div>
+            <p class="apply-fee" data-apply-fee aria-live="polite">Service fee: enter 5 to 50 pieces</p>
+
+            <fieldset class="apply-bank">
+              <legend>Banking details <span class="muted">— where we'll send your money</span></legend>
+              <div class="apply-form__grid">
+                <div class="field">
+                  <label for="apply-bank">Bank</label>
+                  <select id="apply-bank" required data-a="bankName">
+                    <option value="" disabled selected>Pick your bank</option>
+                    <option>Bank Windhoek</option>
+                    <option>FNB Namibia</option>
+                    <option>Standard Bank Namibia</option>
+                    <option>Nedbank Namibia</option>
+                    <option>Letshego Bank Namibia</option>
+                    <option>Bank BIC Namibia</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="apply-holder">Account holder</label>
+                  <input id="apply-holder" type="text" maxlength="80" autocomplete="name" required data-a="accountHolder" />
+                </div>
+                <div class="field">
+                  <label for="apply-account">Account number</label>
+                  <input id="apply-account" type="text" inputmode="numeric" maxlength="30" autocomplete="off" required data-a="accountNumber" />
+                </div>
+                <div class="field">
+                  <label for="apply-branch">Branch code <span class="muted">(optional)</span></label>
+                  <input id="apply-branch" type="text" inputmode="numeric" maxlength="20" autocomplete="off" data-a="branchCode" />
+                </div>
+              </div>
+              <p class="apply-private"><i class="ico ico--lock" aria-hidden="true"></i> Only Closeted By Grace can see your banking details. They're used for one thing: paying you.</p>
+            </fieldset>
+
+            <label class="apply-agree">
+              <input type="checkbox" required data-a="agree" />
+              <span>I understand there's no guarantee on how quickly my pieces will sell, and that I'll be paid whenever one does.</span>
+            </label>
+
+            <button type="submit" class="btn btn--primary btn--block" data-apply-submit>Send application</button>
+          </form>
+
+          <div class="apply-done" data-apply-done hidden>
+            <div class="empty-state__icon"><i class="ico ico--check ico--xl" aria-hidden="true"></i></div>
+            <p class="h3">Application sent — thank you!</p>
+            <p class="muted">We'll review it and message you on WhatsApp to arrange a pickup.</p>
+            <a href="index.html" class="btn btn--outline">Back to the shop</a>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/layout.js"></script>
+  <script type="module" src="js/sell.js"></script>
+</body>
+</html>

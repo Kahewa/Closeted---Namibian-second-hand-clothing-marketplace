@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Closet Sales Namibia — Pre-Loved Fashion</title>
+<title>Closeted By Grace — Pre-Loved Fashion</title>
 <meta name="description" content="Pre-loved shirts, dresses, shoes and more, posted fresh in Namibia. Filter by what you want and ask about any piece on WhatsApp." />
-<meta property="og:title" content="Closet Sales Namibia — Pre-Loved Fashion" />
+<meta property="og:title" content="Closeted By Grace — Pre-Loved Fashion" />
 <meta property="og:description" content="Pre-loved shirts, dresses, shoes and more, posted fresh in Namibia. Filter by what you want and ask about any piece on WhatsApp." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&family=Poppins:wght@800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -22,36 +22,233 @@
       <section class="hero">
         <div class="shell shell--wide hero__inner">
           <div class="hero__copy">
-            <p class="eyebrow">Pre-loved fashion · Namibia</p>
-            <h1 class="hero__title">Curated pre-loved style for Namibia's <em>conscious closets.</em></h1>
-            <p class="hero__lead">
-              Photographed individually, styled for everyday wear. Add the pieces you love to your cart
-              and send it to us on WhatsApp.
-            </p>
-            <div class="hero__cta-row">
-              <a href="#browse" class="btn btn--primary">Shop pre-loved</a>
+            <div class="hero__sticker-text">
+              <!-- the headline as denim patches: denim-filled letters with a pale
+                   fabric rim (js/headline.js fits the drawing to the text once
+                   the font has loaded) -->
+              <h1 class="hero__title hero__title--denim">
+                <span class="visually-hidden">Made for Namibia's second hand market.</span>
+                <svg class="denim-title" aria-hidden="true" focusable="false" data-denim-title>
+                  <defs>
+                    <!-- a light soft shadow under the letters -->
+                    <filter id="denim-3d" x="-5%" y="-15%" width="110%" height="140%" color-interpolation-filters="sRGB">
+                      <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="shadowBlur" />
+                      <feOffset in="shadowBlur" dx="2" dy="7" result="shadowOffset" />
+                      <feFlood flood-color="#3b2430" flood-opacity="0.22" />
+                      <feComposite in2="shadowOffset" operator="in" result="shadow" />
+                      <feMerge>
+                        <feMergeNode in="shadow" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                    <pattern id="denim-fill" patternUnits="userSpaceOnUse" width="330" height="220">
+                      <image href="assets/denim.jpg" width="330" height="220" preserveAspectRatio="xMidYMid slice" />
+                    </pattern>
+                  </defs>
+                  <g filter="url(#denim-3d)">
+                  <g class="denim-title__rim">
+                    <text x="0" y="0" data-line="1">Made for Namibia's second</text>
+                    <text x="0" y="0" data-line="2">hand market.</text>
+                  </g>
+                  <g class="denim-title__fill">
+                    <text x="0" y="0" data-line="1">Made for Namibia's second</text>
+                    <text x="0" y="0" data-line="2">hand market.</text>
+                  </g>
+                  </g>
+                </svg>
+              </h1>
+              <p class="hero__lead">Browse, Add to Cart, Buy. Closet Sales made Simple.</p>
+            </div>
+            <!-- sewn-on denim patches. "Advertise" opens the advertising prices
+                 pop-up (js/ads.js); its WhatsApp button uses the shop's number,
+                 which feed.js fills in from the latest post -->
+            <div class="hero__patches">
+              <a href="sell.html" class="denim-patch">How to sell</a>
+              <a href="buy.html" class="denim-patch">How to buy</a>
+              <a href="#" class="denim-patch" data-advertise>Advertise your business</a>
             </div>
           </div>
 
-          <!-- filled with the newest pieces by feed.js; soft tiles until then.
-               The whole collage jumps down to the feed. -->
-          <a href="#browse" class="hero__collage" data-hero-collage aria-label="See the latest arrivals">
-            <span class="hero__tile"></span>
-            <span class="hero__tile"></span>
-            <span class="hero__tile"></span>
-            <span class="hero__tile"></span>
-            <span class="hero__arrivals" aria-hidden="true">Latest arrivals <span class="hero__arrivals-arrow">↓</span></span>
-          </a>
+          <!-- Local Business Feature: three poster spaces the admin fills from
+               the dashboard (js/ads.js). Empty ones invite businesses to advertise. -->
+          <aside class="biz-feature" aria-labelledby="biz-feature-title">
+            <h2 class="biz-feature__title" id="biz-feature-title">Local Business Feature</h2>
+            <div class="biz-feature__slots" data-ad-slots></div>
+          </aside>
         </div>
       </section>
 
+      <!-- tapping an empty poster space: the advertising prices first -->
+      <dialog class="biz-modal biz-modal--pricing" data-adprice-modal aria-labelledby="adprice-title">
+        <button type="button" class="biz-modal__close" aria-label="Close" data-adprice-close>
+          <i class="ico ico--close" aria-hidden="true"></i>
+        </button>
+        <div class="biz-modal__body">
+          <p class="eyebrow">Local Business Feature</p>
+          <h2 class="biz-modal__title" id="adprice-title">Advertise your poster here</h2>
+          <p class="biz-modal__desc">Put your business in front of everyone shopping on Closeted By Grace. Your poster sits right at the top of the home page.</p>
+          <table class="fee-table adprice-table">
+            <thead><tr><th scope="col">Time on the page</th><th scope="col">Price</th></tr></thead>
+            <tbody>
+              <tr><td>1 week</td><td>N$100</td></tr>
+              <tr><td>2 weeks</td><td>N$200</td></tr>
+              <tr><td>3 weeks</td><td>N$300</td></tr>
+            </tbody>
+          </table>
+          <p class="adprice-note">3 weeks is the maximum, so other local businesses get a chance to be featured too.</p>
+          <a class="btn btn--lime btn--block" target="_blank" rel="noopener noreferrer" data-adprice-wa hidden>
+            <i class="ico ico--chat" aria-hidden="true"></i> Interested? Send us a WhatsApp
+          </a>
+        </div>
+      </dialog>
+
+      <!-- a featured business's poster, description and WhatsApp -->
+      <dialog class="biz-modal" data-ad-modal aria-labelledby="biz-modal-title">
+        <button type="button" class="biz-modal__close" aria-label="Close" data-ad-close>
+          <i class="ico ico--close" aria-hidden="true"></i>
+        </button>
+        <img class="biz-modal__img" alt="" data-ad-modal-img />
+        <div class="biz-modal__body">
+          <p class="eyebrow">Local Business Feature</p>
+          <h2 class="biz-modal__title" id="biz-modal-title" data-ad-modal-title></h2>
+          <p class="biz-modal__desc" data-ad-modal-desc></p>
+          <a class="btn btn--lime btn--block" target="_blank" rel="noopener noreferrer" data-ad-modal-wa>
+            <i class="ico ico--chat" aria-hidden="true"></i> <span data-ad-modal-wa-label>WhatsApp</span>
+          </a>
+        </div>
+      </dialog>
+
       <section class="browse" id="browse">
+        <!-- stickers scattered on the denim; they stay put with it while the
+             clothes scroll over them. Purely decorative. -->
+        <div class="denim-stickers" aria-hidden="true">
+          <img class="sticker sticker--vinyl" src="assets/stickers/vinyl.webp" alt="" width="440" height="287" decoding="async" />
+          <img class="sticker sticker--safety-pin" src="assets/stickers/safety-pin.webp" alt="" width="349" height="440" decoding="async" />
+          <img class="sticker sticker--jelly-star" src="assets/stickers/jelly-star.webp" alt="" width="440" height="410" decoding="async" />
+          <img class="sticker sticker--gummy-bear" src="assets/stickers/gummy-bear.webp" alt="" width="329" height="440" decoding="async" />
+          <img class="sticker sticker--leopard-star" src="assets/stickers/leopard-star.webp" alt="" width="440" height="421" decoding="async" />
+          <img class="sticker sticker--handle-with-love" src="assets/stickers/handle-with-love.webp" alt="" width="440" height="148" decoding="async" />
+          <img class="sticker sticker--phone" src="assets/stickers/phone.webp" alt="" width="98" height="440" decoding="async" />
+          <img class="sticker sticker--denim-pocket" src="assets/stickers/denim-pocket.webp" alt="" width="440" height="417" decoding="async" />
+          <img class="sticker sticker--push-pin" src="assets/stickers/push-pin.webp" alt="" width="365" height="440" decoding="async" />
+          <img class="sticker sticker--heart-button" src="assets/stickers/heart-button.webp" alt="" width="440" height="419" decoding="async" />
+          <img class="sticker sticker--cherries" src="assets/stickers/cherries.webp" alt="" width="440" height="416" decoding="async" />
+          <img class="sticker sticker--kirby" src="assets/stickers/kirby.webp" alt="" width="440" height="349" decoding="async" />
+          <img class="sticker sticker--megaphone" src="assets/stickers/megaphone.webp" alt="" width="440" height="384" decoding="async" />
+          <img class="sticker sticker--pink-star" src="assets/stickers/pink-star.webp" alt="" width="440" height="424" decoding="async" />
+        </div>
         <div class="shell shell--wide">
           <div class="browse__head">
-            <p class="eyebrow">Just in</p>
-          </div>
+            <h2 class="puffy-title" data-text="Shop now">Shop now</h2>
+            <!-- plush fur letters (used by .puffy-title in style.css), built like a
+                 stuffed cushion: a piping rim round the edge, a thin sewn seam, then
+                 the puffed body; all of it furred, then a soft studio shadow -->
+            <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+              <filter id="plush" x="-10%" y="-30%" width="120%" height="175%" color-interpolation-filters="sRGB">
+                <!-- piping rim: the letter grown a few pixels, deeper pink, lightly rounded -->
+                <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="rimShape" />
+                <feGaussianBlur in="rimShape" stdDeviation="3" result="rimBump" />
+                <feDiffuseLighting in="rimBump" surfaceScale="4" diffuseConstant="1.35" lighting-color="#ffffff" result="rimLight">
+                  <feDistantLight azimuth="235" elevation="50" />
+                </feDiffuseLighting>
+                <feFlood flood-color="#de6a96" result="rimPink" />
+                <feBlend in="rimPink" in2="rimLight" mode="multiply" result="rimLitAll" />
+                <feComposite in="rimLitAll" in2="rimShape" operator="in" result="rim" />
 
-          <div class="filter-bar" role="group" aria-label="Filter by category" data-filters></div>
+                <!-- the seam between rim and body -->
+                <feMorphology in="SourceAlpha" operator="dilate" radius="1.5" result="seamShape" />
+                <feFlood flood-color="#9c3f66" flood-opacity="0.75" />
+                <feComposite in2="seamShape" operator="in" result="seam" />
+
+                <!-- the stuffed body: a deep bulge, lit from the top left -->
+                <feGaussianBlur in="SourceAlpha" stdDeviation="9" result="bodyBump" />
+                <feDiffuseLighting in="bodyBump" surfaceScale="11" diffuseConstant="1.55" lighting-color="#ffffff" result="bodyLight">
+                  <feDistantLight azimuth="235" elevation="52" />
+                </feDiffuseLighting>
+                <feBlend in="SourceGraphic" in2="bodyLight" mode="multiply" result="bodyLitAll" />
+
+                <!-- fur on the body: soft clumps plus fine hairs -->
+                <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="5" result="clumpNoise" />
+                <feColorMatrix in="clumpNoise" type="matrix" values="0.3 0 0 0 0.77  0.3 0 0 0 0.77  0.3 0 0 0 0.77  0 0 0 0 1" result="clumps" />
+                <feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="2" seed="9" result="hairNoise" />
+                <feColorMatrix in="hairNoise" type="matrix" values="0.4 0 0 0 0.78  0.4 0 0 0 0.78  0.4 0 0 0 0.78  0 0 0 0 1" result="hairs" />
+                <feBlend in="bodyLitAll" in2="clumps" mode="multiply" result="clumped" />
+                <feBlend in="clumped" in2="hairs" mode="multiply" result="haired" />
+                <feComposite in="haired" in2="SourceAlpha" operator="in" result="body" />
+
+                <!-- stack rim, seam, body, then fray every edge into fuzz -->
+                <feMerge result="cushion">
+                  <feMergeNode in="rim" />
+                  <feMergeNode in="seam" />
+                  <feMergeNode in="body" />
+                </feMerge>
+                <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="2" seed="4" result="fuzz" />
+                <feDisplacementMap in="cushion" in2="fuzz" scale="6" xChannelSelector="R" yChannelSelector="G" result="plush" />
+
+                <!-- soft studio shadow -->
+                <feGaussianBlur in="rimShape" stdDeviation="9" result="shadowBlur" />
+                <feOffset in="shadowBlur" dx="3" dy="10" result="shadowOffset" />
+                <feFlood flood-color="#140c22" flood-opacity="0.45" />
+                <feComposite in2="shadowOffset" operator="in" result="shadow" />
+                <feMerge>
+                  <feMergeNode in="shadow" />
+                  <feMergeNode in="plush" />
+                </feMerge>
+              </filter>
+              <!-- the same plush, scaled down for the smaller heading on phones -->
+              <filter id="plush-sm" x="-10%" y="-30%" width="120%" height="175%" color-interpolation-filters="sRGB">
+                <!-- piping rim: the letter grown a few pixels, deeper pink, lightly rounded -->
+                <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="rimShape" />
+                <feGaussianBlur in="rimShape" stdDeviation="2" result="rimBump" />
+                <feDiffuseLighting in="rimBump" surfaceScale="3" diffuseConstant="1.35" lighting-color="#ffffff" result="rimLight">
+                  <feDistantLight azimuth="235" elevation="50" />
+                </feDiffuseLighting>
+                <feFlood flood-color="#de6a96" result="rimPink" />
+                <feBlend in="rimPink" in2="rimLight" mode="multiply" result="rimLitAll" />
+                <feComposite in="rimLitAll" in2="rimShape" operator="in" result="rim" />
+
+                <!-- the seam between rim and body -->
+                <feMorphology in="SourceAlpha" operator="dilate" radius="1" result="seamShape" />
+                <feFlood flood-color="#9c3f66" flood-opacity="0.75" />
+                <feComposite in2="seamShape" operator="in" result="seam" />
+
+                <!-- the stuffed body: a deep bulge, lit from the top left -->
+                <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="bodyBump" />
+                <feDiffuseLighting in="bodyBump" surfaceScale="7" diffuseConstant="1.55" lighting-color="#ffffff" result="bodyLight">
+                  <feDistantLight azimuth="235" elevation="52" />
+                </feDiffuseLighting>
+                <feBlend in="SourceGraphic" in2="bodyLight" mode="multiply" result="bodyLitAll" />
+
+                <!-- fur on the body: soft clumps plus fine hairs -->
+                <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="5" result="clumpNoise" />
+                <feColorMatrix in="clumpNoise" type="matrix" values="0.3 0 0 0 0.77  0.3 0 0 0 0.77  0.3 0 0 0 0.77  0 0 0 0 1" result="clumps" />
+                <feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="2" seed="9" result="hairNoise" />
+                <feColorMatrix in="hairNoise" type="matrix" values="0.4 0 0 0 0.78  0.4 0 0 0 0.78  0.4 0 0 0 0.78  0 0 0 0 1" result="hairs" />
+                <feBlend in="bodyLitAll" in2="clumps" mode="multiply" result="clumped" />
+                <feBlend in="clumped" in2="hairs" mode="multiply" result="haired" />
+                <feComposite in="haired" in2="SourceAlpha" operator="in" result="body" />
+
+                <!-- stack rim, seam, body, then fray every edge into fuzz -->
+                <feMerge result="cushion">
+                  <feMergeNode in="rim" />
+                  <feMergeNode in="seam" />
+                  <feMergeNode in="body" />
+                </feMerge>
+                <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="2" seed="4" result="fuzz" />
+                <feDisplacementMap in="cushion" in2="fuzz" scale="3.5" xChannelSelector="R" yChannelSelector="G" result="plush" />
+
+                <!-- soft studio shadow -->
+                <feGaussianBlur in="rimShape" stdDeviation="6" result="shadowBlur" />
+                <feOffset in="shadowBlur" dx="2" dy="6" result="shadowOffset" />
+                <feFlood flood-color="#140c22" flood-opacity="0.45" />
+                <feComposite in2="shadowOffset" operator="in" result="shadow" />
+                <feMerge>
+                  <feMergeNode in="shadow" />
+                  <feMergeNode in="plush" />
+                </feMerge>
+              </filter>
+            </svg>
+          </div>
 
           <div class="empty-state" data-empty-state hidden>
             <div class="empty-state__icon"><i class="ico ico--shirt ico--xl" aria-hidden="true"></i></div>
@@ -71,5 +268,7 @@
 
   <script type="module" src="js/layout.js"></script>
   <script type="module" src="js/feed.js"></script>
+  <script type="module" src="js/ads.js"></script>
+  <script type="module" src="js/headline.js"></script>
 </body>
 </html>

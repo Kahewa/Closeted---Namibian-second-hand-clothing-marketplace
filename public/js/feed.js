@@ -8,8 +8,8 @@ import {
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { renderItemCard, syncCartButton } from "./item-card.js";
-import { sized } from "./cloudinary.js";
-import { $, el, itemImages, CATEGORIES } from "./utils.js";
+import { masonry } from "./masonry.js";
+import { $, el, whatsappHref, CATEGORIES } from "./utils.js";
 
 // How many matching pieces to show per "load more". Firestore is asked for
 // pages in the same order and the category is filtered here in the
@@ -56,6 +56,12 @@ function paintFilters() {
 
 function setFilter(cat) {
   active = cat;
+  // the pills live in the header; bring the pieces into view if they're
+  // still below the fold (e.g. picking a filter from the top of the page)
+  const browse = document.getElementById("browse");
+  if (browse && browse.getBoundingClientRect().top > window.innerHeight * 0.5) {
+    browse.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
   shown = PAGE_SIZE;
   const url = new URL(location.href);
   if (cat) url.searchParams.set("c", cat);
@@ -102,26 +108,20 @@ async function fill() {
   }
 }
 
-// The hero's photo collage: cover shots of the newest pieces still for
-// sale, biggest tile first. Tiles without a photo keep their soft colour.
-let heroPainted = false;
-function paintHero() {
-  const tiles = document.querySelectorAll("[data-hero-collage] .hero__tile");
-  if (heroPainted || !tiles.length) return;
-  const covers = loaded
-    .filter((item) => !item.sold)
-    .map((item) => itemImages(item)[0]?.url)
-    .filter(Boolean)
-    .slice(0, tiles.length);
-  if (!covers.length) return;
-  heroPainted = true;
-  covers.forEach((url, i) =>
-    tiles[i].replaceChildren(el("img", { src: sized(url, i === 0 ? 640 : 400), alt: "", decoding: "async" }))
-  );
+// "Advertise your business": a WhatsApp chat with the shop, on the same
+// number the listings use (the newest post's), so it's never hard-coded.
+const advertise = $("[data-advertise]");
+function paintAdvertise() {
+  if (!advertise || advertise.dataset.ready) return;
+  const number = loaded.find((item) => whatsappHref(item.whatsapp))?.whatsapp;
+  const href = number && whatsappHref(number, "Hi! I'd like to advertise my business on Closeted By Grace.");
+  if (!href) return;
+  advertise.href = href;
+  advertise.dataset.ready = "1";
 }
 
 function paint() {
-  paintHero();
+  paintAdvertise();
   const list = matches();
   feedEl.innerHTML = "";
   list.slice(0, shown).forEach((item) => feedEl.append(renderItemCard(item)));
@@ -147,5 +147,6 @@ loadMoreBtn.addEventListener("click", () => {
   fill();
 });
 
+masonry(feedEl);
 paintFilters();
 fill();

@@ -2,9 +2,11 @@ import { auth, db } from "./firebase-config.js";
 import {
   collection,
   query,
+  where,
   orderBy,
   limit,
   getDocs,
+  getDoc,
   doc,
   setDoc,
   addDoc,
@@ -24,6 +26,8 @@ import {
   toFirestoreDate,
   whatsappHref,
   itemImages,
+  sellFee,
+  AD_SLOTS,
   CATEGORIES,
   CONDITIONS,
   MAX_PHOTOS,
@@ -53,7 +57,8 @@ const foldersView = $("[data-folders-view]");
 const folderView = $("[data-folder-view]");
 
 let items = [];
-let clients = []; // [{ id, name }], A–Z
+let clients = []; // [{ id, name, whatsapp?, pieces?, bank? }], A–Z
+let apps = []; // pending seller applications, newest first
 let editing = null; // the item being edited, if any
 let openFolder = null; // ALL, NO_CLIENT, a client id, or null for the folder grid
 
@@ -351,7 +356,9 @@ const sameName = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
 $("[data-client-add]").addEventListener("submit", async (e) => {
   e.preventDefault();
   const input = $("[data-client-name]");
+  const numberInput = $("[data-client-number]");
   const name = input.value.trim().replace(/\s+/g, " ");
+  const whatsapp = numberInput.value.trim();
   if (!name) {
     toast("Type the client's name first.", "error");
     return;
@@ -360,13 +367,20 @@ $("[data-client-add]").addEventListener("submit", async (e) => {
     toast(`${name} is already in your list.`, "error");
     return;
   }
+  if (whatsapp && !whatsappHref(whatsapp)) {
+    toast("That number doesn't look right (e.g. 081 234 5678).", "error");
+    numberInput.focus();
+    return;
+  }
 
   const btn = e.submitter;
   if (btn) btn.disabled = true;
   try {
-    const ref = await addDoc(collection(db, "clients"), { name, createdAt: serverTimestamp() });
-    clients = [...clients, { id: ref.id, name }].sort((a, b) => a.name.localeCompare(b.name));
+    const extra = whatsapp ? { whatsapp } : {};
+    const ref = await addDoc(collection(db, "clients"), { name, ...extra, createdAt: serverTimestamp() });
+    clients = [...clients, { id: ref.id, name, ...extra }].sort((a, b) => a.name.localeCompare(b.name));
     input.value = "";
+    numberInput.value = "";
     paintClientSelect();
     paintMine();
     toast(`Added ${name}`);
@@ -400,6 +414,27 @@ $("[data-folder-rename]").addEventListener("click", async () => {
   }
 });
 
+$("[data-folder-number]").addEventListener("click", async () => {
+  const client = clients.find((c) => c.id === openFolder);
+  if (!client) return;
+  const answer = prompt(`${client.name}'s WhatsApp number:`, client.whatsapp || "");
+  if (answer === null) return;
+  const whatsapp = answer.trim();
+  if (whatsapp && !whatsappHref(whatsapp)) {
+    toast("That number doesn't look right (e.g. 081 234 5678).", "error");
+    return;
+  }
+  try {
+    await updateDoc(doc(db, "clients", client.id), { whatsapp });
+    client.whatsapp = whatsapp;
+    paintMine();
+    toast(whatsapp ? "Number saved" : "Number removed");
+  } catch (err) {
+    console.error(err);
+    toast(saveError(err), "error");
+  }
+});
+
 $("[data-folder-delete]").addEventListener("click", async () => {
   const client = clients.find((c) => c.id === openFolder);
   if (!client) return;
@@ -427,6 +462,250 @@ $("[data-folder-delete]").addEventListener("click", async () => {
 });
 
 // ---------------------------------------------------------------------
+// Local Business Feature — the three poster spaces in the home page hero
+// ---------------------------------------------------------------------
+async function loadAds() {
+  const box = $("[data-ad-admin]");
+  try {
+    const ads = await Promise.all(
+      AD_SLOTS.map(async (id) => {
+        const snap = await getDoc(doc(db, "ads", id));
+        return { id, ...(snap.exists() ? snap.data() : {}) };
+      })
+    );
+    box.replaceChildren(...ads.map((ad, i) => adCard(ad, i)));
+  } catch (err) {
+    console.error("Couldn't load the featured businesses:", err);
+    box.replaceChildren(el("p", { class: "muted" }, `Couldn't load them: ${saveError(err)}`));
+  }
+}
+
+function adCard(ad, i) {
+  let file = null;
+  const preview = el("div", { class: "ad-admin__preview" });
+  const paintPreview = (src) =>
+    preview.replaceChildren(
+      src
+        ? el("img", { src, alt: "" })
+        : el("span", { class: "ad-admin__empty" }, [el("i", { class: "ico ico--camera ico--lg", "aria-hidden": "true" }), "Add poster"])
+    );
+  paintPreview(ad.imageURL ? sized(ad.imageURL, 400) : null);
+
+  const fileInput = el("input", { type: "file", accept: "image/*", class: "visually-hidden-file", id: `ad-file-${ad.id}` });
+  fileInput.addEventListener("change", () => {
+    const f = fileInput.files?.[0];
+    if (!f) return;
+    if (f.size > MAX_IMAGE_BYTES) {
+      toast("That photo is over 8MB — try a smaller one.", "error");
+      fileInput.value = "";
+      return;
+    }
+    file = f;
+    paintPreview(URL.createObjectURL(f));
+  });
+
+  const input = (label, attrs, value = "") => {
+    const id = `ad-${attrs["data-k"]}-${ad.id}`;
+    const tag = attrs.rows ? "textarea" : "input";
+    const node = el(tag, { id, ...attrs });
+    node.value = value;
+    return [node, el("div", { class: "field" }, [el("label", { for: id }, label), node])];
+  };
+  const [nameIn, nameField] = input("Business name (optional)", { type: "text", maxlength: "60", "data-k": "name" }, ad.name || "");
+  const [descIn, descField] = input("Description", { rows: "3", maxlength: "400", "data-k": "desc", placeholder: "What they do, where they are, opening hours…" }, ad.description || "");
+  const [waIn, waField] = input("WhatsApp number", { type: "tel", maxlength: "30", "data-k": "wa", placeholder: "081 234 5678" }, ad.whatsapp || "");
+
+  const saveBtn = el("button", { type: "button", class: "btn btn--primary btn--sm" }, "Save");
+  const clearBtn = el("button", { type: "button", class: "btn btn--chrome btn--sm", hidden: !ad.imageURL }, "Clear slot");
+
+  saveBtn.addEventListener("click", async () => {
+    const data = {
+      name: nameIn.value.trim(),
+      description: descIn.value.trim(),
+      whatsapp: waIn.value.trim(),
+    };
+    if (!file && !ad.imageURL) return toast("Add a poster first.", "error");
+    if (!data.description) return toast("Add a short description.", "error");
+    if (!whatsappHref(data.whatsapp)) return toast("Add a WhatsApp number (e.g. 081 234 5678).", "error");
+
+    saveBtn.disabled = true;
+    saveBtn.classList.add("btn--loading");
+    try {
+      let media = { imageURL: ad.imageURL, publicId: ad.publicId || null };
+      if (file) {
+        const up = await uploadImage(file, `ads/${auth.currentUser.uid}`);
+        media = { imageURL: up.url, publicId: up.publicId };
+      }
+      await setDoc(doc(db, "ads", ad.id), { ...data, ...media, updatedAt: serverTimestamp() });
+      // the old poster is no longer used once a new one replaced it
+      if (file && ad.publicId) cleanUpImages([ad.publicId]);
+      Object.assign(ad, data, media);
+      file = null;
+      clearBtn.hidden = false;
+      toast(`Slot ${i + 1} saved — it's on the home page`);
+    } catch (err) {
+      console.error(err);
+      toast(saveError(err), "error");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.classList.remove("btn--loading");
+    }
+  });
+
+  clearBtn.addEventListener("click", async () => {
+    if (!confirm(`Clear slot ${i + 1}? It will go back to “Advertise your business here”.`)) return;
+    try {
+      await deleteDoc(doc(db, "ads", ad.id));
+      if (ad.publicId) cleanUpImages([ad.publicId]);
+      ["name", "description", "whatsapp", "imageURL", "publicId"].forEach((k) => delete ad[k]);
+      nameIn.value = descIn.value = waIn.value = "";
+      file = null;
+      paintPreview(null);
+      clearBtn.hidden = true;
+      toast(`Slot ${i + 1} cleared`);
+    } catch (err) {
+      console.error(err);
+      toast(saveError(err), "error");
+    }
+  });
+
+  return el("article", { class: "review ad-admin__card" }, [
+    el("p", { class: "review__seller" }, `Slot ${i + 1}`),
+    el("label", { class: "ad-admin__pick", for: fileInput.id }, [preview, fileInput]),
+    nameField,
+    descField,
+    waField,
+    el("div", { class: "review__actions" }, [saveBtn, clearBtn]),
+  ]);
+}
+
+// ---------------------------------------------------------------------
+// seller applications — from sell.html
+// ---------------------------------------------------------------------
+async function loadApplications() {
+  try {
+    // equality-only, so no composite index; sorted here instead
+    const snap = await getDocs(query(collection(db, "applications"), where("status", "==", "pending")));
+    const millis = (a) => toFirestoreDate(a.createdAt)?.getTime() || 0;
+    apps = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => millis(b) - millis(a));
+    paintApps();
+  } catch (err) {
+    console.error("Couldn't load applications:", err);
+    $("[data-apps-empty]").hidden = false;
+    $("[data-apps-empty]").textContent = `Couldn't load applications: ${saveError(err)}`;
+  }
+}
+
+const fullName = (a) => `${a.firstName} ${a.surname}`.trim();
+
+/** Bank details as a small definition list. */
+function bankList(bank = {}) {
+  const rows = [
+    ["Bank", bank.bankName],
+    ["Account holder", bank.accountHolder],
+    ["Account number", bank.accountNumber],
+    ["Branch code", bank.branchCode],
+  ].filter(([, v]) => v);
+  return el("dl", { class: "bank-list" }, rows.flatMap(([k, v]) => [el("dt", {}, k), el("dd", {}, v)]));
+}
+
+function whatsappButton(number, label = number) {
+  const href = whatsappHref(number);
+  return href
+    ? el("a", { class: "btn btn--lime btn--sm", href, target: "_blank", rel: "noopener noreferrer" }, [
+        el("i", { class: "ico ico--chat", "aria-hidden": "true" }),
+        ` ${label}`,
+      ])
+    : null;
+}
+
+function paintApps() {
+  $("[data-apps-count]").textContent = apps.length;
+  $("[data-apps-empty]").hidden = apps.length > 0;
+  const list = $("[data-apps]");
+  list.innerHTML = "";
+  apps.forEach((app) => {
+    const fee = sellFee(app.pieces);
+    list.append(
+      el("article", { class: "review app-card" }, [
+        el("div", { class: "review__head" }, [
+          el("div", {}, [
+            el("p", { class: "review__seller" }, fullName(app)),
+            el(
+              "p",
+              { class: "review__meta" },
+              `${app.pieces} pieces · fee ${fee ? formatNAD(fee) : "—"} · applied ${timeAgo(toFirestoreDate(app.createdAt)) || "just now"}`
+            ),
+          ]),
+          el("span", { class: "status-pill status-pill--pending" }, "new"),
+        ]),
+        el("div", { class: "app-card__contact" }, [whatsappButton(app.whatsapp)]),
+        bankList(app.bank),
+        el("div", { class: "review__actions" }, [
+          el("button", { class: "btn btn--primary btn--sm", type: "button", onClick: (e) => approve(e.currentTarget, app) }, [
+            el("i", { class: "ico ico--check", "aria-hidden": "true" }),
+            " approve",
+          ]),
+          el("button", { class: "btn btn--chrome btn--sm", type: "button", onClick: (e) => decline(e.currentTarget, app) }, [
+            el("i", { class: "ico ico--close", "aria-hidden": "true" }),
+            " decline",
+          ]),
+        ]),
+      ])
+    );
+  });
+}
+
+/** Approving adds them to the name bank, number and bank details included. */
+async function approve(btn, app) {
+  let name = fullName(app);
+  for (let n = 2; clients.some((c) => sameName(c.name, name)); n++) name = `${fullName(app)} (${n})`;
+
+  btn.disabled = true;
+  try {
+    const clientRef = doc(collection(db, "clients"));
+    const client = {
+      name,
+      whatsapp: app.whatsapp,
+      pieces: app.pieces,
+      bank: app.bank,
+      applicationId: app.id,
+    };
+    const batch = writeBatch(db);
+    batch.set(clientRef, { ...client, createdAt: serverTimestamp() });
+    batch.update(doc(db, "applications", app.id), { status: "approved", clientId: clientRef.id });
+    await batch.commit();
+
+    clients = [...clients, { id: clientRef.id, ...client }].sort((a, b) => a.name.localeCompare(b.name));
+    apps = apps.filter((a) => a.id !== app.id);
+    paintClientSelect();
+    paintApps();
+    paintMine();
+    toast(`${name} is now one of your clients`);
+  } catch (err) {
+    console.error(err);
+    toast(saveError(err), "error");
+    btn.disabled = false;
+  }
+}
+
+/** Declining deletes the application — and the bank details in it. */
+async function decline(btn, app) {
+  if (!confirm(`Decline ${fullName(app)}'s application? It will be deleted, bank details included.`)) return;
+  btn.disabled = true;
+  try {
+    await deleteDoc(doc(db, "applications", app.id));
+    apps = apps.filter((a) => a.id !== app.id);
+    paintApps();
+    toast("Application declined");
+  } catch (err) {
+    console.error(err);
+    toast(saveError(err), "error");
+    btn.disabled = false;
+  }
+}
+
+// ---------------------------------------------------------------------
 // what's posted — folders by client
 // ---------------------------------------------------------------------
 async function loadAll() {
@@ -437,6 +716,8 @@ async function loadAll() {
     toast(saveError(err), "error");
   }
   loadMine();
+  loadApplications();
+  loadAds();
 }
 
 async function loadMine() {
@@ -498,9 +779,31 @@ function paintMine() {
     el("span", { class: "folder-head__meta" }, `${list.length} posted · ${sold} sold`)
   );
   $("[data-folder-actions]").hidden = openFolder === ALL || openFolder === NO_CLIENT;
+  paintClientInfo(clients.find((c) => c.id === openFolder));
   mineEmpty.hidden = list.length > 0;
   mineList.innerHTML = "";
   list.forEach((item) => mineList.append(row(item)));
+}
+
+/** The open client's number (tap for WhatsApp), batch and bank details. */
+function paintClientInfo(client) {
+  const box = $("[data-client-info]");
+  box.hidden = !client;
+  if (!client) return;
+  const fee = sellFee(client.pieces);
+  box.replaceChildren(
+    el("div", { class: "client-info__row" }, [
+      client.whatsapp && whatsappHref(client.whatsapp)
+        ? whatsappButton(client.whatsapp, `WhatsApp ${client.whatsapp}`)
+        : el("p", { class: "muted client-info__none" }, "No number yet — use “number” to add one."),
+      client.pieces
+        ? el("p", { class: "client-info__batch" }, `${client.pieces} pieces · service fee ${fee ? formatNAD(fee) : "—"}`)
+        : null,
+    ]),
+    client.bank
+      ? el("details", { class: "client-info__bank" }, [el("summary", {}, "Banking details"), bankList(client.bank)])
+      : null
+  );
 }
 
 function paintFolders() {
