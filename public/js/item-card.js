@@ -1,6 +1,6 @@
 import { sized } from "./cloudinary.js";
 import { addToCart, removeFromCart, inCart, MAX_CART, siteLink } from "./cart.js";
-import { el, toast, formatNAD, itemImages, whatsappHref } from "./utils.js";
+import { el, toast, formatNAD, itemImages, whatsappHref, SHOP_WHATSAPP } from "./utils.js";
 
 export const CONDITION_CLASS = {
   "New with tags": "condition-pill--new",
@@ -33,7 +33,7 @@ export function buyNowHref(item) {
     "",
     siteLink(itemHref(item)),
   ].join("\n");
-  return whatsappHref(item.whatsapp, message);
+  return whatsappHref(SHOP_WHATSAPP, message);
 }
 
 /** Buy now + Add to cart, or a note once it's sold. */

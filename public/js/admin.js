@@ -30,6 +30,7 @@ import {
   AD_SLOTS,
   CATEGORIES,
   CONDITIONS,
+  SHOP_WHATSAPP,
   MAX_PHOTOS,
 } from "./utils.js";
 
@@ -140,7 +141,7 @@ function rememberWhatsapp(value) {
   }
 }
 
-field("whatsapp").value = rememberedWhatsapp();
+field("whatsapp").value = rememberedWhatsapp() || SHOP_WHATSAPP;
 
 function paintPhotos() {
   photoGrid.innerHTML = "";

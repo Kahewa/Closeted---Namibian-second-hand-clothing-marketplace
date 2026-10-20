@@ -3,7 +3,7 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase
 import { sized } from "./cloudinary.js";
 import { cartIds, cleanIds, keepOnly, removeFromCart, cartLink } from "./cart.js";
 import { itemTitle } from "./item-card.js";
-import { $, el, formatNAD, whatsappHref } from "./utils.js";
+import { $, el, formatNAD, whatsappHref, SHOP_WHATSAPP } from "./utils.js";
 
 // cart.html?items=a,b,c is a cart someone sent over WhatsApp — shown
 // read-only, exactly as they picked it. Without it, this is the visitor's
@@ -103,7 +103,7 @@ function row(item) {
 
 /** The WhatsApp message: what they want, the total, and the cart link. */
 function paintSend(available) {
-  const number = available.find((i) => whatsappHref(i.whatsapp))?.whatsapp;
+  const number = SHOP_WHATSAPP;
   const lines = available.map(
     (i, n) => `${n + 1}. ${itemTitle(i)} (size ${i.size || "?"}, ${formatNAD(i.price)})`
   );

@@ -160,3 +160,8 @@ export function sellFee(pieces) {
 // The Local Business Feature on the home page: three poster spaces, stored
 // as ads/slot1 … ads/slot3 (firebase/firestore.rules).
 export const AD_SLOTS = ["slot1", "slot2", "slot3"];
+
+// The shop's WhatsApp: every "contact us" on the site goes here — Buy now,
+// Send cart, Advertise your business — and it's the default number on new
+// posts in the admin.
+export const SHOP_WHATSAPP = "081 809 3531";

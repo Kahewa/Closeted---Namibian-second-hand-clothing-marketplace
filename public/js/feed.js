@@ -9,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { renderItemCard, syncCartButton } from "./item-card.js";
 import { masonry } from "./masonry.js";
-import { $, el, whatsappHref, CATEGORIES } from "./utils.js";
+import { $, el, whatsappHref, CATEGORIES, SHOP_WHATSAPP } from "./utils.js";
 
 // How many matching pieces to show per "load more". Firestore is asked for
 // pages in the same order and the categories are filtered here in the
@@ -199,8 +199,7 @@ async function fill() {
 const advertise = $("[data-advertise]");
 function paintAdvertise() {
   if (!advertise || advertise.dataset.ready) return;
-  const number = loaded.find((item) => whatsappHref(item.whatsapp))?.whatsapp;
-  const href = number && whatsappHref(number, "Hi! I'd like to advertise my business on Closeted By Grace.");
+  const href = whatsappHref(SHOP_WHATSAPP, "Hi! I'd like to advertise my business on Closeted By Grace.");
   if (!href) return;
   advertise.href = href;
   advertise.dataset.ready = "1";
@@ -234,5 +233,6 @@ loadMoreBtn.addEventListener("click", () => {
 });
 
 masonry(feedEl);
+paintAdvertise();
 paintFilters();
 fill();
