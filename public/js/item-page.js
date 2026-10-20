@@ -42,7 +42,6 @@ async function load() {
 
 function paint(item) {
   const title = itemTitle(item);
-  document.title = `${title} — Closeted By Grace`;
 
   const photos = $("[data-item-photos]");
   photos.classList.toggle("item-view__photos--sold", !!item.sold);
