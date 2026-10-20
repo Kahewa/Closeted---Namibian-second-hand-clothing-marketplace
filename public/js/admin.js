@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase-config.js";
+import { db } from "./firebase-config.js";
 import {
   collection,
   query,
@@ -15,7 +15,7 @@ import {
   writeBatch,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { watchAuthState, signInWithPassword, signOutUser, friendlyAuthError, isAdminUser } from "./auth.js";
+import { auth, watchAuthState, signInWithPassword, signOutUser, friendlyAuthError, isAdminUser } from "./auth.js";
 import { uploadImage, deleteImages, sized } from "./cloudinary.js";
 import {
   $,

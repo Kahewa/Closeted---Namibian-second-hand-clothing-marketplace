@@ -1,9 +1,9 @@
 // Firebase client SDK, loaded straight from Google's CDN — no npm install
 // or bundler needed for the frontend. This one file is the only place
 // that talks to the Firebase *project*; everything else imports the
-// ready-made `auth` / `db` instances from here.
+// ready-made `app` / `db` instances from here. (Login — firebase-auth — is
+// set up in auth.js, so only the admin page downloads it.)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 // No Firebase Storage import: creating a bucket needs the paid Blaze plan,
 // so images live on Cloudinary instead — see public/js/cloudinary.js.
@@ -86,6 +86,5 @@ function showSetupBanner() {
 }
 
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const FIREBASE_SDK_VERSION = "12.17.1";

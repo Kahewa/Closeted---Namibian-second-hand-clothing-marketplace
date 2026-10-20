@@ -409,7 +409,7 @@ p, h1, h2, h3 { margin: 0; }
   position: fixed;
   inset: 0;
   z-index: -2;
-  background: #4a6487 url("../assets/denim.jpg") center / cover;
+  background: #4a6487 url("../assets/denim.webp") center / cover;
   pointer-events: none;
 }
 /* "SHOP NOW": plush pink fur cushion letters. The look — piping rim,
@@ -1606,7 +1606,7 @@ a.item-card__category:hover { text-decoration: underline; text-underline-offset:
   padding: 14px 26px;
   border-radius: 10px;
   /* the same denim, at the same scale, as the headline's letters: no tint */
-  background: #4a6487 url("../assets/denim.jpg") center / 330px auto;
+  background: #4a6487 url("../assets/denim.webp") center / 330px auto;
   color: #fff;
   font-family: var(--font-body);
   font-size: 14px;
@@ -1852,7 +1852,7 @@ a.item-card__category:hover { text-decoration: underline; text-underline-offset:
   border-radius: 14px;
   background:
     linear-gradient(rgba(255, 196, 220, 0.32), rgba(255, 196, 220, 0.32)),
-    url("../assets/denim.jpg") center / 330px auto,
+    url("../assets/denim.webp") center / 330px auto,
     #f07aa9;
   background-blend-mode: normal, luminosity;
   color: #fff;
@@ -1901,7 +1901,7 @@ a.item-card__category:hover { text-decoration: underline; text-underline-offset:
   border-radius: 10px;
   background:
     linear-gradient(rgba(255, 196, 220, 0.32), rgba(255, 196, 220, 0.32)),
-    url("../assets/denim.jpg") center / 330px auto,
+    url("../assets/denim.webp") center / 330px auto,
     #f07aa9;
   background-blend-mode: normal, luminosity;
   color: #fff;
@@ -1927,7 +1927,7 @@ a.item-card__category:hover { text-decoration: underline; text-underline-offset:
 .navbar .filter-chip.filter-chip:hover { transform: translateY(-1px) scale(1.04); color: #fff; }
 .navbar .filter-chip.filter-chip--on,
 .navbar .filter-chip.filter-chip--on:hover {
-  background: #4a6487 url("../assets/denim.jpg") center / 330px auto;
+  background: #4a6487 url("../assets/denim.webp") center / 330px auto;
   box-shadow:
     0 0 0 2px #c9d6e6,
     0 0 0 3px rgba(45, 68, 102, 0.6),
@@ -2210,8 +2210,162 @@ body.is-leaving .page {
    between it and the logo */
 .navbar__top > .navbar__cart { margin-left: auto; }
 
-/* the hero's background: pink waves (assets/hero-waves.webp), covering the
-   whole hero; the flat pink behind it shows while it loads */
-.hero.hero {
-  background: #fccad9 url("../assets/hero-waves.webp") center / cover no-repeat;
+/* the hero's background: plain baby pastel pink */
+.hero.hero { background: #ffe4ee; }
+
+/* ---- top bar: frosted glass with a wavy bottom edge ----------------------
+   The wave is cut into the bar with a mask (a solid block down to the
+   wave, then a repeating wave along the bottom), so the glass itself is
+   wavy and whatever's behind shows through the dips. The bar overlaps
+   the page by the wave's height, so the dips sit over the hero's pink
+   rather than a gap. */
+.navbar.navbar {
+  --wave: 14px;
+  padding-bottom: var(--wave);
+  margin-bottom: calc(-1 * var(--wave));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 240, 246, 0.62) 100%);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+  border-bottom: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--wave)) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 14' preserveAspectRatio='none'%3E%3Cpath d='M0 0h80v7c-10 0-10 7-20 7s-10-7-20-7-10 7-20 7S10 7 0 7z'/%3E%3C/svg%3E") bottom / 80px var(--wave) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--wave)) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 14' preserveAspectRatio='none'%3E%3Cpath d='M0 0h80v7c-10 0-10 7-20 7s-10-7-20-7-10 7-20 7S10 7 0 7z'/%3E%3C/svg%3E") bottom / 80px var(--wave) repeat-x;
+}
+/* the hero's text starts below the wave, not under it */
+.navbar + main .hero { padding-top: calc(28px + 14px); }
+@media (min-width: 880px) { .navbar + main .hero { padding-top: calc(40px + 14px); } }
+
+/* =========================================================================
+   SITE-WIDE CONSISTENCY — every page follows the home page:
+   pastel pink ground, denim Fredoka titles, navy Fredoka headings, pink
+   denim patch labels, blue denim patch buttons (white stitching, Poppins).
+   Product cards, WhatsApp buttons, logo and footer already come from the
+   home page and are left as they are.
+   ========================================================================= */
+
+/* ground: plain baby pastel pink, like the hero */
+body { background: #ffe4ee; }
+body::before, body::after { display: none; }
+
+/* page titles: denim lettering, like the home headline */
+.h1,
+.sell-intro__title,
+.item-view__title,
+.auth-card h1 {
+  font-family: "Fredoka", system-ui, sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.01em;
+  line-height: 1.08;
+  color: transparent;
+  background: #4a6487 url("../assets/denim.webp") center / 330px auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter:
+    drop-shadow(2.5px 0 0 #c9d6e6) drop-shadow(-2.5px 0 0 #c9d6e6)
+    drop-shadow(0 2.5px 0 #c9d6e6) drop-shadow(0 -2.5px 0 #c9d6e6)
+    drop-shadow(0 6px 6px rgba(59, 36, 48, 0.2));
+}
+.h1 em, .sell-intro__title em, .item-view__title em, .auth-card h1 em { font-style: normal; color: transparent; }
+
+/* section headings: Fredoka in denim navy */
+.h2,
+.h3,
+.sell-block__title,
+.sell-step__title,
+.related__title,
+.folder-head__title,
+.cart-total,
+.biz-modal__title,
+.apply-bank legend {
+  font-family: "Fredoka", system-ui, sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.005em;
+  color: #2d4466;
+}
+.auth-card h1.h2 { font-size: clamp(30px, 4vw, 40px); }
+
+/* small labels: pink denim patches, like "Local Business Feature" */
+.eyebrow {
+  position: relative;
+  display: inline-block;
+  padding: 5px 12px 6px;
+  border-radius: 8px;
+  background:
+    linear-gradient(rgba(255, 196, 220, 0.32), rgba(255, 196, 220, 0.32)),
+    url("../assets/denim.webp") center / 330px auto,
+    #f07aa9;
+  background-blend-mode: normal, luminosity;
+  color: #fff;
+  font-family: "Poppins", var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  box-shadow: 0 0 0 2px #f9c9dc, 0 0 0 3px rgba(150, 40, 85, 0.45), 0 3px 6px rgba(80, 30, 55, 0.18);
+}
+.eyebrow::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.85);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.text-center .eyebrow, .eyebrow.text-center { display: table; margin-left: auto; margin-right: auto; }
+
+/* main page buttons: blue denim patches, like the hero buttons (the
+   product cards' Buy now / Add to cart stay as they are on the home page) */
+.btn--primary:not(.buy-row > .btn) {
+  position: relative;
+  border: 0;
+  border-radius: 10px;
+  background: #4a6487 url("../assets/denim.webp") center / 330px auto;
+  color: #fff;
+  font-family: "Poppins", var(--font-body);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 0 3px #c9d6e6, 0 0 0 4px rgba(45, 68, 102, 0.6), 0 6px 14px rgba(30, 30, 60, 0.28);
+}
+.btn--primary:not(.buy-row > .btn)::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 2px dashed rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.btn--primary:not(.buy-row > .btn):hover {
+  background: #4a6487 url("../assets/denim.webp") center / 330px auto;
+  transform: scale(1.03);
+}
+.btn--primary.btn--sm:not(.buy-row > .btn)::before { inset: 4px; border-width: 1.5px; }
+
+/* the numbered steps on the sell / buy pages: little blue denim discs */
+.sell-step__num {
+  background: #4a6487 url("../assets/denim.webp") center / 330px auto;
+  font-family: "Poppins", var(--font-body);
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: 0 0 0 2px #c9d6e6, 0 0 0 3px rgba(45, 68, 102, 0.55), 0 4px 10px rgba(30, 30, 60, 0.22);
+}
+
+/* ---- performance ----------------------------------------------------------
+   - nothing loops forever: the fur "SHOP NOW" (a heavy SVG filter) and the
+     admin card's holographic edge sit still, so phones aren't re-drawing
+     them every frame
+   - on phones, product cards don't blur the denim behind them (re-blurred
+     on every scroll frame there); a more solid fill looks nearly the same */
+.puffy-title, .hero__tile::after, .auth-card::after { animation: none; }
+@media (max-width: 879px) {
+  .browse .item-card {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--glass-sheen), rgba(255, 244, 249, 0.94);
+  }
 }

@@ -100,6 +100,11 @@ export function gallery(images, title, size, width = 720) {
     el("img", {
       class: "item-card__img",
       src: sized(img.url, width),
+      // let the browser pick a size that fits the screen: feed cards are a
+      // half, third or quarter of the page wide (the product page passes a
+      // bigger width and fills more of it)
+      srcset: [360, 540, width].map((w) => `${sized(img.url, w)} ${w}w`).join(", "),
+      sizes: width > 720 ? "(max-width: 859px) 100vw, 55vw" : "(max-width: 679px) 50vw, (max-width: 1039px) 33vw, 25vw",
       alt: alt(i),
       loading: "lazy",
       decoding: "async",

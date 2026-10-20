@@ -8,8 +8,9 @@
 // one-way hash that can't be turned back into the password. Firebase then
 // checks the password. scripts/set-admin-password.js does the same
 // hashing when it creates the account — keep the two in step.
-import { auth } from "./firebase-config.js";
+import { app } from "./firebase-config.js";
 import {
+  getAuth,
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
@@ -17,6 +18,8 @@ import {
 import { isAdminUser } from "./utils.js";
 
 export { isAdminUser };
+
+export const auth = getAuth(app);
 
 export function watchAuthState(callback) {
   return onAuthStateChanged(auth, callback);

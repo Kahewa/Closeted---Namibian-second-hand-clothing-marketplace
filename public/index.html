@@ -9,8 +9,11 @@
 <meta property="og:description" content="Pre-loved shirts, dresses, shoes and more, posted fresh in Namibia. Filter by what you want and ask about any piece on WhatsApp." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
+<link rel="preconnect" href="https://res.cloudinary.com" />
 <link
-  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&family=Poppins:wght@800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&family=Poppins:wght@800&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
   rel="stylesheet"
 />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -42,7 +45,7 @@
                       </feMerge>
                     </filter>
                     <pattern id="denim-fill" patternUnits="userSpaceOnUse" width="330" height="220">
-                      <image href="assets/denim.jpg" width="330" height="220" preserveAspectRatio="xMidYMid slice" />
+                      <image href="assets/denim.webp" width="330" height="220" preserveAspectRatio="xMidYMid slice" />
                     </pattern>
                   </defs>
                   <g filter="url(#denim-3d)">
@@ -122,20 +125,20 @@
         <!-- stickers scattered on the denim; they stay put with it while the
              clothes scroll over them. Purely decorative. -->
         <div class="denim-stickers" aria-hidden="true">
-          <img class="sticker sticker--vinyl" src="assets/stickers/vinyl.webp" alt="" width="440" height="287" decoding="async" />
-          <img class="sticker sticker--safety-pin" src="assets/stickers/safety-pin.webp" alt="" width="349" height="440" decoding="async" />
-          <img class="sticker sticker--jelly-star" src="assets/stickers/jelly-star.webp" alt="" width="440" height="410" decoding="async" />
-          <img class="sticker sticker--gummy-bear" src="assets/stickers/gummy-bear.webp" alt="" width="329" height="440" decoding="async" />
-          <img class="sticker sticker--leopard-star" src="assets/stickers/leopard-star.webp" alt="" width="440" height="421" decoding="async" />
-          <img class="sticker sticker--handle-with-love" src="assets/stickers/handle-with-love.webp" alt="" width="440" height="148" decoding="async" />
-          <img class="sticker sticker--phone" src="assets/stickers/phone.webp" alt="" width="98" height="440" decoding="async" />
-          <img class="sticker sticker--denim-pocket" src="assets/stickers/denim-pocket.webp" alt="" width="440" height="417" decoding="async" />
-          <img class="sticker sticker--push-pin" src="assets/stickers/push-pin.webp" alt="" width="365" height="440" decoding="async" />
-          <img class="sticker sticker--heart-button" src="assets/stickers/heart-button.webp" alt="" width="440" height="419" decoding="async" />
-          <img class="sticker sticker--cherries" src="assets/stickers/cherries.webp" alt="" width="440" height="416" decoding="async" />
-          <img class="sticker sticker--kirby" src="assets/stickers/kirby.webp" alt="" width="440" height="349" decoding="async" />
-          <img class="sticker sticker--megaphone" src="assets/stickers/megaphone.webp" alt="" width="440" height="384" decoding="async" />
-          <img class="sticker sticker--pink-star" src="assets/stickers/pink-star.webp" alt="" width="440" height="424" decoding="async" />
+          <img loading="lazy" class="sticker sticker--vinyl" src="assets/stickers/vinyl.webp" alt="" width="440" height="287" decoding="async" />
+          <img loading="lazy" class="sticker sticker--safety-pin" src="assets/stickers/safety-pin.webp" alt="" width="349" height="440" decoding="async" />
+          <img loading="lazy" class="sticker sticker--jelly-star" src="assets/stickers/jelly-star.webp" alt="" width="440" height="410" decoding="async" />
+          <img loading="lazy" class="sticker sticker--gummy-bear" src="assets/stickers/gummy-bear.webp" alt="" width="329" height="440" decoding="async" />
+          <img loading="lazy" class="sticker sticker--leopard-star" src="assets/stickers/leopard-star.webp" alt="" width="440" height="421" decoding="async" />
+          <img loading="lazy" class="sticker sticker--handle-with-love" src="assets/stickers/handle-with-love.webp" alt="" width="440" height="148" decoding="async" />
+          <img loading="lazy" class="sticker sticker--phone" src="assets/stickers/phone.webp" alt="" width="98" height="440" decoding="async" />
+          <img loading="lazy" class="sticker sticker--denim-pocket" src="assets/stickers/denim-pocket.webp" alt="" width="440" height="417" decoding="async" />
+          <img loading="lazy" class="sticker sticker--push-pin" src="assets/stickers/push-pin.webp" alt="" width="365" height="440" decoding="async" />
+          <img loading="lazy" class="sticker sticker--heart-button" src="assets/stickers/heart-button.webp" alt="" width="440" height="419" decoding="async" />
+          <img loading="lazy" class="sticker sticker--cherries" src="assets/stickers/cherries.webp" alt="" width="440" height="416" decoding="async" />
+          <img loading="lazy" class="sticker sticker--kirby" src="assets/stickers/kirby.webp" alt="" width="440" height="349" decoding="async" />
+          <img loading="lazy" class="sticker sticker--megaphone" src="assets/stickers/megaphone.webp" alt="" width="440" height="384" decoding="async" />
+          <img loading="lazy" class="sticker sticker--pink-star" src="assets/stickers/pink-star.webp" alt="" width="440" height="424" decoding="async" />
         </div>
         <div class="shell shell--wide">
           <div class="browse__head">
