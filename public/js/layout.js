@@ -8,6 +8,7 @@
 // ...and this module builds the rest around whatever <main> it finds.
 import { cartIds } from "./cart.js";
 import "./glass.js";
+import { Analytics } from "@vercel/analytics/next";
 
 // ---------------------------------------------------------------------
 // Everything editable lives here.
