@@ -12,8 +12,22 @@ export const CATEGORIES = [
   "Shoes",
   "Heels",
   "Bags",
+  "Jacket",
+  "Jersey",
+  "Jeans",
+  "Denim",
   "Accessories",
 ];
+
+/**
+ * A piece's categories. Pieces can have several (categories: [...]);
+ * older posts have just one (category), so that becomes a list of one.
+ * `category` is always kept as the first, for anything that shows one.
+ */
+export function itemCategories(item) {
+  if (Array.isArray(item?.categories) && item.categories.length) return item.categories;
+  return item?.category ? [item.category] : [];
+}
 
 export const CONDITIONS = ["New with tags", "Like new", "Good", "Fair"];
 

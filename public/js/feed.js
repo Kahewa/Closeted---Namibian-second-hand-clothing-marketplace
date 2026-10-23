@@ -9,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { renderItemCard, syncCartButton } from "./item-card.js";
 import { masonry } from "./masonry.js";
-import { $, el, whatsappHref, CATEGORIES, SHOP_WHATSAPP } from "./utils.js";
+import { $, el, whatsappHref, itemCategories, CATEGORIES, SHOP_WHATSAPP } from "./utils.js";
 
 // How many matching pieces to show per "load more". Firestore is asked for
 // pages in the same order and the categories are filtered here in the
@@ -160,7 +160,7 @@ function paintFilters() {
 // ---------------------------------------------------------------------
 // data
 // ---------------------------------------------------------------------
-const matches = () => loaded.filter((item) => !active.size || active.has(item.category));
+const matches = () => loaded.filter((item) => !active.size || itemCategories(item).some((c) => active.has(c)));
 
 async function fetchPage() {
   const constraints = [orderBy("createdAt", "desc"), limit(PAGE_SIZE * 2)];

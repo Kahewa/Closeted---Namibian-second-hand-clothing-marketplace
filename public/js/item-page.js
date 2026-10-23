@@ -10,7 +10,7 @@ import {
   getDocs,
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { gallery, buyButtons, conditionPill, itemTitle, renderItemCard, syncCartButton } from "./item-card.js";
-import { $, el, formatNAD, itemImages, timeAgo, toFirestoreDate } from "./utils.js";
+import { $, el, formatNAD, itemImages, itemCategories, timeAgo, toFirestoreDate } from "./utils.js";
 import { masonry } from "./masonry.js";
 
 // item.html?id=<firestore id> — one piece, big, with similar pieces below.
@@ -48,7 +48,7 @@ function paint(item) {
   photos.append(gallery(itemImages(item), title, item.size, 1200));
   if (item.sold) photos.append(el("div", { class: "carousel-card__sold-stamp" }, "SOLD"));
 
-  $("[data-item-eyebrow]").textContent = item.category || "Pre-loved";
+  $("[data-item-eyebrow]").textContent = itemCategories(item).join(" · ") || "Pre-loved";
   $("[data-item-title]").textContent = title;
   $("[data-item-price]").textContent = formatNAD(item.price);
 
@@ -83,8 +83,12 @@ async function loadRelated(item) {
         if (it.id !== item?.id && !it.sold && itemImages(it).length) pool.set(it.id, it);
       });
 
-    if (item?.category) {
-      add(await getDocs(query(collection(db, "items"), where("category", "==", item.category), limit(40))));
+    // anything sharing a category: newer pieces list them all in
+    // `categories`, older ones have just `category` (no index needed for either)
+    const cats = itemCategories(item).slice(0, 10);
+    if (cats.length) {
+      add(await getDocs(query(collection(db, "items"), where("categories", "array-contains-any", cats), limit(40))));
+      add(await getDocs(query(collection(db, "items"), where("category", "in", cats), limit(40))));
     }
     const sameCategory = [...pool.values()].sort(newestFirst);
 
@@ -97,7 +101,7 @@ async function loadRelated(item) {
     if (!picks.length) return;
 
     $("[data-related-title]").textContent =
-      item?.category && sameCategory.length ? `More ${pluralCategory(item.category)}` : "Fresh on the feed";
+      cats.length && sameCategory.length ? `More ${pluralCategory(cats[0])}` : "Fresh on the feed";
     const grid = $("[data-related-grid]");
     picks.forEach((it) => grid.append(renderItemCard(it)));
     $("[data-related]").hidden = false;
@@ -111,7 +115,7 @@ const newestFirst = (a, b) => millis(b) - millis(a);
 
 function pluralCategory(cat) {
   const c = cat.toLowerCase();
-  if (["pants", "shorts", "shoes", "heels", "accessories"].includes(c)) return c;
+  if (["pants", "shorts", "shoes", "heels", "accessories", "jeans", "denim"].includes(c)) return c;
   if (c === "dress") return "dresses";
   return `${c}s`;
 }

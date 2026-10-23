@@ -1,6 +1,6 @@
 import { sized } from "./cloudinary.js";
 import { addToCart, removeFromCart, inCart, MAX_CART, siteLink } from "./cart.js";
-import { el, toast, formatNAD, itemImages, whatsappHref, SHOP_WHATSAPP } from "./utils.js";
+import { el, toast, formatNAD, itemImages, itemCategories, whatsappHref, SHOP_WHATSAPP } from "./utils.js";
 
 export const CONDITION_CLASS = {
   "New with tags": "condition-pill--new",
@@ -77,7 +77,7 @@ export function renderItemCard(item) {
 
   const details = el("div", { class: "item-card__body" }, [
     el("div", { class: "item-card__line" }, [
-      el("a", { class: "item-card__category", href }, item.category || "Item"),
+      el("a", { class: "item-card__category", href }, itemCategories(item).join(" · ") || "Item"),
       conditionPill(item),
     ]),
     el("p", { class: "item-card__meta" }, `Size ${item.size || "—"} · ${item.brand || "No brand"}`),

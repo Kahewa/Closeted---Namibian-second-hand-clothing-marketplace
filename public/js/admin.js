@@ -26,6 +26,7 @@ import {
   toFirestoreDate,
   whatsappHref,
   itemImages,
+  itemCategories,
   sellFee,
   AD_SLOTS,
   CATEGORIES,
@@ -115,7 +116,30 @@ $("[data-signout]").addEventListener("click", () => signOutUser());
 // the form
 // ---------------------------------------------------------------------
 const option = (value, label = value) => el("option", { value }, label);
-field("category").append(el("option", { value: "", disabled: true, selected: true }, "Pick one"), ...CATEGORIES.map((c) => option(c)));
+// categories: tappable chips, any number can be on; the first one picked
+// becomes the piece's main category (shown where only one fits)
+const catPicker = $("[data-categories]");
+let pickedCats = [];
+function paintCats() {
+  catPicker.replaceChildren(
+    ...CATEGORIES.map((c) =>
+      el(
+        "button",
+        {
+          type: "button",
+          class: `cat-chip${pickedCats.includes(c) ? " cat-chip--on" : ""}`,
+          "aria-pressed": String(pickedCats.includes(c)),
+          onClick: () => {
+            pickedCats = pickedCats.includes(c) ? pickedCats.filter((x) => x !== c) : [...pickedCats, c];
+            paintCats();
+          },
+        },
+        c
+      )
+    )
+  );
+}
+paintCats();
 field("condition").append(el("option", { value: "", disabled: true, selected: true }, "Pick one"), ...CONDITIONS.map((c) => option(c)));
 
 function paintClientSelect() {
@@ -219,6 +243,8 @@ function resetForm() {
   form.reset();
   field("whatsapp").value = whatsapp;
   field("client").value = folderClient();
+  pickedCats = [];
+  paintCats();
   clearPhotos();
   editing = null;
   formTitle.textContent = "Post a Piece";
@@ -230,7 +256,8 @@ function startEdit(item) {
   editing = item;
   form.reset();
   field("client").value = clients.some((c) => c.id === item.clientId) ? item.clientId : "";
-  field("category").value = item.category || "";
+  pickedCats = itemCategories(item).filter((c) => CATEGORIES.includes(c));
+  paintCats();
   field("condition").value = item.condition || "";
   field("price").value = item.price ?? "";
   field("size").value = item.size || "";
@@ -253,7 +280,8 @@ form.addEventListener("submit", async (e) => {
 
   const draft = {
     clientId: field("client").value || null,
-    category: field("category").value,
+    categories: [...pickedCats],
+    category: pickedCats[0] || "",
     condition: field("condition").value,
     price: Number(field("price").value),
     size: field("size").value.trim(),
@@ -264,8 +292,8 @@ form.addEventListener("submit", async (e) => {
 
   const problem = !photos.length
     ? "Add at least one photo."
-    : !draft.category
-      ? "Pick a category."
+    : !draft.categories.length
+      ? "Pick at least one category."
       : !draft.price || draft.price <= 0
         ? "Add a price."
         : !draft.size
@@ -862,7 +890,7 @@ function row(item) {
     el("div", { class: "posted__body" }, [
       el("div", { class: "review__head" }, [
         el("div", {}, [
-          el("p", { class: "review__seller" }, `${item.category || "Item"}${item.brand ? ` · ${item.brand}` : ""}`),
+          el("p", { class: "review__seller" }, `${itemCategories(item).join(" · ") || "Item"}${item.brand ? ` · ${item.brand}` : ""}`),
           el(
             "p",
             { class: "review__meta" },

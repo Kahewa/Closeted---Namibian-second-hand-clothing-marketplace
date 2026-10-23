@@ -1347,7 +1347,7 @@ body::after {
   backdrop-filter: none;
 }
 /* wide screens: one row — logo, pills, cart */
-@media (min-width: 1180px) {
+@media (min-width: 1700px) {
   .navbar__top { flex-wrap: nowrap; }
   .navbar .navbar__filters {
     order: 0;
@@ -1935,7 +1935,7 @@ a.item-card__category:hover { text-decoration: underline; text-underline-offset:
 }
 /* room for the patch rims in the scrolling row */
 .navbar .navbar__filters { gap: 10px; padding-top: 6px; padding-bottom: 14px; }
-@media (min-width: 1180px) { .navbar .navbar__filters { padding-top: 4px; padding-bottom: 4px; } }
+@media (min-width: 1700px) { .navbar .navbar__filters { padding-top: 4px; padding-bottom: 4px; } }
 
 /* ---- phones: the hero centred ------------------------------------------- */
 @media (max-width: 879px) {
@@ -2376,7 +2376,7 @@ body::before, body::after { display: none; }
    chosen categories show in the top bar as tags with an ×. js/feed.js.
    ========================================================================= */
 .filter-strip { display: none; }
-@media (max-width: 1179px) {
+@media (max-width: 1699px) {
   .navbar .navbar__filters { display: none; }
   .filter-strip {
     order: 3;
@@ -2554,3 +2554,37 @@ body::before, body::after { display: none; }
    "Shop now" area keeps a little room under the top bar's wave */
 .is-filtering .hero { display: none; }
 .is-filtering .browse { padding-top: 40px; }
+
+/* admin: the category chips on the post form — pink denim, blue when on */
+.field__label { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-soft); }
+.cat-picker { display: flex; flex-wrap: wrap; gap: 10px; padding: 4px 2px; }
+.cat-chip {
+  position: relative;
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 9px;
+  background:
+    linear-gradient(rgba(255, 196, 220, 0.32), rgba(255, 196, 220, 0.32)),
+    url("../assets/denim.webp") center / 330px auto,
+    #f07aa9;
+  background-blend-mode: normal, luminosity;
+  color: #fff;
+  font-family: "Poppins", var(--font-body);
+  font-size: 12.5px;
+  font-weight: 800;
+  box-shadow: 0 0 0 2px #f9c9dc, 0 0 0 3px rgba(150, 40, 85, 0.45);
+  cursor: pointer;
+}
+.cat-chip::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.85);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.cat-chip--on {
+  background: #4a6487 url("../assets/denim.webp") center / 330px auto;
+  box-shadow: 0 0 0 2px #c9d6e6, 0 0 0 3px rgba(45, 68, 102, 0.6);
+}

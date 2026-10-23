@@ -64,9 +64,9 @@
                   <label for="post-client"><i class="ico ico--user" aria-hidden="true"></i> Selling for</label>
                   <select id="post-client" data-field="client"></select>
                 </div>
-                <div class="field">
-                  <label for="post-category">Category</label>
-                  <select id="post-category" data-field="category" required></select>
+                <div class="field post-form__span">
+                  <span class="field__label" id="post-category-label">Categories <span class="muted" style="font-weight:400;">— pick one or more</span></span>
+                  <div class="cat-picker" role="group" aria-labelledby="post-category-label" data-categories></div>
                 </div>
                 <div class="field">
                   <label for="post-price">Price (N$)</label>

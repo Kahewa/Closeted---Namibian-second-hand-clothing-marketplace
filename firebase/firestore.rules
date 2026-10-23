@@ -9,21 +9,32 @@ service cloud.firestore {
     // admin password. The uid comes from the verified auth token, so it
     // can't be spoofed by a client. Set by `npm run admin:password`;
     // mirrored in public/js/utils.js (ADMIN_UID).
+    // The shop's categories. Mirrored in public/js/utils.js (CATEGORIES).
+    function CATEGORIES() {
+      return ['Shirt', 'Top', 'Belt', 'Pants', 'Skirt', 'Shorts', 'Dress', 'Shoes', 'Heels', 'Bags',
+              'Jacket', 'Jersey', 'Jeans', 'Denim', 'Accessories'];
+    }
+
     function isAdmin() {
       return request.auth != null && request.auth.uid == 'aNHz1YdC6De9S7aS0GZqBUlBlp73';
     }
 
     // ---------------------------------------------------------------
     // items/{itemId} — one posted piece: up to 5 photos (images, with the
-    // cover mirrored in imageURL), category, size, brand, condition, price,
+    // cover mirrored in imageURL), categories (one or more; the first is
+    // also kept as category), size, brand, condition, price,
     // notes, WhatsApp number, sold, and clientId (who it's sold for).
     // Anyone can browse; only the admin can post, edit or delete.
     // ---------------------------------------------------------------
     match /items/{itemId} {
       allow read: if true;
       allow create, update: if isAdmin()
-        && request.resource.data.category in
-             ['Shirt', 'Top', 'Belt', 'Pants', 'Skirt', 'Shorts', 'Dress', 'Shoes', 'Heels', 'Bags', 'Accessories']
+        && request.resource.data.category in CATEGORIES()
+        && (!('categories' in request.resource.data)
+            || (request.resource.data.categories is list
+                && request.resource.data.categories.size() > 0
+                && request.resource.data.categories.size() <= 8
+                && request.resource.data.categories.hasOnly(CATEGORIES())))
         && request.resource.data.price is number
         && request.resource.data.price > 0
         && (!('images' in request.resource.data)
