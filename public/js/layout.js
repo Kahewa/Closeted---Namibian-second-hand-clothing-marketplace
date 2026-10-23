@@ -8,7 +8,17 @@
 // ...and this module builds the rest around whatever <main> it finds.
 import { cartIds } from "./cart.js";
 import "./glass.js";
-import { Analytics } from "@vercel/analytics/next";
+
+// Vercel Web Analytics. This is a plain HTML site, not Next.js, so it's
+// Vercel's script tag (not the @vercel/analytics/next package, which a
+// browser can't load). The script only exists on the deployed site, so
+// it's skipped locally. Turn it on in Vercel → Project → Analytics.
+if (!["localhost", "127.0.0.1"].includes(location.hostname)) {
+  const insights = document.createElement("script");
+  insights.defer = true;
+  insights.src = "/_vercel/insights/script.js";
+  document.head.append(insights);
+}
 
 // ---------------------------------------------------------------------
 // Everything editable lives here.

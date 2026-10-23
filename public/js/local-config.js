@@ -19,4 +19,4 @@ export const CLOUDINARY_UPLOAD_PRESET = "ldcel0mh";
 
 // The live site's address, e.g. https://closet-sales.vercel.app — used in
 // the cart link shoppers send over WhatsApp, so it never says localhost.
-export const SITE_URL = "https://closetsalesnam.vercel.app";
+export const SITE_URL = "https://closetedbygrace.vercel.app";
